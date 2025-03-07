@@ -1,0 +1,36 @@
+{
+  "author": "artiphishle",
+  "dependencies": {
+    "axios": "^1.8.1",
+    "puppeteer": "^24.4.0",
+    "puppeteer-extra": "^3.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
+    "robots-parser": "^3.0.1"
+  },
+  "description": "Scraper for A.I. data collection",
+  "devDependencies": {
+    "@types/node": "^22.13.9",
+    "typescript": "^5.8.2"
+  },
+  "engines": {
+    "node": "^22.14.x",
+    "pnpm": "^10.6.x"
+  },
+  "keywords": [],
+  "main": "dist/index.types.js",
+  "packageManager": "pnpm@10.6.0",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/artiphishle/scraper.git"
+  },
+  "scripts": {
+    "build": "tsc",
+    "prettier:validate": "pnpmx prettier --config .prettierrc --write .",
+    "prettier:write": "pnpmx prettier --config .prettierrc --write .",
+    "lint:fix": "tsc && pnpmx eslint --fix",
+    "prepublish": "pnpm run build",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "version": "0.1.0"
+}
