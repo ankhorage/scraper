@@ -50,7 +50,7 @@
     "check-types": "tsc --noEmit -p tsconfig.json",
     "typecheck": "bun run check-types",
     "test": "bun test src",
-    "test:standalone": "bun test src/standalone.test.ts",
+    "test:standalone": "bun run build && bun test src/standalone.test.ts",
     "docs": "paradox",
     "changeset": "ankhorage-changeset",
     "changeset:status": "ankhorage-changeset status --since=origin/main",
