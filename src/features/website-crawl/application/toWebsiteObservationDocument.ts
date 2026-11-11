@@ -6,13 +6,12 @@ import type {
   WebsitePageObservation,
 } from '@ankhorage/contracts/website';
 
-import type { CrawlDiagnostic, PageObservation } from '../../../types/public.js';
+import type { PageObservation } from '../../../types/public.js';
 
 /*** Convert browser facts into the published portable website observation document. */
 export const toWebsiteObservationDocument = (
   sourceUrl: string,
   pages: readonly PageObservation[],
-  diagnostics: readonly CrawlDiagnostic[],
 ): WebsiteObservationDocument => {
   const collectedAt = new Date().toISOString();
   const siteId = hash(sourceUrl);
@@ -26,7 +25,7 @@ export const toWebsiteObservationDocument = (
       crawlId: hash(`${sourceUrl}:${collectedAt}`),
       crawlerId: '@ankhorage/scraper',
       crawlerVersion: '0.1.0',
-      revision: diagnostics.length === 0 ? null : `diagnostics:${diagnostics.length}`,
+      revision: null,
     },
   };
 };
@@ -36,20 +35,29 @@ const groupPages = (
   pages: readonly PageObservation[],
   collectedAt: string,
 ): WebsitePageObservation[] =>
-  [
-    ...new Map(
-      pages.map((page) => [page.url, pages.filter((candidate) => candidate.url === page.url)]),
-    ).entries(),
-  ].map(([url, captures]) => ({
+  [...groupCapturesByUrl(pages).entries()].map(([url, captures]) => ({
     assets: collectAssets(captures),
     id: hash(url),
-    navigation: collectNavigation(captures[0]),
+    navigation: collectNavigation(captures),
     nodes: collectNodes(captures, collectedAt),
     path: new URL(url).pathname,
     states: [{ id: 'default', name: 'default' }],
     url,
-    viewports: captures.map(({ viewport }) => ({ ...viewport, devicePixelRatio: 1 })),
+    viewports: captures
+      .map(({ viewport }) => ({ ...viewport, devicePixelRatio: 1 }))
+      .sort((left, right) => left.id.localeCompare(right.id)),
   }));
+
+/*** Group captures by canonical URL without allowing viewport order to duplicate page records. */
+const groupCapturesByUrl = (pages: readonly PageObservation[]): Map<string, PageObservation[]> => {
+  const capturesByUrl = new Map<string, PageObservation[]>();
+  for (const page of pages) {
+    const captures = capturesByUrl.get(page.url) ?? [];
+    captures.push(page);
+    capturesByUrl.set(page.url, captures);
+  }
+  return new Map([...capturesByUrl.entries()].sort(([left], [right]) => left.localeCompare(right)));
+};
 
 /*** Retain every stable DOM node once and append its viewport-specific observations. */
 const collectNodes = (
@@ -82,13 +90,14 @@ const collectNodes = (
       observations: elements
         .filter((candidate) => candidate.element.id === element.id)
         .map(({ element: captured, page }) => ({
-          availability: { missing: null, status: 'available' },
+          availability: { missing: null, status: 'available' as const },
           css: captured.css,
-          provenance: { capturedAt: collectedAt, method: 'browser', sourceUrl: page.url },
+          provenance: { capturedAt: collectedAt, method: 'browser' as const, sourceUrl: page.url },
           rect: captured.rect,
           stateId: 'default',
           viewportId: page.viewport.id,
-        })),
+        }))
+        .sort((left, right) => left.viewportId.localeCompare(right.viewportId)),
       parentSourceRef: element.parentId ?? null,
       sourceRef: element.id,
       textRuns: element.text
@@ -98,24 +107,26 @@ const collectNodes = (
   );
 };
 
-/*** Deduplicate safe navigation observations in document order. */
-const collectNavigation = (page: PageObservation | undefined) =>
-  page
-    ? [...new Set(page.links)].map((url) => ({
-        id: hash(url),
-        label: '',
-        sourceRef: `navigation:${hash(url)}`,
-        url,
-      }))
-    : [];
+/*** Deduplicate source-linked navigation observations while preserving DOM order. */
+const collectNavigation = (pages: readonly PageObservation[]) => {
+  const links = pages[0]?.elements.filter((element) => element.attributes.href) ?? [];
+  return links.reduce<WebsitePageObservation['navigation']>((navigation, element) => {
+    const url = element.attributes.href;
+    if (!url || navigation.some((item) => item.url === url)) return navigation;
+    return [...navigation, { id: hash(url), label: element.text, sourceRef: element.id, url }];
+  }, []);
+};
 
 /*** Deduplicate media assets while retaining the exact observed source references. */
 const collectAssets = (pages: readonly PageObservation[]) =>
-  [...new Set(pages.flatMap((page) => page.assets))].map((url) => ({
+  [...new Set(pages.flatMap((page) => page.assets))].sort().map((url) => ({
     contentType: null,
     id: hash(url),
     kind: 'image' as const,
-    sourceRefs: [],
+    sourceRefs: pages
+      .flatMap((page) => page.elements)
+      .filter((element) => element.attributes.src === url)
+      .map((element) => element.id),
     url,
   }));
 

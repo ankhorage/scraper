@@ -45,7 +45,13 @@ export interface PageObservation {
 
 export interface CrawlDiagnostic {
   readonly code: 'blocked' | 'robots' | 'unreachable' | 'limit';
+  readonly message: string;
+  readonly sourceUrl: string;
   readonly url: string;
+  readonly viewportId?: string;
 }
 
-export type CrawlResult = WebsiteObservationDocument;
+export interface CrawlResult {
+  readonly document: WebsiteObservationDocument;
+  readonly diagnostics: readonly CrawlDiagnostic[];
+}

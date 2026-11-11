@@ -8,6 +8,6 @@
 import { createWebsiteCrawler } from '@ankhorage/scraper';
 
 const crawler = createWebsiteCrawler();
-const observation = await crawler.crawlWebsiteAsync({ url: 'https://example.com' });
+const result = await crawler.crawlWebsiteAsync({ url: 'https://example.com' });
 
-console.log(observation.pages.length);
+console.log(result.document.pages.length, result.diagnostics);

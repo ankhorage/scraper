@@ -23,6 +23,20 @@ interface CrawlPlan {
   readonly viewports: NonNullable<CrawlOptions['viewports']>;
 }
 
+interface CrawlState {
+  readonly diagnostics: CrawlDiagnostic[];
+  readonly pages: PageObservation[];
+  readonly queue: CrawlEntry[];
+  readonly selectedUrls: Set<string>;
+  readonly visited: Set<string>;
+}
+
+interface CrawlEntry {
+  readonly depth: number;
+  readonly sourceUrl: string;
+  readonly url: string;
+}
+
 /*** Crawl a bounded same-origin website and return raw browser observations without assessing them. */
 export const crawlWebsiteAsync = async (
   options: CrawlOptions,
@@ -30,50 +44,91 @@ export const crawlWebsiteAsync = async (
 ): Promise<CrawlResult> => {
   const sourceUrl = normalizeUrl(options.url);
   const plan = createCrawlPlan(options);
-  const queue = [{ depth: 0, url: sourceUrl }];
-  const visited = new Set<string>();
-  const pages: PageObservation[] = [];
-  const diagnostics = [] as CrawlDiagnostic[];
+  const state: CrawlState = {
+    diagnostics: [],
+    pages: [],
+    queue: [{ depth: 0, sourceUrl, url: sourceUrl }],
+    selectedUrls: new Set<string>(),
+    visited: new Set<string>(),
+  };
 
   try {
-    while (queue.length > 0 && pages.length < plan.maxPages) {
-      const entry = queue.shift();
-      if (!entry || visited.has(entry.url)) continue;
-      visited.add(entry.url);
-
-      if (!(await dependencies.robots.isAllowedAsync(entry.url))) {
-        diagnostics.push({ code: 'robots', url: entry.url });
-        continue;
+    while (state.queue.length > 0) {
+      if (state.selectedUrls.size >= plan.maxPages) {
+        const [next] = state.queue;
+        if (next) state.diagnostics.push(limitDiagnostic(next));
+        break;
       }
-
-      for (const viewport of plan.viewports) {
-        try {
-          const page = await dependencies.capturePage.capturePageAsync({
-            maxBytes: plan.maxBytes,
-            timeoutMs: plan.timeoutMs,
-            url: entry.url,
-            viewport,
-          });
-          pages.push(page);
-          enqueueLinks(
-            queue,
-            page.links,
-            new URL(sourceUrl).origin,
-            entry.depth,
-            plan.maxDepth,
-            visited,
-          );
-        } catch {
-          diagnostics.push({ code: 'unreachable', url: entry.url });
-        }
-      }
+      await crawlNextEntryAsync(state, plan, sourceUrl, dependencies);
     }
   } finally {
     await dependencies.capturePage.closeAsync();
   }
 
-  if (queue.length > 0) diagnostics.push({ code: 'limit', url: sourceUrl });
-  return toWebsiteObservationDocument(sourceUrl, pages, diagnostics);
+  return {
+    diagnostics: state.diagnostics,
+    document: toWebsiteObservationDocument(sourceUrl, state.pages),
+  };
+};
+
+/*** Crawl the next canonical URL and all configured viewport captures for that URL. */
+const crawlNextEntryAsync = async (
+  state: CrawlState,
+  plan: CrawlPlan,
+  sourceUrl: string,
+  dependencies: CrawlDependencies,
+): Promise<void> => {
+  const entry = state.queue.shift();
+  if (!entry || state.visited.has(entry.url)) return;
+  state.visited.add(entry.url);
+  if (!(await dependencies.robots.isAllowedAsync(entry.url))) {
+    state.diagnostics.push({
+      code: 'robots',
+      message: 'robots.txt disallowed this URL.',
+      sourceUrl: entry.sourceUrl,
+      url: entry.url,
+    });
+    return;
+  }
+  state.selectedUrls.add(entry.url);
+  await captureEntryAsync(state, plan, sourceUrl, entry, dependencies.capturePage);
+};
+
+/*** Capture one selected URL at every viewport while preserving every individual failure. */
+const captureEntryAsync = async (
+  state: CrawlState,
+  plan: CrawlPlan,
+  sourceUrl: string,
+  entry: CrawlEntry,
+  capturePage: CapturePagePort,
+): Promise<void> => {
+  for (const viewport of plan.viewports) {
+    try {
+      const page = await capturePage.capturePageAsync({
+        maxBytes: plan.maxBytes,
+        timeoutMs: plan.timeoutMs,
+        url: entry.url,
+        viewport,
+      });
+      state.pages.push(page);
+      enqueueLinks(
+        state.queue,
+        page.links,
+        new URL(sourceUrl).origin,
+        entry,
+        plan.maxDepth,
+        state.visited,
+      );
+    } catch (error) {
+      state.diagnostics.push({
+        code: 'unreachable',
+        message: error instanceof Error ? error.message : String(error),
+        sourceUrl: entry.sourceUrl,
+        url: entry.url,
+        viewportId: viewport.id,
+      });
+    }
+  }
 };
 
 /*** Apply the explicit resource bounds used for every crawl invocation. */
@@ -86,14 +141,14 @@ const createCrawlPlan = (options: CrawlOptions): CrawlPlan => ({
 });
 
 const enqueueLinks = (
-  queue: { depth: number; url: string }[],
+  queue: CrawlEntry[],
   links: readonly string[],
   origin: string,
-  depth: number,
+  entry: CrawlEntry,
   maxDepth: number,
   visited: ReadonlySet<string>,
 ): void => {
-  if (depth >= maxDepth) return;
+  if (entry.depth >= maxDepth) return;
   for (const link of links) {
     try {
       const url = normalizeUrl(link);
@@ -102,10 +157,18 @@ const enqueueLinks = (
         !visited.has(url) &&
         !queue.some((entry) => entry.url === url)
       ) {
-        queue.push({ depth: depth + 1, url });
+        queue.push({ depth: entry.depth + 1, sourceUrl: entry.url, url });
       }
     } catch {
       // Invalid discovered hrefs have no safe crawl target and are intentionally excluded.
     }
   }
 };
+
+/*** Identify the canonical next URL that was not selected because the page limit was reached. */
+const limitDiagnostic = (entry: CrawlEntry): CrawlDiagnostic => ({
+  code: 'limit',
+  message: 'The configured distinct canonical URL limit was reached.',
+  sourceUrl: entry.sourceUrl,
+  url: entry.url,
+});

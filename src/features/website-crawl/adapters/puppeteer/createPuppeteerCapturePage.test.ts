@@ -53,6 +53,7 @@ describe('createPuppeteerCapturePage', () => {
 
     expect(page.links).toEqual([`${origin}/about`]);
     expect(page.elements.find((element) => element.text === 'red')?.css.color).toContain('255');
+    expect(page.elements.find((element) => element.text === 'One ')?.tagName).toBe('article');
     expect(page.elements.find((element) => element.text === 'Hidden')?.visible).toBe(false);
     expect(page.elements.some((element) => element.css.display === 'grid')).toBe(true);
   });
