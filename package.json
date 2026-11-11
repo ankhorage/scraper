@@ -1,36 +1,76 @@
 {
-  "author": "artiphishle",
-  "dependencies": {
-    "axios": "^1.8.1",
-    "puppeteer": "^24.4.0",
-    "puppeteer-extra": "^3.3.6",
-    "puppeteer-extra-plugin-stealth": "^2.11.2",
-    "robots-parser": "^3.0.1"
-  },
-  "description": "Scraper for A.I. data collection",
-  "devDependencies": {
-    "@types/node": "^22.13.9",
-    "typescript": "^5.8.2"
-  },
-  "engines": {
-    "node": "^22.14.x",
-    "pnpm": "^10.6.x"
-  },
-  "keywords": [],
-  "main": "dist/index.types.js",
-  "packageManager": "pnpm@10.6.0",
-  "private": true,
+  "name": "@ankhorage/scraper",
+  "version": "0.1.0",
+  "description": "Safe, bounded browser observations for public websites.",
+  "license": "MIT",
+  "keywords": [
+    "ankhorage",
+    "browser-observation",
+    "crawler",
+    "puppeteer",
+    "recognition",
+    "scraper"
+  ],
+  "type": "module",
+  "sideEffects": false,
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/artiphishle/scraper.git"
+    "url": "git+https://github.com/ankhorage/scraper.git"
+  },
+  "homepage": "https://github.com/ankhorage/scraper#readme",
+  "bugs": {
+    "url": "https://github.com/ankhorage/scraper/issues"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE",
+    "CHANGELOG.md",
+    "examples"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./types": {
+      "types": "./dist/types/public.d.ts",
+      "import": "./dist/types/public.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "engines": {
+    "node": ">=24"
   },
   "scripts": {
-    "build": "tsc",
-    "prettier:validate": "pnpmx prettier --config .prettierrc --write .",
-    "prettier:write": "pnpmx prettier --config .prettierrc --write .",
-    "lint:fix": "tsc && pnpmx eslint --fix",
-    "prepublish": "pnpm run build",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "tsc -p tsconfig.build.json",
+    "check-types": "tsc --noEmit -p tsconfig.json",
+    "typecheck": "bun run check-types",
+    "test": "bun test src",
+    "test:standalone": "bun run build && bun test src/standalone.test.ts",
+    "docs": "paradox",
+    "changeset": "ankhorage-changeset",
+    "changeset:status": "ankhorage-changeset status --since=origin/main",
+    "version-packages": "ankhorage-changeset version",
+    "lint": "ankhorage-eslint . --max-warnings=0",
+    "lint:fix": "ankhorage-eslint . --fix --max-warnings=0",
+    "format": "ankhorage-prettier --write .",
+    "format:check": "ankhorage-prettier --check .",
+    "knip:check": "ankhorage-knip"
   },
-  "version": "0.1.0"
+  "dependencies": {
+    "@ankhorage/contracts": "^26.6.0",
+    "puppeteer": "^24.4.0"
+  },
+  "devDependencies": {
+    "@ankhorage/devtools": "^2.4.3",
+    "@ankhorage/paradox": "^0.3.6",
+    "@types/bun": "^1.4.2",
+    "@types/node": "^26.6.6",
+    "typescript": "~6.0.3"
+  },
+  "packageManager": "bun@1.4.2"
 }

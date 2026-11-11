@@ -1,12 +1,12 @@
 {
   "compilerOptions": {
-    "declaration": true,
-    "forceConsistentCasingInFileNames": true,
-    "esModuleInterop": true,
-    "module": "commonjs",
-    "outDir": "./dist",
+    "exactOptionalPropertyTypes": true,
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "noUncheckedIndexedAccess": true,
     "strict": true,
-    "target": "es2016"
-  }
-  // "include": ["lib/ankh/index.types.ts"]
+    "target": "ES2024",
+    "types": ["bun", "node"]
+  },
+  "include": ["src/**/*.ts", "examples/**/*.ts"]
 }
