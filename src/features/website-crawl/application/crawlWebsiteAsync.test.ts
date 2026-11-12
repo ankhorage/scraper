@@ -8,9 +8,10 @@ describe('crawlWebsiteAsync', () => {
     'keeps a bounded same-origin page inventory and records robots exclusions',
     testRobotsExclusionAsync,
   );
+  test('applies the request limit while retaining every configured viewport', testPageLimitAsync);
   test(
-    'applies the page limit to distinct URLs while retaining every configured viewport',
-    testPageLimitAsync,
+    'bounds redirect aliases by requested URL even when they share one canonical page',
+    testRedirectRequestLimitAsync,
   );
   test(
     'deduplicates aliases by final URL while retaining redirect evidence and source-linked observations',
@@ -145,6 +146,46 @@ const testCanonicalCaptureIdentityAsync = async (): Promise<void> => {
         diagnostic.viewportId === 'desktop',
     ),
   ).toBe(true);
+};
+
+const testRedirectRequestLimitAsync = async (): Promise<void> => {
+  const captured = [] as string[];
+  const result = await crawlWebsiteAsync(
+    { maxDepth: 1, maxPages: 2, url: 'https://example.test/aliases' },
+    {
+      capturePage: {
+        capturePageAsync: ({ url, viewport }) => {
+          captured.push(url);
+          return Promise.resolve({
+            assets: [],
+            elements: [],
+            links:
+              url === 'https://example.test/aliases'
+                ? [
+                    'https://example.test/alias-1',
+                    'https://example.test/alias-2',
+                    'https://example.test/alias-3',
+                  ]
+                : [],
+            statusCode: 200,
+            title: 'Canonical page',
+            url: url === 'https://example.test/aliases' ? url : 'https://example.test/canonical',
+            viewport,
+          });
+        },
+        closeAsync: () => Promise.resolve(),
+      },
+      robots: { isAllowedAsync: () => Promise.resolve(true) },
+    },
+  );
+
+  expect(captured).toEqual(['https://example.test/aliases', 'https://example.test/alias-1']);
+  expect(result.diagnostics).toContainEqual({
+    code: 'limit',
+    message: 'The configured requested URL limit was reached.',
+    sourceUrl: 'https://example.test/aliases',
+    url: 'https://example.test/alias-2',
+  });
 };
 
 const canonicalCaptureAsync = ({

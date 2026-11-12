@@ -25,6 +25,11 @@ describe('createWebsiteCrawler public acceptance', () => {
     testRedirectCanonicalizationAsync,
     30_000,
   );
+  test(
+    'discovers viewport-specific links from one redirected canonical page',
+    testResponsiveCanonicalLinksAsync,
+    30_000,
+  );
 });
 
 const testCrawlerAsync = async (): Promise<void> => {
@@ -106,10 +111,42 @@ const testRedirectCanonicalizationAsync = async (): Promise<void> => {
   expect(result.diagnostics.some((diagnostic) => diagnostic.code === 'duplicate')).toBe(true);
 };
 
+const testResponsiveCanonicalLinksAsync = async (): Promise<void> => {
+  const crawler = createWebsiteCrawler({
+    allowPrivateHostsForTests: true,
+    launchArguments: chromiumLaunchArguments,
+  });
+  const result = await crawler.crawlWebsiteAsync({
+    maxDepth: 1,
+    maxPages: 3,
+    navigationTimeoutMs: 10_000,
+    url: `${origin}/responsive-alias`,
+    viewports: [
+      { height: 900, id: 'desktop', width: 1440 },
+      { height: 844, id: 'mobile', width: 390 },
+    ],
+  });
+
+  const responsive = result.document.pages.find((page) => page.url === `${origin}/responsive`);
+  expect(new Set(result.document.pages.map((page) => page.url))).toEqual(
+    new Set([`${origin}/responsive`, `${origin}/desktop-only`, `${origin}/mobile-only`]),
+  );
+  expect(responsive?.viewports.map((viewport) => viewport.id)).toEqual(['desktop', 'mobile']);
+  expect(result.document.pages.filter((page) => page.url === `${origin}/responsive`)).toHaveLength(
+    1,
+  );
+  expect(result.diagnostics.some((diagnostic) => diagnostic.code === 'redirect')).toBe(true);
+};
+
 const createFixtureServer = (): Server =>
   createServer((request, response) => {
     if (request.url === '/kontakt') {
       response.writeHead(302, { location: '/kontakt/' });
+      response.end();
+      return;
+    }
+    if (request.url === '/responsive-alias') {
+      response.writeHead(302, { location: '/responsive' });
       response.end();
       return;
     }
@@ -121,7 +158,13 @@ const createFixtureServer = (): Server =>
           ? aliasesPage
           : request.url === '/kontakt/'
             ? contactPage
-            : homePage,
+            : request.url === '/responsive'
+              ? responsivePage
+              : request.url === '/desktop-only'
+                ? desktopOnlyPage
+                : request.url === '/mobile-only'
+                  ? mobileOnlyPage
+                  : homePage,
     );
   });
 
@@ -159,3 +202,10 @@ const aliasesPage =
   '<!doctype html><html><body><a href="/kontakt">Contact</a><a href="/kontakt/">Contact canonical</a></body></html>';
 const contactPage =
   '<!doctype html><html><body><main style="color:red">Contact page</main><img src="/contact.png" alt="Contact"></body></html>';
+const responsivePage = `<!doctype html><html><body><script>
+document.write(window.innerWidth > 600
+  ? '<a href="/desktop-only">Desktop only</a>'
+  : '<a href="/mobile-only">Mobile only</a>');
+</script></body></html>`;
+const desktopOnlyPage = '<!doctype html><html><body><main>Desktop page</main></body></html>';
+const mobileOnlyPage = '<!doctype html><html><body><main>Mobile page</main></body></html>';

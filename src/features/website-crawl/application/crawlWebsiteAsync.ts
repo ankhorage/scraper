@@ -29,9 +29,9 @@ interface CrawlState {
   readonly diagnostics: CrawlDiagnostic[];
   readonly captureFingerprints: Map<string, string>;
   readonly canonicalUrls: Set<string>;
-  readonly expandedCanonicalUrls: Set<string>;
   readonly pages: PageObservation[];
   readonly queue: CrawlEntry[];
+  readonly requestedUrls: Set<string>;
   readonly redirects: Set<string>;
   readonly visited: Set<string>;
 }
@@ -53,16 +53,16 @@ export const crawlWebsiteAsync = async (
     diagnostics: [],
     captureFingerprints: new Map<string, string>(),
     canonicalUrls: new Set<string>(),
-    expandedCanonicalUrls: new Set<string>(),
     pages: [],
     queue: [{ depth: 0, sourceUrl, url: sourceUrl }],
+    requestedUrls: new Set<string>(),
     redirects: new Set<string>(),
     visited: new Set<string>(),
   };
 
   try {
     while (state.queue.length > 0) {
-      if (state.canonicalUrls.size >= plan.maxPages) {
+      if (state.requestedUrls.size >= plan.maxPages) {
         const [next] = state.queue;
         if (next) state.diagnostics.push(limitDiagnostic(next));
         break;
@@ -98,6 +98,7 @@ const crawlNextEntryAsync = async (
     });
     return;
   }
+  state.requestedUrls.add(entry.url);
   await captureEntryAsync(state, plan, sourceUrl, entry, dependencies.capturePage);
 };
 
@@ -162,8 +163,6 @@ const retainCanonicalCapture = (
   state.captureFingerprints.set(captureKey, captureFingerprint);
   state.canonicalUrls.add(page.url);
   state.pages.push(page);
-  if (state.expandedCanonicalUrls.has(page.url)) return;
-  state.expandedCanonicalUrls.add(page.url);
   enqueueLinks(
     state.queue,
     page.links,
@@ -245,10 +244,10 @@ const enqueueLinks = (
   }
 };
 
-/*** Identify the canonical next URL that was not selected because the page limit was reached. */
+/*** Identify the next request that was not navigated because the request budget was exhausted. */
 const limitDiagnostic = (entry: CrawlEntry): CrawlDiagnostic => ({
   code: 'limit',
-  message: 'The configured distinct canonical URL limit was reached.',
+  message: 'The configured requested URL limit was reached.',
   sourceUrl: entry.sourceUrl,
   url: entry.url,
 });
