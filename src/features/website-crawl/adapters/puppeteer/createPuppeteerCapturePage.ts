@@ -7,77 +7,17 @@ import type {
 } from '../../../../types/public.js';
 import type { CapturePageInput, CapturePagePort } from '../../ports/CapturePagePort.js';
 import { assertPublicUrlAsync as assertPublicNetworkUrlAsync } from '../network/assertPublicUrlAsync.js';
-
+import type { LayoutCss, VisualCss } from './browserExtractionTypes.js';
+import { discoverBreakpointsAsync } from './discoverBreakpointsAsync.js';
+import { probeResponsiveAsync } from './probeResponsiveAsync.js';
 interface PuppeteerOptions {
   readonly allowPrivateHostsForTests?: boolean;
   readonly launchArguments?: readonly string[];
 }
-
 interface BrowserExtractionInput {
   readonly statusCode: number;
   readonly viewport: { readonly height: number; readonly id: string; readonly width: number };
 }
-
-type LayoutCss = Pick<
-  CssObservation,
-  | 'alignContent'
-  | 'alignItems'
-  | 'alignSelf'
-  | 'display'
-  | 'flexBasis'
-  | 'flexDirection'
-  | 'flexGrow'
-  | 'flexShrink'
-  | 'flexWrap'
-  | 'gap'
-  | 'gridAutoColumns'
-  | 'gridAutoFlow'
-  | 'gridAutoRows'
-  | 'gridColumn'
-  | 'gridColumnEnd'
-  | 'gridColumnStart'
-  | 'gridRow'
-  | 'gridRowEnd'
-  | 'gridRowStart'
-  | 'gridTemplateColumns'
-  | 'gridTemplateRows'
-  | 'justifyContent'
-  | 'justifyItems'
-  | 'justifySelf'
-  | 'order'
-  | 'overflow'
-  | 'overflowX'
-  | 'overflowY'
-  | 'placeContent'
-  | 'placeItems'
-  | 'placeSelf'
-  | 'position'
->;
-
-type VisualCss = Pick<
-  CssObservation,
-  | 'backgroundColor'
-  | 'backgroundImage'
-  | 'backgroundPosition'
-  | 'backgroundRepeat'
-  | 'backgroundSize'
-  | 'borderColor'
-  | 'borderRadius'
-  | 'borderWidth'
-  | 'boxShadow'
-  | 'color'
-  | 'fontFamily'
-  | 'fontSize'
-  | 'fontStyle'
-  | 'fontWeight'
-  | 'letterSpacing'
-  | 'lineHeight'
-  | 'opacity'
-  | 'textAlign'
-  | 'textDecoration'
-  | 'visibility'
->;
-
 declare global {
   var __ankhorageScraperElementPath: (element: Element) => string;
   var __ankhorageScraperExtractLayoutCss: (style: CSSStyleDeclaration) => LayoutCss;
@@ -85,7 +25,6 @@ declare global {
   var __ankhorageScraperExtractCss: (style: CSSStyleDeclaration) => CssObservation;
   var __ankhorageScraperExtractElement: (element: Element) => ElementObservation;
 }
-
 /*** Create the Puppeteer edge adapter used to collect serializable browser evidence. */
 export const createPuppeteerCapturePage = async (
   options: PuppeteerOptions = {},
@@ -97,10 +36,29 @@ export const createPuppeteerCapturePage = async (
 
   return {
     capturePageAsync: async (input) => capturePageAsync(browser, input, options),
+    discoverBreakpointsAsync: async (input) =>
+      discoverBreakpointsAsync({
+        assertBoundedDocumentAsync,
+        assertPublicUrlAsync,
+        blockUnsafeRequestsAsync,
+        browser,
+        input,
+        options,
+      }),
+    probeResponsiveAsync: async ({ conditions, widths, ...input }) =>
+      probeResponsiveAsync({
+        assertBoundedDocumentAsync,
+        assertPublicUrlAsync,
+        blockUnsafeRequestsAsync,
+        browser,
+        conditions,
+        input,
+        options,
+        widths,
+      }),
     closeAsync: async () => browser.close(),
   };
 };
-
 /*** Navigate one bounded viewport after installing only browser-context extraction functions. */
 const capturePageAsync = async (
   browser: Browser,
@@ -127,7 +85,6 @@ const capturePageAsync = async (
     await page.close();
   }
 };
-
 /*** Install the browser-only helper functions before every navigation or redirect can replace them. */
 const installBrowserExtractionAsync = async (page: Page): Promise<void> => {
   await page.evaluateOnNewDocument(installBrowserPath);
@@ -136,7 +93,6 @@ const installBrowserExtractionAsync = async (page: Page): Promise<void> => {
   await page.evaluateOnNewDocument(installBrowserCss);
   await page.evaluateOnNewDocument(installBrowserElement);
 };
-
 /*** Reject browser requests and redirects that resolve to non-public network targets. */
 const blockUnsafeRequestsAsync = async (page: Page, options: PuppeteerOptions): Promise<void> => {
   await page.setRequestInterception(true);

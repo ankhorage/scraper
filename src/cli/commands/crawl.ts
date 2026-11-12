@@ -18,11 +18,25 @@ export async function crawl(
       return { exitCode: 0 };
     }
     await assertOutputDoesNotExistAsync(input.outputPath);
+    if (input.breakpointOutputPath) await assertOutputDoesNotExistAsync(input.breakpointOutputPath);
     const result = await createWebsiteCrawler().crawlWebsiteAsync(crawlOptions(input));
     await writeFile(input.outputPath, `${JSON.stringify(result.document, null, 2)}\n`, {
       encoding: 'utf8',
       flag: 'wx',
     });
+    if (input.breakpointOutputPath)
+      await writeFile(
+        input.breakpointOutputPath,
+        `${JSON.stringify(
+          {
+            breakpointCoverage: result.breakpointCoverage,
+            breakpointEvidence: result.breakpointEvidence,
+          },
+          null,
+          2,
+        )}\n`,
+        { encoding: 'utf8', flag: 'wx' },
+      );
     context.writeStdout(`Wrote website observation document to ${input.outputPath}.\n`);
     if (result.diagnostics.length > 0) {
       context.writeStderr(`${JSON.stringify(result.diagnostics, null, 2)}\n`);
@@ -35,6 +49,7 @@ export async function crawl(
 }
 
 interface CrawlInput {
+  readonly breakpointOutputPath: string | undefined;
   readonly maxDepth: number | undefined;
   readonly maxPages: number | undefined;
   readonly outputPath: string;
@@ -65,12 +80,21 @@ function parseCrawlInput(
   const [url, ...tokens] = argv;
   if (url === undefined || url.startsWith('-')) throw new Error(renderUsage());
   const values = collectCrawlOptions(tokens);
-  const output = singleOption(values, '--output', true);
+  const output = singleOption(values, '--output');
+  const breakpointOutput = optionalSingleOption(values, '--breakpoint-output');
   const maxPages = positiveIntegerOption(values, '--max-pages');
   const maxDepth = nonnegativeIntegerOption(values, '--max-depth');
   const viewports = (values.get('--viewport') ?? []).map(parseViewport);
   assertUniqueViewportIds(viewports);
-  return { url, maxDepth, maxPages, outputPath: resolve(cwd, output), viewports };
+  return {
+    breakpointOutputPath:
+      breakpointOutput === undefined ? undefined : resolve(cwd, breakpointOutput),
+    url,
+    maxDepth,
+    maxPages,
+    outputPath: resolve(cwd, output),
+    viewports,
+  };
 }
 
 /*** Collect repeated flags from complete argument pairs without indexing user-controlled arrays. */
@@ -84,11 +108,12 @@ function collectCrawlOptions(tokens: readonly string[]): ReadonlyMap<CrawlFlag, 
 }
 
 /*** Accept only the named flags supported by the crawl delivery adapter. */
-type CrawlFlag = '--max-depth' | '--max-pages' | '--output' | '--viewport';
+type CrawlFlag = '--breakpoint-output' | '--max-depth' | '--max-pages' | '--output' | '--viewport';
 
 function isCrawlFlag(value: string): value is CrawlFlag {
   return (
     value === '--output' ||
+    value === '--breakpoint-output' ||
     value === '--max-pages' ||
     value === '--max-depth' ||
     value === '--viewport'
@@ -96,16 +121,22 @@ function isCrawlFlag(value: string): value is CrawlFlag {
 }
 
 /*** Read one non-repeating flag value and make required options explicit. */
-function singleOption(
-  values: ReadonlyMap<CrawlFlag, readonly string[]>,
-  flag: CrawlFlag,
-  required: boolean,
-): string {
+function singleOption(values: ReadonlyMap<CrawlFlag, readonly string[]>, flag: CrawlFlag): string {
   const options = values.get(flag) ?? [];
-  if ((required && options.length !== 1) || options.length > 1) throw new Error(renderUsage());
+  if (options.length !== 1) throw new Error(renderUsage());
   const [value] = options;
   if (value === undefined) throw new Error(renderUsage());
   return value;
+}
+
+/*** Read one optional non-repeating output path without creating a default sidecar. */
+function optionalSingleOption(
+  values: ReadonlyMap<CrawlFlag, readonly string[]>,
+  flag: CrawlFlag,
+): string | undefined {
+  const options = values.get(flag) ?? [];
+  if (options.length > 1) throw new Error(renderUsage());
+  return options[0];
 }
 
 /*** Convert an optional positive integer flag without coercing malformed values. */
@@ -194,7 +225,7 @@ function renderHelp(): string {
 
 /*** Render the canonical crawl invocation shape. */
 function renderUsage(): string {
-  return 'Usage: ankh scraper crawl <url> --output <file> [--max-pages <count>] [--max-depth <count>] [--viewport <id:WIDTHxHEIGHT>]...';
+  return 'Usage: ankh scraper crawl <url> --output <file> [--breakpoint-output <file>] [--max-pages <count>] [--max-depth <count>] [--viewport <id:WIDTHxHEIGHT>]...';
 }
 
 /*** Convert an unknown boundary failure to a safe command diagnostic. */

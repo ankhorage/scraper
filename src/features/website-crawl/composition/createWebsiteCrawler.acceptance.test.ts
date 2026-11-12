@@ -3,6 +3,7 @@ import { createServer, type Server } from 'node:http';
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test';
 
 import { createWebsiteCrawler } from '../../../index.js';
+import type { CrawlResult } from '../../../types/public.js';
 
 let origin = '';
 let server: Server;
@@ -28,6 +29,16 @@ describe('createWebsiteCrawler public acceptance', () => {
   test(
     'discovers viewport-specific links from one redirected canonical page',
     testResponsiveCanonicalLinksAsync,
+    30_000,
+  );
+  test(
+    'discovers nested CSS viewport conditions without selecting container queries',
+    testAutomaticBreakpointDiscoveryAsync,
+    30_000,
+  );
+  test(
+    'retains JavaScript-only responsive navigation without authored media queries',
+    testJavaScriptResponsiveNavigationAsync,
     30_000,
   );
 });
@@ -138,6 +149,86 @@ const testResponsiveCanonicalLinksAsync = async (): Promise<void> => {
   expect(result.diagnostics.some((diagnostic) => diagnostic.code === 'redirect')).toBe(true);
 };
 
+const testAutomaticBreakpointDiscoveryAsync = async (): Promise<void> => {
+  const crawler = createWebsiteCrawler({
+    allowPrivateHostsForTests: true,
+    launchArguments: chromiumLaunchArguments,
+  });
+  const result = await crawler.crawlWebsiteAsync({
+    maxDepth: 1,
+    maxPages: 3,
+    navigationTimeoutMs: 10_000,
+    url: `${origin}/automatic`,
+  });
+  assertAutomaticBreakpointDiscovery(result);
+};
+
+const testJavaScriptResponsiveNavigationAsync = async (): Promise<void> => {
+  const crawler = createWebsiteCrawler({
+    allowPrivateHostsForTests: true,
+    launchArguments: chromiumLaunchArguments,
+  });
+  const result = await crawler.crawlWebsiteAsync({
+    maxDepth: 0,
+    maxPages: 1,
+    navigationTimeoutMs: 10_000,
+    url: `${origin}/responsive`,
+  });
+  const responsive = result.document.pages.find((page) => page.url === `${origin}/responsive`);
+  expect(
+    responsive?.viewports.map((viewport) => viewport.width).sort((left, right) => left - right),
+  ).toEqual([320, 1440]);
+  expect(new Set(responsive?.navigation.map((item) => item.url))).toEqual(
+    new Set([`${origin}/mobile-only`, `${origin}/desktop-only`]),
+  );
+  expect(result.breakpointCoverage[0]?.probes).toHaveLength(2);
+};
+
+const assertAutomaticBreakpointDiscovery = (result: CrawlResult): void => {
+  const automatic = result.document.pages.find((page) => page.url === `${origin}/automatic`);
+
+  expect(automatic?.viewports.map((viewport) => viewport.width)).toEqual([320, 601]);
+  expect(automatic?.viewports.map((viewport) => viewport.id)).toEqual(['auto-320', 'auto-601']);
+  expect(automatic?.navigation.map((item) => item.url)).toEqual([
+    `${origin}/mobile-only`,
+    `${origin}/desktop-only`,
+  ]);
+  const evidence = result.breakpointEvidence.map(
+    (item) => `${item.kind}:${item.condition}:${item.source}`,
+  );
+  for (const expected of [
+    'viewport:(max-width: 600px):document.styleSheets[0]',
+    'viewport:(min-width: 601px):document.styleSheets[0]',
+    'container:(width > 20rem):document.styleSheets[0]',
+    `viewport:(min-width: 900px):${origin}/automatic.css`,
+  ])
+    expect(evidence.includes(expected)).toBe(true);
+  expect(
+    result.diagnostics.some(
+      (diagnostic) =>
+        diagnostic.code === 'breakpoint' &&
+        diagnostic.message.includes('Container query retained as evidence'),
+    ),
+  ).toBe(true);
+  expect(
+    result.diagnostics.some(
+      (diagnostic) =>
+        diagnostic.code === 'breakpoint' &&
+        diagnostic.message.includes('Stylesheet CSSOM could not be read'),
+    ),
+  ).toBe(true);
+  expect(
+    automatic?.nodes.every(
+      (node) =>
+        new Set(
+          node.observations.map(
+            (observation) => `${observation.viewportId}:${observation.stateId}`,
+          ),
+        ).size === node.observations.length,
+    ),
+  ).toBe(true);
+};
+
 const createFixtureServer = (): Server =>
   createServer((request, response) => {
     if (request.url === '/kontakt') {
@@ -148,6 +239,11 @@ const createFixtureServer = (): Server =>
     if (request.url === '/responsive-alias') {
       response.writeHead(302, { location: '/responsive' });
       response.end();
+      return;
+    }
+    if (request.url === '/automatic.css' || request.url === '/cross-origin.css') {
+      response.writeHead(200, { 'content-type': 'text/css' });
+      response.end(automaticStyles);
       return;
     }
     response.writeHead(200, { 'content-type': 'text/html' });
@@ -164,7 +260,9 @@ const createFixtureServer = (): Server =>
                 ? desktopOnlyPage
                 : request.url === '/mobile-only'
                   ? mobileOnlyPage
-                  : homePage,
+                  : request.url === '/automatic'
+                    ? automaticPage(origin.replace('127.0.0.1', 'localhost'))
+                    : homePage,
     );
   });
 
@@ -188,24 +286,17 @@ const chromiumLaunchArguments = [
   '--single-process',
 ] as const;
 
-const homePage = `<!doctype html>
-<html><head><style>
-.grid { display: grid; grid-template-columns: repeat(3, 1fr); }
-.hidden { display: none; }
-</style></head><body>
-<nav><a href="/about">About</a></nav>
-<section class="grid"><article>One <span style="color: red">red</span></article><article class="hidden">Hidden</article><article>Three</article></section>
-</body></html>`;
+const homePage =
+  '<!doctype html><html><head><style>.grid { display: grid; grid-template-columns: repeat(3, 1fr); }.hidden { display: none; }</style></head><body><nav><a href="/about">About</a></nav><section class="grid"><article>One <span style="color: red">red</span></article><article class="hidden">Hidden</article><article>Three</article></section></body></html>';
 
 const aboutPage = '<!doctype html><html><body><main>About page</main></body></html>';
 const aliasesPage =
   '<!doctype html><html><body><a href="/kontakt">Contact</a><a href="/kontakt/">Contact canonical</a></body></html>';
 const contactPage =
   '<!doctype html><html><body><main style="color:red">Contact page</main><img src="/contact.png" alt="Contact"></body></html>';
-const responsivePage = `<!doctype html><html><body><script>
-document.write(window.innerWidth > 600
-  ? '<a href="/desktop-only">Desktop only</a>'
-  : '<a href="/mobile-only">Mobile only</a>');
-</script></body></html>`;
+const responsivePage = `<!doctype html><html><body><script>document.write(window.innerWidth > 600 ? '<a href="/desktop-only">Desktop only</a>' : '<a href="/mobile-only">Mobile only</a>');</script></body></html>`;
+const automaticPage = (crossOriginStylesheetUrl: string): string =>
+  `<!doctype html><html><head><style>@media (max-width: 600px) { .mobile { display: block; } } @supports (display: grid) { @media (min-width: 601px) { .desktop { display: block; } } } @container (width > 20rem) { .container-only { display: grid; } }</style><link rel="stylesheet" href="/automatic.css"><link rel="stylesheet" href="${crossOriginStylesheetUrl}/cross-origin.css"></head><body><script>document.write(window.innerWidth > 600 ? '<a href="/desktop-only">Desktop only</a>' : '<a href="/mobile-only">Mobile only</a>');</script></body></html>`;
+const automaticStyles = '@media (min-width: 900px) { .wide { display: grid; } }';
 const desktopOnlyPage = '<!doctype html><html><body><main>Desktop page</main></body></html>';
 const mobileOnlyPage = '<!doctype html><html><body><main>Mobile page</main></body></html>';

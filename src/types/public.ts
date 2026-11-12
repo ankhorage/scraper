@@ -13,6 +13,46 @@ export interface CrawlOptions {
   readonly viewports?: readonly CrawlViewport[];
 }
 
+/** Raw responsive evidence retained by the scraper outside the portable observation document. */
+export interface BreakpointEvidence {
+  readonly condition: string;
+  readonly kind: 'container' | 'diagnostic' | 'viewport';
+  readonly source: string;
+  /** Canonical page URL whose CSSOM produced this evidence. */
+  readonly sourceUrl: string;
+}
+
+/** A bounded browser probe of responsive facts, retained separately from full observations. */
+export interface BreakpointProbe {
+  readonly conditionMatches: readonly string[];
+  readonly hasHorizontalOverflow: boolean;
+  readonly layout: readonly string[];
+  readonly navigation: readonly string[];
+  readonly width: number;
+}
+
+/** Explain one full viewport measurement selected from verified responsive probes. */
+export interface BreakpointMeasurement {
+  readonly reason: string;
+  readonly width: number;
+}
+
+/** Explain a candidate responsive state that was deliberately not fully measured. */
+export interface BreakpointOmission {
+  readonly reason: string;
+  readonly width: number;
+}
+
+/** Per-page automatic-breakpoint provenance and bounded-coverage status. */
+export interface BreakpointCoverage {
+  readonly evidence: readonly BreakpointEvidence[];
+  readonly measurements: readonly BreakpointMeasurement[];
+  readonly omissions: readonly BreakpointOmission[];
+  readonly probes: readonly BreakpointProbe[];
+  readonly sourceUrl: string;
+  readonly uncertainty: readonly string[];
+}
+
 import type { WebsiteComputedCss, WebsiteObservationDocument } from '@ankhorage/contracts/website';
 
 export type CssObservation = WebsiteComputedCss;
@@ -45,7 +85,14 @@ export interface PageObservation {
 
 export interface CrawlDiagnostic {
   readonly code:
-    'blocked' | 'robots' | 'unreachable' | 'limit' | 'redirect' | 'duplicate' | 'conflict';
+    | 'blocked'
+    | 'robots'
+    | 'unreachable'
+    | 'limit'
+    | 'redirect'
+    | 'duplicate'
+    | 'conflict'
+    | 'breakpoint';
   readonly captureFingerprint?: string;
   readonly existingCaptureFingerprint?: string;
   readonly finalUrl?: string;
@@ -56,6 +103,8 @@ export interface CrawlDiagnostic {
 }
 
 export interface CrawlResult {
+  readonly breakpointCoverage: readonly BreakpointCoverage[];
+  readonly breakpointEvidence: readonly BreakpointEvidence[];
   readonly document: WebsiteObservationDocument;
   readonly diagnostics: readonly CrawlDiagnostic[];
 }
