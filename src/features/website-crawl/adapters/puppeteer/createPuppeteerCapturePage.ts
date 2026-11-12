@@ -75,7 +75,7 @@ const resolvePageAsync = async (
   const page = await browser.newPage();
   try {
     await page.setViewport({ height: input.viewport.height, width: input.viewport.width });
-    await blockUnsafeRequestsAsync(page, options);
+    await blockUnsafeRequestsAsync(page, options, input.origin);
     await page.goto(input.url, { timeout: input.timeoutMs, waitUntil: 'networkidle2' });
     await assertPublicUrlAsync(page.url(), options);
     await assertBoundedDocumentAsync(page, input.maxBytes);
@@ -95,7 +95,7 @@ const capturePageAsync = async (
   try {
     await page.setViewport({ height: input.viewport.height, width: input.viewport.width });
     await installBrowserExtractionAsync(page);
-    await blockUnsafeRequestsAsync(page, options);
+    await blockUnsafeRequestsAsync(page, options, input.origin);
     const response = await page.goto(input.url, {
       timeout: input.timeoutMs,
       waitUntil: 'networkidle2',
@@ -119,10 +119,14 @@ const installBrowserExtractionAsync = async (page: Page): Promise<void> => {
   await page.evaluateOnNewDocument(installBrowserElement);
 };
 /*** Reject browser requests and redirects that resolve to non-public network targets. */
-const blockUnsafeRequestsAsync = async (page: Page, options: PuppeteerOptions): Promise<void> => {
+const blockUnsafeRequestsAsync = async (
+  page: Page,
+  options: PuppeteerOptions,
+  origin: string,
+): Promise<void> => {
   await page.setRequestInterception(true);
   page.on('request', (request) => {
-    void continuePublicRequestAsync(request, options);
+    void continuePublicRequestAsync(request, options, origin);
   });
 };
 
@@ -130,10 +134,13 @@ const blockUnsafeRequestsAsync = async (page: Page, options: PuppeteerOptions): 
 const continuePublicRequestAsync = async (
   request: HTTPRequest,
   options: PuppeteerOptions,
+  origin: string,
 ): Promise<void> => {
   try {
     const url = request.url();
     if (url.startsWith('data:') || url.startsWith('blob:')) return request.continue();
+    if (request.isNavigationRequest() && new URL(url).origin !== origin)
+      throw new Error('Navigation left the permitted crawl origin');
     await assertPublicUrlAsync(url, options);
     return request.continue();
   } catch {

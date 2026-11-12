@@ -7,6 +7,7 @@ import type {
 
 export interface CapturePageInput {
   readonly maxBytes: number;
+  readonly origin: string;
   readonly timeoutMs: number;
   readonly url: string;
   readonly viewport: CrawlViewport;
@@ -14,6 +15,7 @@ export interface CapturePageInput {
 
 export interface ResolvePageInput {
   readonly maxBytes: number;
+  readonly origin: string;
   readonly timeoutMs: number;
   readonly url: string;
   readonly viewport: CrawlViewport;
@@ -25,12 +27,14 @@ export interface CapturePagePort {
   readonly resolvePageAsync?: (input: ResolvePageInput) => Promise<{ readonly url: string }>;
   readonly discoverBreakpointsAsync?: (input: {
     readonly maxBytes: number;
+    readonly origin: string;
     readonly timeoutMs: number;
     readonly url: string;
   }) => Promise<readonly BreakpointEvidence[]>;
   readonly probeResponsiveAsync?: (input: {
     readonly conditions: readonly string[];
     readonly maxBytes: number;
+    readonly origin: string;
     readonly timeoutMs: number;
     readonly url: string;
     readonly widths: readonly number[];

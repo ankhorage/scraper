@@ -73,6 +73,59 @@ test('does not infer equivalence for distinct slash-sensitive 200 resources', as
   ]);
 });
 
+test('continues regular capture after a transient identity navigation failure', async () => {
+  const captured: string[] = [];
+  const result = await crawlWebsiteAsync(
+    { maxDepth: 0, maxPages: 1, url: 'https://example.test/fallback', viewports: [desktop] },
+    {
+      capturePage: {
+        capturePageAsync: ({ url, viewport }) => {
+          captured.push(`${url}:${viewport.id}`);
+          return Promise.resolve(observation(url, viewport, []));
+        },
+        closeAsync: () => Promise.resolve(),
+        resolvePageAsync: () => Promise.reject(new Error('Navigation timeout exceeded')),
+      },
+      robots: { isAllowedAsync: () => Promise.resolve(true) },
+    },
+  );
+  expect(captured).toEqual(['https://example.test/fallback:desktop']);
+  expect(result.document.pages).toHaveLength(1);
+  expect(
+    result.diagnostics.some(
+      (diagnostic) =>
+        diagnostic.code === 'unreachable' &&
+        diagnostic.message.includes('continuing with the regular capture pipeline'),
+    ),
+  ).toBe(true);
+});
+
+test('does not capture a redirect target disallowed by robots', async () => {
+  const captured: string[] = [];
+  const result = await crawlWebsiteAsync(
+    { maxDepth: 0, maxPages: 1, url: 'https://example.test/alias', viewports: [desktop] },
+    {
+      capturePage: {
+        capturePageAsync: ({ url, viewport }) => {
+          captured.push(url);
+          return Promise.resolve(observation(url, viewport, []));
+        },
+        closeAsync: () => Promise.resolve(),
+        resolvePageAsync: () => Promise.resolve({ url: 'https://example.test/private' }),
+      },
+      robots: { isAllowedAsync: (url) => Promise.resolve(url !== 'https://example.test/private') },
+    },
+  );
+  expect(captured).toEqual([]);
+  expect(result.document.pages).toEqual([]);
+  expect(
+    result.diagnostics.some(
+      (diagnostic) =>
+        diagnostic.code === 'robots' && diagnostic.finalUrl === 'https://example.test/private',
+    ),
+  ).toBe(true);
+});
+
 const desktop: CrawlViewport = { height: 900, id: 'desktop', width: 1440 };
 const aliases = ['https://example.test/about', 'https://example.test/about/'];
 const slashResources = ['https://example.test/test', 'https://example.test/test/'];

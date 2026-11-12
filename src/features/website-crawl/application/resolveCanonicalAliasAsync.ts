@@ -1,6 +1,7 @@
 import type { CrawlDiagnostic, CrawlOptions, CrawlViewport } from '../../../types/public.js';
 import { isSameOrigin } from '../domain/isSameOrigin.js';
 import type { CapturePagePort } from '../ports/CapturePagePort.js';
+import type { RobotsPort } from '../ports/RobotsPort.js';
 
 interface ResolveCanonicalAliasInput {
   readonly canonicalViewportPlans: ReadonlyMap<
@@ -17,7 +18,7 @@ type CanonicalAliasResolution =
   | { readonly kind: 'blocked'; readonly finalUrl: string }
   | { readonly kind: 'capture'; readonly finalUrl: string }
   | { readonly kind: 'skip'; readonly finalUrl: string }
-  | { readonly kind: 'unreachable'; readonly message: string };
+  | { readonly kind: 'fallback'; readonly message: string };
 
 const identityViewport = { height: 900, id: 'identity', width: 1440 } as const;
 
@@ -34,6 +35,7 @@ const resolveCanonicalAliasAsync = async ({
   try {
     const identity = await resolvePageAsync({
       maxBytes,
+      origin: new URL(entry.sourceUrl).origin,
       timeoutMs,
       url: entry.url,
       viewport: identityViewport,
@@ -47,7 +49,13 @@ const resolveCanonicalAliasAsync = async ({
       viewports.map((viewport) =>
         isIdentityViewport(viewport)
           ? Promise.resolve(identity)
-          : resolvePageAsync({ maxBytes, timeoutMs, url: entry.url, viewport }),
+          : resolvePageAsync({
+              maxBytes,
+              origin: new URL(entry.sourceUrl).origin,
+              timeoutMs,
+              url: entry.url,
+              viewport,
+            }),
       ),
     );
     return resolutions.every((resolution) => resolution.url === identity.url)
@@ -55,7 +63,7 @@ const resolveCanonicalAliasAsync = async ({
       : { finalUrl: identity.url, kind: 'capture' };
   } catch (error) {
     return {
-      kind: 'unreachable',
+      kind: 'fallback',
       message: error instanceof Error ? error.message : String(error),
     };
   }
@@ -68,11 +76,13 @@ export const prepareCanonicalCaptureAsync = async ({
   diagnostics,
   entry,
   maxBytes,
+  robots,
   redirects,
   timeoutMs,
 }: ResolveCanonicalAliasInput & {
   readonly diagnostics: CrawlDiagnostic[];
   readonly redirects: Set<string>;
+  readonly robots: RobotsPort;
 }): Promise<string | undefined> => {
   const resolution = await resolveCanonicalAliasAsync({
     canonicalViewportPlans,
@@ -81,11 +91,14 @@ export const prepareCanonicalCaptureAsync = async ({
     maxBytes,
     timeoutMs,
   });
-  if (resolution.kind === 'unreachable') {
-    return recordUnreachable(diagnostics, entry.sourceUrl, entry.url, resolution.message);
+  if (resolution.kind === 'fallback') {
+    return recordFallback(diagnostics, entry.sourceUrl, entry.url, resolution.message);
   }
   if (resolution.kind === 'blocked') {
     return recordBlocked(diagnostics, entry.sourceUrl, entry.url, resolution.finalUrl);
+  }
+  if (!(await robots.isAllowedAsync(resolution.finalUrl))) {
+    return recordRobotsBlocked(diagnostics, entry.sourceUrl, entry.url, resolution.finalUrl);
   }
   recordRedirect(diagnostics, redirects, entry.sourceUrl, entry.url, resolution.finalUrl);
   if (resolution.kind === 'skip') {
@@ -94,14 +107,36 @@ export const prepareCanonicalCaptureAsync = async ({
   return resolution.finalUrl;
 };
 
-/*** Record a bounded identity-navigation failure without claiming a completed alias. */
-const recordUnreachable = (
+/*** Preserve the regular capture pipeline when optional identity navigation is transiently unavailable. */
+const recordFallback = (
   diagnostics: CrawlDiagnostic[],
   sourceUrl: string,
   url: string,
   message: string,
+): string => {
+  diagnostics.push({
+    code: 'unreachable',
+    message: `Identity navigation failed; continuing with the regular capture pipeline. ${message}`,
+    sourceUrl,
+    url,
+  });
+  return url;
+};
+
+/*** Refuse an alias whose resolved canonical target is disallowed by robots before capture. */
+const recordRobotsBlocked = (
+  diagnostics: CrawlDiagnostic[],
+  sourceUrl: string,
+  url: string,
+  finalUrl: string,
 ): undefined => {
-  diagnostics.push({ code: 'unreachable', message, sourceUrl, url });
+  diagnostics.push({
+    code: 'robots',
+    finalUrl,
+    message: 'robots.txt disallowed the resolved redirect target.',
+    sourceUrl,
+    url,
+  });
   return undefined;
 };
 

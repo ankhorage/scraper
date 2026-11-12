@@ -114,7 +114,7 @@ const crawlNextEntryAsync = async (
     return;
   }
   state.requestedUrls.add(entry.url);
-  await captureEntryAsync(state, plan, sourceUrl, entry, dependencies.capturePage);
+  await captureEntryAsync(state, plan, sourceUrl, entry, dependencies);
 };
 
 /*** Capture one requested URL at every viewport while enforcing canonical capture uniqueness. */
@@ -123,25 +123,31 @@ const captureEntryAsync = async (
   plan: CrawlPlan,
   sourceUrl: string,
   entry: CrawlEntry,
-  capturePage: CapturePagePort,
+  dependencies: CrawlDependencies,
 ): Promise<void> => {
   const finalUrl = await prepareCanonicalCaptureAsync({
     canonicalViewportPlans: state.canonicalViewportPlans,
-    capturePage,
+    capturePage: dependencies.capturePage,
     diagnostics: state.diagnostics,
     entry,
     maxBytes: plan.maxBytes,
     redirects: state.redirects,
+    robots: dependencies.robots,
     timeoutMs: plan.timeoutMs,
   });
   if (!finalUrl) return;
-  const viewports = await resolveResponsiveViewportsAsync({ capturePage, entry, plan, state });
+  const viewports = await resolveResponsiveViewportsAsync({
+    capturePage: dependencies.capturePage,
+    entry,
+    plan,
+    state,
+  });
   const capturedFinalUrls = await captureViewportsAsync(
     state,
     plan,
     sourceUrl,
     entry,
-    capturePage,
+    dependencies.capturePage,
     viewports,
   );
   if (
@@ -170,6 +176,7 @@ const captureViewportsAsync = async (
     try {
       const page = await capturePage.capturePageAsync({
         maxBytes: plan.maxBytes,
+        origin: new URL(sourceUrl).origin,
         timeoutMs: plan.timeoutMs,
         url: entry.url,
         viewport,

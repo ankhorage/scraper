@@ -11,10 +11,16 @@ interface ProbeResponsiveInput {
   readonly blockUnsafeRequestsAsync: (
     page: Page,
     options: { readonly allowPrivateHostsForTests?: boolean },
+    origin: string,
   ) => Promise<void>;
   readonly browser: Browser;
   readonly conditions: readonly string[];
-  readonly input: { readonly maxBytes: number; readonly timeoutMs: number; readonly url: string };
+  readonly input: {
+    readonly maxBytes: number;
+    readonly origin: string;
+    readonly timeoutMs: number;
+    readonly url: string;
+  };
   readonly options: { readonly allowPrivateHostsForTests?: boolean };
   readonly widths: readonly number[];
 }
@@ -33,7 +39,7 @@ export const probeResponsiveAsync = async ({
   await assertPublicUrlAsync(input.url, options);
   const page = await browser.newPage();
   try {
-    await blockUnsafeRequestsAsync(page, options);
+    await blockUnsafeRequestsAsync(page, options, input.origin);
     const probes: BreakpointProbe[] = [];
     for (const width of widths) {
       await page.setViewport({ height: 900, width });

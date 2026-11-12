@@ -36,6 +36,7 @@ export const resolveResponsiveViewportsAsync = async ({
   try {
     const evidence = await capturePage.discoverBreakpointsAsync({
       maxBytes: plan.maxBytes,
+      origin: new URL(entry.sourceUrl).origin,
       timeoutMs: plan.timeoutMs,
       url: entry.url,
     });
@@ -45,6 +46,7 @@ export const resolveResponsiveViewportsAsync = async ({
       capturePage,
       evidence,
       maxBytes: plan.maxBytes,
+      origin: new URL(entry.sourceUrl).origin,
       sourceUrl: entry.sourceUrl,
       timeoutMs: plan.timeoutMs,
       url: entry.url,
