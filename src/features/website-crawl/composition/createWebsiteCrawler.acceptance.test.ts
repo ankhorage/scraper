@@ -3,6 +3,7 @@ import { createServer, type Server } from 'node:http';
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test';
 
 import { createWebsiteCrawler } from '../../../index.js';
+import type { CrawlResult } from '../../../types/public.js';
 
 let origin = '';
 let server: Server;
@@ -28,6 +29,11 @@ describe('createWebsiteCrawler public acceptance', () => {
   test(
     'discovers viewport-specific links from one redirected canonical page',
     testResponsiveCanonicalLinksAsync,
+    30_000,
+  );
+  test(
+    'discovers nested CSS viewport conditions without selecting container queries',
+    testAutomaticBreakpointDiscoveryAsync,
     30_000,
   );
 });
@@ -138,6 +144,70 @@ const testResponsiveCanonicalLinksAsync = async (): Promise<void> => {
   expect(result.diagnostics.some((diagnostic) => diagnostic.code === 'redirect')).toBe(true);
 };
 
+const testAutomaticBreakpointDiscoveryAsync = async (): Promise<void> => {
+  const crawler = createWebsiteCrawler({
+    allowPrivateHostsForTests: true,
+    launchArguments: chromiumLaunchArguments,
+  });
+  const result = await crawler.crawlWebsiteAsync({
+    maxDepth: 1,
+    maxPages: 3,
+    navigationTimeoutMs: 10_000,
+    url: `${origin}/automatic`,
+  });
+  assertAutomaticBreakpointDiscovery(result);
+};
+
+/*** Assert the public automatic-discovery contract through the real Chromium adapter. */
+const assertAutomaticBreakpointDiscovery = (result: CrawlResult): void => {
+  const automatic = result.document.pages.find((page) => page.url === `${origin}/automatic`);
+
+  expect(automatic?.viewports.map((viewport) => viewport.width)).toEqual([320, 601, 900]);
+  expect(automatic?.viewports.map((viewport) => viewport.id)).toEqual([
+    'auto-320',
+    'auto-601',
+    'auto-900',
+  ]);
+  expect(automatic?.navigation.map((item) => item.url)).toEqual([
+    `${origin}/mobile-only`,
+    `${origin}/desktop-only`,
+  ]);
+  const evidence = result.breakpointEvidence.map(
+    (item) => `${item.kind}:${item.condition}:${item.source}`,
+  );
+  for (const expected of [
+    'viewport:(max-width: 600px):document.styleSheets[0]',
+    'viewport:(min-width: 601px):document.styleSheets[0]',
+    'container:(width > 20rem):document.styleSheets[0]',
+    `viewport:(min-width: 900px):${origin}/automatic.css`,
+  ])
+    expect(evidence.includes(expected)).toBe(true);
+  expect(
+    result.diagnostics.some(
+      (diagnostic) =>
+        diagnostic.code === 'breakpoint' &&
+        diagnostic.message.includes('Container query retained as evidence'),
+    ),
+  ).toBe(true);
+  expect(
+    result.diagnostics.some(
+      (diagnostic) =>
+        diagnostic.code === 'breakpoint' &&
+        diagnostic.message.includes('Stylesheet CSSOM could not be read'),
+    ),
+  ).toBe(true);
+  expect(
+    automatic?.nodes.every(
+      (node) =>
+        new Set(
+          node.observations.map(
+            (observation) => `${observation.viewportId}:${observation.stateId}`,
+          ),
+        ).size === node.observations.length,
+    ),
+  ).toBe(true);
+};
+
 const createFixtureServer = (): Server =>
   createServer((request, response) => {
     if (request.url === '/kontakt') {
@@ -148,6 +218,11 @@ const createFixtureServer = (): Server =>
     if (request.url === '/responsive-alias') {
       response.writeHead(302, { location: '/responsive' });
       response.end();
+      return;
+    }
+    if (request.url === '/automatic.css' || request.url === '/cross-origin.css') {
+      response.writeHead(200, { 'content-type': 'text/css' });
+      response.end(automaticStyles);
       return;
     }
     response.writeHead(200, { 'content-type': 'text/html' });
@@ -164,7 +239,9 @@ const createFixtureServer = (): Server =>
                 ? desktopOnlyPage
                 : request.url === '/mobile-only'
                   ? mobileOnlyPage
-                  : homePage,
+                  : request.url === '/automatic'
+                    ? automaticPage(origin.replace('127.0.0.1', 'localhost'))
+                    : homePage,
     );
   });
 
@@ -207,5 +284,17 @@ document.write(window.innerWidth > 600
   ? '<a href="/desktop-only">Desktop only</a>'
   : '<a href="/mobile-only">Mobile only</a>');
 </script></body></html>`;
+const automaticPage = (
+  crossOriginStylesheetUrl: string,
+): string => `<!doctype html><html><head><style>
+@media (max-width: 600px) { .mobile { display: block; } }
+@supports (display: grid) { @media (min-width: 601px) { .desktop { display: block; } } }
+@container (width > 20rem) { .container-only { display: grid; } }
+</style><link rel="stylesheet" href="/automatic.css"><link rel="stylesheet" href="${crossOriginStylesheetUrl}/cross-origin.css"></head><body><script>
+document.write(window.innerWidth > 600
+  ? '<a href="/desktop-only">Desktop only</a>'
+  : '<a href="/mobile-only">Mobile only</a>');
+</script></body></html>`;
+const automaticStyles = '@media (min-width: 900px) { .wide { display: grid; } }';
 const desktopOnlyPage = '<!doctype html><html><body><main>Desktop page</main></body></html>';
 const mobileOnlyPage = '<!doctype html><html><body><main>Mobile page</main></body></html>';

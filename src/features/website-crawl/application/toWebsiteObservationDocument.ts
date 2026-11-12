@@ -109,7 +109,7 @@ const collectNodes = (
 
 /*** Deduplicate source-linked navigation observations while preserving DOM order. */
 const collectNavigation = (pages: readonly PageObservation[]) => {
-  const links = pages[0]?.elements.filter((element) => element.attributes.href) ?? [];
+  const links = pages.flatMap((page) => page.elements.filter((element) => element.attributes.href));
   return links.reduce<WebsitePageObservation['navigation']>((navigation, element) => {
     const url = element.attributes.href;
     if (!url || navigation.some((item) => item.url === url)) return navigation;

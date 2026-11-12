@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 
 import type {
+  BreakpointEvidence,
   CrawlDiagnostic,
   CrawlOptions,
   CrawlResult,
@@ -8,6 +9,7 @@ import type {
 } from '../../../types/public.js';
 import { isSameOrigin } from '../domain/isSameOrigin.js';
 import { normalizeUrl } from '../domain/normalizeUrl.js';
+import { selectResponsiveViewports } from '../domain/selectResponsiveViewports.js';
 import type { CapturePagePort } from '../ports/CapturePagePort.js';
 import type { RobotsPort } from '../ports/RobotsPort.js';
 import { toWebsiteObservationDocument } from './toWebsiteObservationDocument.js';
@@ -22,10 +24,11 @@ interface CrawlPlan {
   readonly maxDepth: number;
   readonly maxPages: number;
   readonly timeoutMs: number;
-  readonly viewports: NonNullable<CrawlOptions['viewports']>;
+  readonly viewports?: CrawlOptions['viewports'];
 }
 
 interface CrawlState {
+  readonly breakpointEvidence: BreakpointEvidence[];
   readonly diagnostics: CrawlDiagnostic[];
   readonly captureFingerprints: Map<string, string>;
   readonly canonicalUrls: Set<string>;
@@ -50,6 +53,7 @@ export const crawlWebsiteAsync = async (
   const sourceUrl = normalizeUrl(options.url);
   const plan = createCrawlPlan(options);
   const state: CrawlState = {
+    breakpointEvidence: [],
     diagnostics: [],
     captureFingerprints: new Map<string, string>(),
     canonicalUrls: new Set<string>(),
@@ -74,6 +78,7 @@ export const crawlWebsiteAsync = async (
   }
 
   return {
+    breakpointEvidence: state.breakpointEvidence,
     diagnostics: state.diagnostics,
     document: toWebsiteObservationDocument(sourceUrl, state.pages),
   };
@@ -110,7 +115,8 @@ const captureEntryAsync = async (
   entry: CrawlEntry,
   capturePage: CapturePagePort,
 ): Promise<void> => {
-  for (const viewport of plan.viewports) {
+  const viewports = await resolveViewportsAsync(state, plan, entry, capturePage);
+  for (const viewport of viewports) {
     try {
       const page = await capturePage.capturePageAsync({
         maxBytes: plan.maxBytes,
@@ -130,6 +136,54 @@ const captureEntryAsync = async (
     }
   }
 };
+
+/*** Discover each page's CSS viewport regions unless the caller supplied a complete override. */
+const resolveViewportsAsync = async (
+  state: CrawlState,
+  plan: CrawlPlan,
+  entry: CrawlEntry,
+  capturePage: CapturePagePort,
+): Promise<readonly NonNullable<CrawlOptions['viewports']>[number][]> => {
+  if (plan.viewports) return plan.viewports;
+  if (!capturePage.discoverBreakpointsAsync) return [{ height: 900, id: 'desktop', width: 1440 }];
+  try {
+    const evidence = await capturePage.discoverBreakpointsAsync({
+      maxBytes: plan.maxBytes,
+      timeoutMs: plan.timeoutMs,
+      url: entry.url,
+    });
+    state.breakpointEvidence.push(...evidence);
+    state.diagnostics.push(...breakpointDiagnostics(entry, evidence));
+    return selectResponsiveViewports(evidence);
+  } catch (error) {
+    state.diagnostics.push({
+      code: 'breakpoint',
+      message: `Breakpoint discovery failed; using the bounded default viewport. ${error instanceof Error ? error.message : String(error)}`,
+      sourceUrl: entry.sourceUrl,
+      url: entry.url,
+    });
+    return [{ height: 900, id: 'auto-1440', width: 1440 }];
+  }
+};
+
+/*** Surface unsupported CSSOM evidence without conflating container conditions with viewport rules. */
+const breakpointDiagnostics = (
+  entry: CrawlEntry,
+  evidence: readonly BreakpointEvidence[],
+): CrawlDiagnostic[] =>
+  evidence
+    .filter((item) => item.kind !== 'viewport')
+    .map((item) => ({
+      code: 'breakpoint' as const,
+      message:
+        item.kind === 'container'
+          ? `Container query retained as evidence but excluded from viewport selection: ${item.condition}`
+          : item.condition === 'Breakpoint CSSOM evidence limit reached.'
+            ? 'CSSOM breakpoint evidence reached its bounded limit; automatic selection may be incomplete.'
+            : `Stylesheet CSSOM could not be read: ${item.source} (${item.condition})`,
+      sourceUrl: entry.sourceUrl,
+      url: entry.url,
+    }));
 
 /*** Retain only the first deterministic capture for each final URL, viewport, and default state. */
 const retainCanonicalCapture = (
@@ -216,7 +270,7 @@ const createCrawlPlan = (options: CrawlOptions): CrawlPlan => ({
   maxDepth: options.maxDepth ?? 1,
   maxPages: options.maxPages ?? 20,
   timeoutMs: options.navigationTimeoutMs ?? 15_000,
-  viewports: options.viewports ?? [{ id: 'desktop', width: 1440, height: 900 }],
+  ...(options.viewports ? { viewports: options.viewports } : {}),
 });
 
 const enqueueLinks = (

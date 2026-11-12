@@ -13,6 +13,13 @@ export interface CrawlOptions {
   readonly viewports?: readonly CrawlViewport[];
 }
 
+/** Raw responsive evidence retained by the scraper outside the portable observation document. */
+export interface BreakpointEvidence {
+  readonly condition: string;
+  readonly kind: 'container' | 'diagnostic' | 'viewport';
+  readonly source: string;
+}
+
 import type { WebsiteComputedCss, WebsiteObservationDocument } from '@ankhorage/contracts/website';
 
 export type CssObservation = WebsiteComputedCss;
@@ -45,7 +52,14 @@ export interface PageObservation {
 
 export interface CrawlDiagnostic {
   readonly code:
-    'blocked' | 'robots' | 'unreachable' | 'limit' | 'redirect' | 'duplicate' | 'conflict';
+    | 'blocked'
+    | 'robots'
+    | 'unreachable'
+    | 'limit'
+    | 'redirect'
+    | 'duplicate'
+    | 'conflict'
+    | 'breakpoint';
   readonly captureFingerprint?: string;
   readonly existingCaptureFingerprint?: string;
   readonly finalUrl?: string;
@@ -56,6 +70,7 @@ export interface CrawlDiagnostic {
 }
 
 export interface CrawlResult {
+  readonly breakpointEvidence: readonly BreakpointEvidence[];
   readonly document: WebsiteObservationDocument;
   readonly diagnostics: readonly CrawlDiagnostic[];
 }
