@@ -45,6 +45,7 @@ describe('createPuppeteerCapturePage', () => {
     });
     const page = await capture.capturePageAsync({
       maxBytes: 100_000,
+      origin,
       timeoutMs: 10_000,
       url: `${origin}/`,
       viewport: { height: 800, id: 'desktop', width: 1440 },

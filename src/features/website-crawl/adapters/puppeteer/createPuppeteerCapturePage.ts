@@ -5,7 +5,11 @@ import type {
   ElementObservation,
   PageObservation,
 } from '../../../../types/public.js';
-import type { CapturePageInput, CapturePagePort } from '../../ports/CapturePagePort.js';
+import type {
+  CapturePageInput,
+  CapturePagePort,
+  ResolvePageInput,
+} from '../../ports/CapturePagePort.js';
 import { assertPublicUrlAsync as assertPublicNetworkUrlAsync } from '../network/assertPublicUrlAsync.js';
 import type { LayoutCss, VisualCss } from './browserExtractionTypes.js';
 import { discoverBreakpointsAsync } from './discoverBreakpointsAsync.js';
@@ -36,6 +40,7 @@ export const createPuppeteerCapturePage = async (
 
   return {
     capturePageAsync: async (input) => capturePageAsync(browser, input, options),
+    resolvePageAsync: async (input) => resolvePageAsync(browser, input, options),
     discoverBreakpointsAsync: async (input) =>
       discoverBreakpointsAsync({
         assertBoundedDocumentAsync,
@@ -59,6 +64,26 @@ export const createPuppeteerCapturePage = async (
     closeAsync: async () => browser.close(),
   };
 };
+
+/*** Resolve one bounded browser navigation before responsive work establishes page identity. */
+const resolvePageAsync = async (
+  browser: Browser,
+  input: ResolvePageInput,
+  options: PuppeteerOptions,
+): Promise<{ readonly url: string }> => {
+  await assertPublicUrlAsync(input.url, options);
+  const page = await browser.newPage();
+  try {
+    await page.setViewport({ height: input.viewport.height, width: input.viewport.width });
+    await blockUnsafeRequestsAsync(page, options, input.origin);
+    await page.goto(input.url, { timeout: input.timeoutMs, waitUntil: 'networkidle2' });
+    await assertPublicUrlAsync(page.url(), options);
+    await assertBoundedDocumentAsync(page, input.maxBytes);
+    return { url: page.url() };
+  } finally {
+    await page.close();
+  }
+};
 /*** Navigate one bounded viewport after installing only browser-context extraction functions. */
 const capturePageAsync = async (
   browser: Browser,
@@ -70,7 +95,7 @@ const capturePageAsync = async (
   try {
     await page.setViewport({ height: input.viewport.height, width: input.viewport.width });
     await installBrowserExtractionAsync(page);
-    await blockUnsafeRequestsAsync(page, options);
+    await blockUnsafeRequestsAsync(page, options, input.origin);
     const response = await page.goto(input.url, {
       timeout: input.timeoutMs,
       waitUntil: 'networkidle2',
@@ -94,10 +119,14 @@ const installBrowserExtractionAsync = async (page: Page): Promise<void> => {
   await page.evaluateOnNewDocument(installBrowserElement);
 };
 /*** Reject browser requests and redirects that resolve to non-public network targets. */
-const blockUnsafeRequestsAsync = async (page: Page, options: PuppeteerOptions): Promise<void> => {
+const blockUnsafeRequestsAsync = async (
+  page: Page,
+  options: PuppeteerOptions,
+  origin: string,
+): Promise<void> => {
   await page.setRequestInterception(true);
   page.on('request', (request) => {
-    void continuePublicRequestAsync(request, options);
+    void continuePublicRequestAsync(request, options, origin);
   });
 };
 
@@ -105,10 +134,13 @@ const blockUnsafeRequestsAsync = async (page: Page, options: PuppeteerOptions): 
 const continuePublicRequestAsync = async (
   request: HTTPRequest,
   options: PuppeteerOptions,
+  origin: string,
 ): Promise<void> => {
   try {
     const url = request.url();
     if (url.startsWith('data:') || url.startsWith('blob:')) return request.continue();
+    if (request.isNavigationRequest() && new URL(url).origin !== origin)
+      throw new Error('Navigation left the permitted crawl origin');
     await assertPublicUrlAsync(url, options);
     return request.continue();
   } catch {

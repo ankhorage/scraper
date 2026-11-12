@@ -13,6 +13,7 @@ interface VerifyResponsiveCoverageInput {
   readonly capturePage: CapturePagePort;
   readonly evidence: readonly BreakpointEvidence[];
   readonly maxBytes: number;
+  readonly origin: string;
   readonly sourceUrl: string;
   readonly timeoutMs: number;
   readonly url: string;
@@ -31,6 +32,7 @@ export const verifyResponsiveCoverageAsync = async ({
   capturePage,
   evidence,
   maxBytes,
+  origin,
   sourceUrl,
   timeoutMs,
   url,
@@ -42,6 +44,7 @@ export const verifyResponsiveCoverageAsync = async ({
         capturePage,
         evidence,
         maxBytes,
+        origin,
         probePlan,
         timeoutMs,
         url,
@@ -74,6 +77,7 @@ const verifiedCoverageAsync = async ({
   capturePage,
   evidence,
   maxBytes,
+  origin,
   omitted,
   probePlan,
   selected,
@@ -83,6 +87,7 @@ const verifiedCoverageAsync = async ({
   readonly capturePage: CapturePagePort;
   readonly evidence: readonly BreakpointEvidence[];
   readonly maxBytes: number;
+  readonly origin: string;
   readonly omitted: readonly BreakpointOmission[];
   readonly probePlan: ReturnType<typeof createResponsiveProbePlan>;
   readonly selected: readonly number[];
@@ -95,6 +100,7 @@ const verifiedCoverageAsync = async ({
   const probes = await capturePage.probeResponsiveAsync?.({
     conditions,
     maxBytes,
+    origin,
     timeoutMs,
     url,
     widths: selected,

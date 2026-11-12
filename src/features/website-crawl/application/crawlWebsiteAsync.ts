@@ -12,8 +12,9 @@ import { isSameOrigin } from '../domain/isSameOrigin.js';
 import { normalizeUrl } from '../domain/normalizeUrl.js';
 import type { CapturePagePort } from '../ports/CapturePagePort.js';
 import type { RobotsPort } from '../ports/RobotsPort.js';
+import { prepareCanonicalCaptureAsync } from './resolveCanonicalAliasAsync.js';
+import { resolveResponsiveViewportsAsync } from './resolveResponsiveViewportsAsync.js';
 import { toWebsiteObservationDocument } from './toWebsiteObservationDocument.js';
-import { verifyResponsiveCoverageAsync } from './verifyResponsiveCoverageAsync.js';
 
 interface CrawlDependencies {
   readonly capturePage: CapturePagePort;
@@ -34,6 +35,10 @@ interface CrawlState {
   readonly diagnostics: CrawlDiagnostic[];
   readonly captureFingerprints: Map<string, string>;
   readonly canonicalUrls: Set<string>;
+  readonly canonicalViewportPlans: Map<
+    string,
+    readonly NonNullable<CrawlOptions['viewports']>[number][]
+  >;
   readonly pages: PageObservation[];
   readonly queue: CrawlEntry[];
   readonly requestedUrls: Set<string>;
@@ -60,6 +65,7 @@ export const crawlWebsiteAsync = async (
     diagnostics: [],
     captureFingerprints: new Map<string, string>(),
     canonicalUrls: new Set<string>(),
+    canonicalViewportPlans: new Map(),
     pages: [],
     queue: [{ depth: 0, sourceUrl, url: sourceUrl }],
     requestedUrls: new Set<string>(),
@@ -108,7 +114,7 @@ const crawlNextEntryAsync = async (
     return;
   }
   state.requestedUrls.add(entry.url);
-  await captureEntryAsync(state, plan, sourceUrl, entry, dependencies.capturePage);
+  await captureEntryAsync(state, plan, sourceUrl, entry, dependencies);
 };
 
 /*** Capture one requested URL at every viewport while enforcing canonical capture uniqueness. */
@@ -117,17 +123,65 @@ const captureEntryAsync = async (
   plan: CrawlPlan,
   sourceUrl: string,
   entry: CrawlEntry,
-  capturePage: CapturePagePort,
+  dependencies: CrawlDependencies,
 ): Promise<void> => {
-  const viewports = await resolveViewportsAsync(state, plan, entry, capturePage);
+  const finalUrl = await prepareCanonicalCaptureAsync({
+    canonicalViewportPlans: state.canonicalViewportPlans,
+    capturePage: dependencies.capturePage,
+    diagnostics: state.diagnostics,
+    entry,
+    maxBytes: plan.maxBytes,
+    redirects: state.redirects,
+    robots: dependencies.robots,
+    timeoutMs: plan.timeoutMs,
+  });
+  if (!finalUrl) return;
+  const viewports = await resolveResponsiveViewportsAsync({
+    capturePage: dependencies.capturePage,
+    entry,
+    plan,
+    state,
+  });
+  const capturedFinalUrls = await captureViewportsAsync(
+    state,
+    plan,
+    sourceUrl,
+    entry,
+    dependencies.capturePage,
+    viewports,
+  );
+  if (
+    viewports.length > 0 &&
+    capturedFinalUrls.size === 1 &&
+    capturedFinalUrls.has(finalUrl) &&
+    viewports.every((viewport) =>
+      state.captureFingerprints.has(`${finalUrl}\u0000${viewport.id}\u0000default`),
+    )
+  ) {
+    state.canonicalViewportPlans.set(finalUrl, viewports);
+  }
+};
+
+/*** Collect every selected viewport and retain the final identity observed for each successful one. */
+const captureViewportsAsync = async (
+  state: CrawlState,
+  plan: CrawlPlan,
+  sourceUrl: string,
+  entry: CrawlEntry,
+  capturePage: CapturePagePort,
+  viewports: readonly NonNullable<CrawlOptions['viewports']>[number][],
+): Promise<Set<string>> => {
+  const capturedFinalUrls = new Set<string>();
   for (const viewport of viewports) {
     try {
       const page = await capturePage.capturePageAsync({
         maxBytes: plan.maxBytes,
+        origin: new URL(sourceUrl).origin,
         timeoutMs: plan.timeoutMs,
         url: entry.url,
         viewport,
       });
+      capturedFinalUrls.add(page.url);
       retainCanonicalCapture(state, plan, sourceUrl, entry, page);
     } catch (error) {
       state.diagnostics.push({
@@ -139,69 +193,8 @@ const captureEntryAsync = async (
       });
     }
   }
+  return capturedFinalUrls;
 };
-
-/*** Discover, probe, and select each page's responsive states unless callers supplied an override. */
-const resolveViewportsAsync = async (
-  state: CrawlState,
-  plan: CrawlPlan,
-  entry: CrawlEntry,
-  capturePage: CapturePagePort,
-): Promise<readonly NonNullable<CrawlOptions['viewports']>[number][]> => {
-  if (plan.viewports) return plan.viewports;
-  if (!capturePage.discoverBreakpointsAsync) return [{ height: 900, id: 'desktop', width: 1440 }];
-  try {
-    const evidence = await capturePage.discoverBreakpointsAsync({
-      maxBytes: plan.maxBytes,
-      timeoutMs: plan.timeoutMs,
-      url: entry.url,
-    });
-    state.breakpointEvidence.push(...evidence);
-    state.diagnostics.push(...breakpointDiagnostics(entry, evidence));
-    const responsiveCoverage = await verifyResponsiveCoverageAsync({
-      capturePage,
-      evidence,
-      maxBytes: plan.maxBytes,
-      sourceUrl: entry.sourceUrl,
-      timeoutMs: plan.timeoutMs,
-      url: entry.url,
-    });
-    state.breakpointCoverage.push(responsiveCoverage.coverage);
-    state.diagnostics.push(...responsiveCoverage.diagnostics);
-    return responsiveCoverage.coverage.measurements.map((measurement) => ({
-      height: 900,
-      id: `auto-${measurement.width}`,
-      width: measurement.width,
-    }));
-  } catch (error) {
-    state.diagnostics.push({
-      code: 'breakpoint',
-      message: `Breakpoint discovery failed; using the bounded default viewport. ${error instanceof Error ? error.message : String(error)}`,
-      sourceUrl: entry.sourceUrl,
-      url: entry.url,
-    });
-    return [{ height: 900, id: 'auto-1440', width: 1440 }];
-  }
-};
-
-/*** Surface unsupported CSSOM evidence without conflating container conditions with viewport rules. */
-const breakpointDiagnostics = (
-  entry: CrawlEntry,
-  evidence: readonly BreakpointEvidence[],
-): CrawlDiagnostic[] =>
-  evidence
-    .filter((item) => item.kind !== 'viewport')
-    .map((item) => ({
-      code: 'breakpoint' as const,
-      message:
-        item.kind === 'container'
-          ? `Container query retained as evidence but excluded from viewport selection: ${item.condition}`
-          : item.condition === 'Breakpoint CSSOM evidence limit reached.'
-            ? 'CSSOM breakpoint evidence reached its bounded limit; automatic selection may be incomplete.'
-            : `Stylesheet CSSOM could not be read: ${item.source} (${item.condition})`,
-      sourceUrl: entry.sourceUrl,
-      url: entry.url,
-    }));
 
 /*** Retain only the first deterministic capture for each final URL, viewport, and default state. */
 const retainCanonicalCapture = (
@@ -267,11 +260,16 @@ const duplicateCaptureDiagnostic = (
 
 /*** Record each requested-to-final URL redirect once while retaining the crawl source evidence. */
 const recordRedirect = (state: CrawlState, entry: CrawlEntry, page: PageObservation): void => {
-  if (entry.url === page.url || state.redirects.has(`${entry.url}\u0000${page.url}`)) return;
-  state.redirects.add(`${entry.url}\u0000${page.url}`);
+  recordRedirectUrl(state, entry, page.url);
+};
+
+/*** Record each proven requested-to-final URL mapping without inferring path equivalence. */
+const recordRedirectUrl = (state: CrawlState, entry: CrawlEntry, finalUrl: string): void => {
+  if (entry.url === finalUrl || state.redirects.has(`${entry.url}\u0000${finalUrl}`)) return;
+  state.redirects.add(`${entry.url}\u0000${finalUrl}`);
   state.diagnostics.push({
     code: 'redirect',
-    finalUrl: page.url,
+    finalUrl,
     message: 'The requested URL redirected to the canonical final URL.',
     sourceUrl: entry.sourceUrl,
     url: entry.url,
