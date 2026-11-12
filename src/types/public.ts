@@ -44,7 +44,11 @@ export interface PageObservation {
 }
 
 export interface CrawlDiagnostic {
-  readonly code: 'blocked' | 'robots' | 'unreachable' | 'limit';
+  readonly code:
+    'blocked' | 'robots' | 'unreachable' | 'limit' | 'redirect' | 'duplicate' | 'conflict';
+  readonly captureFingerprint?: string;
+  readonly existingCaptureFingerprint?: string;
+  readonly finalUrl?: string;
   readonly message: string;
   readonly sourceUrl: string;
   readonly url: string;
