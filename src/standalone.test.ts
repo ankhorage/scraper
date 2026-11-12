@@ -80,7 +80,7 @@ const writeConsumerAsync = async (
     ),
     writeFile(
       join(directory, 'consumer.ts'),
-      "import { createWebsiteCrawler, type CrawlOptions, type CrawlResult } from '@ankhorage/scraper';\n\nconst options: CrawlOptions = { url: 'https://example.com' };\nconst crawler = createWebsiteCrawler();\nconst crawl: Promise<CrawlResult> = crawler.crawlWebsiteAsync(options);\n\nvoid crawl;\n",
+      "import { createWebsiteCrawler, type CrawlOptions, type CrawlResult } from '@ankhorage/scraper';\nimport { CAPABILITIES } from '@ankhorage/scraper/capabilities';\nimport provider from '@ankhorage/scraper/cli';\n\nconst options: CrawlOptions = { url: 'https://example.com' };\nconst crawler = createWebsiteCrawler();\nconst crawl: Promise<CrawlResult> = crawler.crawlWebsiteAsync(options);\n\nvoid crawl;\nif (provider.capabilities !== CAPABILITIES) throw new TypeError('Expected the packed canonical capability catalog.');\n",
     ),
     writeFile(
       join(directory, 'runtime.ts'),

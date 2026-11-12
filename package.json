@@ -33,6 +33,14 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     },
+    "./cli": {
+      "types": "./dist/cli/index.d.ts",
+      "import": "./dist/cli/index.js"
+    },
+    "./capabilities": {
+      "types": "./dist/capabilities/index.d.ts",
+      "import": "./dist/capabilities/index.js"
+    },
     "./types": {
       "types": "./dist/types/public.d.ts",
       "import": "./dist/types/public.js"
@@ -41,6 +49,27 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "ankh": {
+    "category": "scraper",
+    "provider": "./dist/cli/index.js",
+    "capabilities": [
+      {
+        "id": "scraper.crawl",
+        "owner": "@ankhorage/scraper",
+        "access": [
+          "invoke"
+        ],
+        "binding": {
+          "kind": "action",
+          "bindableAs": [
+            "target"
+          ]
+        },
+        "label": "Crawl website",
+        "description": "Capture bounded browser observations for a public website."
+      }
+    ]
   },
   "engines": {
     "node": ">=24"
@@ -62,6 +91,8 @@
     "knip:check": "ankhorage-knip"
   },
   "dependencies": {
+    "@ankhorage/ankh": "^0.13.4",
+    "@ankhorage/capability": "^0.2.2",
     "@ankhorage/contracts": "^26.6.0",
     "puppeteer": "^24.4.0"
   },
