@@ -26,6 +26,7 @@ function inspectStylesheet(
       condition: sheet.media.mediaText,
       kind: 'viewport',
       source,
+      sourceUrl: location.href,
     })
   )
     return;
@@ -36,6 +37,7 @@ function inspectStylesheet(
       condition: error instanceof Error ? error.name : 'CSSOM access failed',
       kind: 'diagnostic',
       source,
+      sourceUrl: location.href,
     });
   }
 }
@@ -67,6 +69,7 @@ function inspectCssRule(
         condition: rule.conditionText,
         kind: 'viewport',
         source,
+        sourceUrl: location.href,
       })
     )
       return;
@@ -77,6 +80,7 @@ function inspectCssRule(
         condition: rule.conditionText,
         kind: 'container',
         source,
+        sourceUrl: location.href,
       })
     )
       return;
@@ -88,6 +92,7 @@ function inspectCssRule(
         condition: rule.media.mediaText,
         kind: 'viewport',
         source: importSource,
+        sourceUrl: location.href,
       });
     if (rule.styleSheet) inspectStylesheet(rule.styleSheet, importSource, evidence, seen);
   } else if ('cssRules' in rule) {
@@ -109,6 +114,7 @@ function appendBreakpointEvidence(
       condition: 'Breakpoint CSSOM evidence limit reached.',
       kind: 'diagnostic',
       source: 'CSSOM',
+      sourceUrl: location.href,
     });
   return false;
 }
@@ -135,7 +141,8 @@ function collectBreakpointEvidence(): readonly BreakpointEvidence[] {
           (candidate) =>
             candidate.kind === item.kind &&
             candidate.condition === item.condition &&
-            candidate.source === item.source,
+            candidate.source === item.source &&
+            candidate.sourceUrl === item.sourceUrl,
         ) === index,
     )
     .sort((left, right) =>

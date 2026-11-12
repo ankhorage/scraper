@@ -52,6 +52,7 @@ const isBreakpointEvidence = (value: unknown): value is readonly BreakpointEvide
       isRecord(item) &&
       typeof item.condition === 'string' &&
       typeof item.source === 'string' &&
+      typeof item.sourceUrl === 'string' &&
       (item.kind === 'container' || item.kind === 'diagnostic' || item.kind === 'viewport'),
   );
 

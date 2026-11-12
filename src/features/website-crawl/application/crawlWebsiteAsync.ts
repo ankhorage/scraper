@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 
 import type {
+  BreakpointCoverage,
   BreakpointEvidence,
   CrawlDiagnostic,
   CrawlOptions,
@@ -9,10 +10,10 @@ import type {
 } from '../../../types/public.js';
 import { isSameOrigin } from '../domain/isSameOrigin.js';
 import { normalizeUrl } from '../domain/normalizeUrl.js';
-import { selectResponsiveViewports } from '../domain/selectResponsiveViewports.js';
 import type { CapturePagePort } from '../ports/CapturePagePort.js';
 import type { RobotsPort } from '../ports/RobotsPort.js';
 import { toWebsiteObservationDocument } from './toWebsiteObservationDocument.js';
+import { verifyResponsiveCoverageAsync } from './verifyResponsiveCoverageAsync.js';
 
 interface CrawlDependencies {
   readonly capturePage: CapturePagePort;
@@ -28,6 +29,7 @@ interface CrawlPlan {
 }
 
 interface CrawlState {
+  readonly breakpointCoverage: BreakpointCoverage[];
   readonly breakpointEvidence: BreakpointEvidence[];
   readonly diagnostics: CrawlDiagnostic[];
   readonly captureFingerprints: Map<string, string>;
@@ -53,6 +55,7 @@ export const crawlWebsiteAsync = async (
   const sourceUrl = normalizeUrl(options.url);
   const plan = createCrawlPlan(options);
   const state: CrawlState = {
+    breakpointCoverage: [],
     breakpointEvidence: [],
     diagnostics: [],
     captureFingerprints: new Map<string, string>(),
@@ -78,6 +81,7 @@ export const crawlWebsiteAsync = async (
   }
 
   return {
+    breakpointCoverage: state.breakpointCoverage,
     breakpointEvidence: state.breakpointEvidence,
     diagnostics: state.diagnostics,
     document: toWebsiteObservationDocument(sourceUrl, state.pages),
@@ -137,7 +141,7 @@ const captureEntryAsync = async (
   }
 };
 
-/*** Discover each page's CSS viewport regions unless the caller supplied a complete override. */
+/*** Discover, probe, and select each page's responsive states unless callers supplied an override. */
 const resolveViewportsAsync = async (
   state: CrawlState,
   plan: CrawlPlan,
@@ -154,7 +158,21 @@ const resolveViewportsAsync = async (
     });
     state.breakpointEvidence.push(...evidence);
     state.diagnostics.push(...breakpointDiagnostics(entry, evidence));
-    return selectResponsiveViewports(evidence);
+    const responsiveCoverage = await verifyResponsiveCoverageAsync({
+      capturePage,
+      evidence,
+      maxBytes: plan.maxBytes,
+      sourceUrl: entry.sourceUrl,
+      timeoutMs: plan.timeoutMs,
+      url: entry.url,
+    });
+    state.breakpointCoverage.push(responsiveCoverage.coverage);
+    state.diagnostics.push(...responsiveCoverage.diagnostics);
+    return responsiveCoverage.coverage.measurements.map((measurement) => ({
+      height: 900,
+      id: `auto-${measurement.width}`,
+      width: measurement.width,
+    }));
   } catch (error) {
     state.diagnostics.push({
       code: 'breakpoint',

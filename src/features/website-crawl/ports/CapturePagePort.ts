@@ -1,4 +1,9 @@
-import type { BreakpointEvidence, CrawlViewport, PageObservation } from '../../../types/public.js';
+import type {
+  BreakpointEvidence,
+  BreakpointProbe,
+  CrawlViewport,
+  PageObservation,
+} from '../../../types/public.js';
 
 export interface CapturePageInput {
   readonly maxBytes: number;
@@ -14,5 +19,12 @@ export interface CapturePagePort {
     readonly timeoutMs: number;
     readonly url: string;
   }) => Promise<readonly BreakpointEvidence[]>;
+  readonly probeResponsiveAsync?: (input: {
+    readonly conditions: readonly string[];
+    readonly maxBytes: number;
+    readonly timeoutMs: number;
+    readonly url: string;
+    readonly widths: readonly number[];
+  }) => Promise<readonly BreakpointProbe[]>;
   readonly closeAsync: () => Promise<void>;
 }

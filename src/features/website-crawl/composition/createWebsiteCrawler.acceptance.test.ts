@@ -36,6 +36,11 @@ describe('createWebsiteCrawler public acceptance', () => {
     testAutomaticBreakpointDiscoveryAsync,
     30_000,
   );
+  test(
+    'retains JavaScript-only responsive navigation without authored media queries',
+    testJavaScriptResponsiveNavigationAsync,
+    30_000,
+  );
 });
 
 const testCrawlerAsync = async (): Promise<void> => {
@@ -158,16 +163,32 @@ const testAutomaticBreakpointDiscoveryAsync = async (): Promise<void> => {
   assertAutomaticBreakpointDiscovery(result);
 };
 
-/*** Assert the public automatic-discovery contract through the real Chromium adapter. */
+const testJavaScriptResponsiveNavigationAsync = async (): Promise<void> => {
+  const crawler = createWebsiteCrawler({
+    allowPrivateHostsForTests: true,
+    launchArguments: chromiumLaunchArguments,
+  });
+  const result = await crawler.crawlWebsiteAsync({
+    maxDepth: 0,
+    maxPages: 1,
+    navigationTimeoutMs: 10_000,
+    url: `${origin}/responsive`,
+  });
+  const responsive = result.document.pages.find((page) => page.url === `${origin}/responsive`);
+  expect(
+    responsive?.viewports.map((viewport) => viewport.width).sort((left, right) => left - right),
+  ).toEqual([320, 1440]);
+  expect(new Set(responsive?.navigation.map((item) => item.url))).toEqual(
+    new Set([`${origin}/mobile-only`, `${origin}/desktop-only`]),
+  );
+  expect(result.breakpointCoverage[0]?.probes).toHaveLength(2);
+};
+
 const assertAutomaticBreakpointDiscovery = (result: CrawlResult): void => {
   const automatic = result.document.pages.find((page) => page.url === `${origin}/automatic`);
 
-  expect(automatic?.viewports.map((viewport) => viewport.width)).toEqual([320, 601, 900]);
-  expect(automatic?.viewports.map((viewport) => viewport.id)).toEqual([
-    'auto-320',
-    'auto-601',
-    'auto-900',
-  ]);
+  expect(automatic?.viewports.map((viewport) => viewport.width)).toEqual([320, 601]);
+  expect(automatic?.viewports.map((viewport) => viewport.id)).toEqual(['auto-320', 'auto-601']);
   expect(automatic?.navigation.map((item) => item.url)).toEqual([
     `${origin}/mobile-only`,
     `${origin}/desktop-only`,
@@ -265,36 +286,17 @@ const chromiumLaunchArguments = [
   '--single-process',
 ] as const;
 
-const homePage = `<!doctype html>
-<html><head><style>
-.grid { display: grid; grid-template-columns: repeat(3, 1fr); }
-.hidden { display: none; }
-</style></head><body>
-<nav><a href="/about">About</a></nav>
-<section class="grid"><article>One <span style="color: red">red</span></article><article class="hidden">Hidden</article><article>Three</article></section>
-</body></html>`;
+const homePage =
+  '<!doctype html><html><head><style>.grid { display: grid; grid-template-columns: repeat(3, 1fr); }.hidden { display: none; }</style></head><body><nav><a href="/about">About</a></nav><section class="grid"><article>One <span style="color: red">red</span></article><article class="hidden">Hidden</article><article>Three</article></section></body></html>';
 
 const aboutPage = '<!doctype html><html><body><main>About page</main></body></html>';
 const aliasesPage =
   '<!doctype html><html><body><a href="/kontakt">Contact</a><a href="/kontakt/">Contact canonical</a></body></html>';
 const contactPage =
   '<!doctype html><html><body><main style="color:red">Contact page</main><img src="/contact.png" alt="Contact"></body></html>';
-const responsivePage = `<!doctype html><html><body><script>
-document.write(window.innerWidth > 600
-  ? '<a href="/desktop-only">Desktop only</a>'
-  : '<a href="/mobile-only">Mobile only</a>');
-</script></body></html>`;
-const automaticPage = (
-  crossOriginStylesheetUrl: string,
-): string => `<!doctype html><html><head><style>
-@media (max-width: 600px) { .mobile { display: block; } }
-@supports (display: grid) { @media (min-width: 601px) { .desktop { display: block; } } }
-@container (width > 20rem) { .container-only { display: grid; } }
-</style><link rel="stylesheet" href="/automatic.css"><link rel="stylesheet" href="${crossOriginStylesheetUrl}/cross-origin.css"></head><body><script>
-document.write(window.innerWidth > 600
-  ? '<a href="/desktop-only">Desktop only</a>'
-  : '<a href="/mobile-only">Mobile only</a>');
-</script></body></html>`;
+const responsivePage = `<!doctype html><html><body><script>document.write(window.innerWidth > 600 ? '<a href="/desktop-only">Desktop only</a>' : '<a href="/mobile-only">Mobile only</a>');</script></body></html>`;
+const automaticPage = (crossOriginStylesheetUrl: string): string =>
+  `<!doctype html><html><head><style>@media (max-width: 600px) { .mobile { display: block; } } @supports (display: grid) { @media (min-width: 601px) { .desktop { display: block; } } } @container (width > 20rem) { .container-only { display: grid; } }</style><link rel="stylesheet" href="/automatic.css"><link rel="stylesheet" href="${crossOriginStylesheetUrl}/cross-origin.css"></head><body><script>document.write(window.innerWidth > 600 ? '<a href="/desktop-only">Desktop only</a>' : '<a href="/mobile-only">Mobile only</a>');</script></body></html>`;
 const automaticStyles = '@media (min-width: 900px) { .wide { display: grid; } }';
 const desktopOnlyPage = '<!doctype html><html><body><main>Desktop page</main></body></html>';
 const mobileOnlyPage = '<!doctype html><html><body><main>Mobile page</main></body></html>';

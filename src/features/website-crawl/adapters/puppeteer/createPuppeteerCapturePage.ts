@@ -9,6 +9,7 @@ import type { CapturePageInput, CapturePagePort } from '../../ports/CapturePageP
 import { assertPublicUrlAsync as assertPublicNetworkUrlAsync } from '../network/assertPublicUrlAsync.js';
 import type { LayoutCss, VisualCss } from './browserExtractionTypes.js';
 import { discoverBreakpointsAsync } from './discoverBreakpointsAsync.js';
+import { probeResponsiveAsync } from './probeResponsiveAsync.js';
 interface PuppeteerOptions {
   readonly allowPrivateHostsForTests?: boolean;
   readonly launchArguments?: readonly string[];
@@ -43,6 +44,17 @@ export const createPuppeteerCapturePage = async (
         browser,
         input,
         options,
+      }),
+    probeResponsiveAsync: async ({ conditions, widths, ...input }) =>
+      probeResponsiveAsync({
+        assertBoundedDocumentAsync,
+        assertPublicUrlAsync,
+        blockUnsafeRequestsAsync,
+        browser,
+        conditions,
+        input,
+        options,
+        widths,
       }),
     closeAsync: async () => browser.close(),
   };

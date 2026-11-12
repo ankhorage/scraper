@@ -1,55 +1,128 @@
-import { describe, expect, test } from 'bun:test';
+import { expect, test } from 'bun:test';
 
-import { selectResponsiveViewports } from './selectResponsiveViewports.js';
+import {
+  createResponsiveProbePlan,
+  selectResponsiveViewports,
+} from './selectResponsiveViewports.js';
 
-describe('selectResponsiveViewports', () => {
-  test('selects one initial width and one width for every responsive transition', () => {
-    expect(
-      selectResponsiveViewports([
-        { condition: '(min-width: 480px)', kind: 'viewport', source: 'inline' },
-        { condition: '(min-width: 768px)', kind: 'viewport', source: 'inline' },
-        { condition: '(min-width: 1024px)', kind: 'viewport', source: 'inline' },
-        { condition: '(min-width: 1280px)', kind: 'viewport', source: 'inline' },
-      ]).map((viewport) => viewport.width),
-    ).toEqual([320, 480, 768, 1024, 1280]);
-  });
+test('selects one initial width and one width for every responsive transition', () => {
+  expect(
+    selectResponsiveViewports([
+      {
+        condition: '(min-width: 480px)',
+        kind: 'viewport',
+        source: 'inline',
+        sourceUrl: 'https://example.test/',
+      },
+      {
+        condition: '(min-width: 768px)',
+        kind: 'viewport',
+        source: 'inline',
+        sourceUrl: 'https://example.test/',
+      },
+      {
+        condition: '(min-width: 1024px)',
+        kind: 'viewport',
+        source: 'inline',
+        sourceUrl: 'https://example.test/',
+      },
+      {
+        condition: '(min-width: 1280px)',
+        kind: 'viewport',
+        source: 'inline',
+        sourceUrl: 'https://example.test/',
+      },
+    ]).map((viewport) => viewport.width),
+  ).toEqual([320, 479, 480, 767, 768, 1023, 1024, 1279, 1280, 1440]);
+});
 
-  test('honours legacy units and inclusive and exclusive range boundaries', () => {
-    expect(
-      selectResponsiveViewports([
-        { condition: '(width > 30em)', kind: 'viewport', source: 'inline' },
-        { condition: '(600px <= width < 900px)', kind: 'viewport', source: 'inline' },
-        { condition: '(max-width: 70rem)', kind: 'viewport', source: 'inline' },
-      ]).map((viewport) => viewport.width),
-    ).toEqual([320, 481, 600, 900, 1121]);
-  });
+test('honours legacy units and inclusive and exclusive range boundaries', () => {
+  expect(
+    selectResponsiveViewports([
+      {
+        condition: '(width > 30em)',
+        kind: 'viewport',
+        source: 'inline',
+        sourceUrl: 'https://example.test/',
+      },
+      {
+        condition: '(600px <= width < 900px)',
+        kind: 'viewport',
+        source: 'inline',
+        sourceUrl: 'https://example.test/',
+      },
+      {
+        condition: '(max-width: 70rem)',
+        kind: 'viewport',
+        source: 'inline',
+        sourceUrl: 'https://example.test/',
+      },
+    ]).map((viewport) => viewport.width),
+  ).toEqual([320, 480, 481, 599, 600, 899, 900, 1120, 1121, 1440]);
+});
 
-  test('does not turn container queries or fluid styles into viewport breakpoints', () => {
-    expect(
-      selectResponsiveViewports([
-        { condition: '(width > 30rem)', kind: 'container', source: 'inline' },
-        { condition: 'display: grid', kind: 'diagnostic', source: 'inline' },
-      ]),
-    ).toEqual([{ height: 900, id: 'auto-1440', width: 1440 }]);
-  });
+test('does not turn container queries or fluid styles into viewport breakpoints', () => {
+  expect(
+    selectResponsiveViewports([
+      {
+        condition: '(width > 30rem)',
+        kind: 'container',
+        source: 'inline',
+        sourceUrl: 'https://example.test/',
+      },
+      {
+        condition: 'display: grid',
+        kind: 'diagnostic',
+        source: 'inline',
+        sourceUrl: 'https://example.test/',
+      },
+    ]),
+  ).toEqual([
+    { height: 900, id: 'auto-320', width: 320 },
+    { height: 900, id: 'auto-1440', width: 1440 },
+  ]);
+});
 
-  test('bounds automatic capture plans for pathological responsive stylesheets', () => {
-    expect(
-      selectResponsiveViewports(
-        Array.from({ length: 100 }, (_, index) => ({
-          condition: `(min-width: ${index * 10 + 1}px)`,
-          kind: 'viewport' as const,
-          source: 'inline',
-        })),
-      ),
-    ).toHaveLength(8);
-  });
+test('retains every candidate so the verification layer can report coverage truncation', () => {
+  expect(
+    selectResponsiveViewports(
+      Array.from({ length: 100 }, (_, index) => ({
+        condition: `(min-width: ${index * 10 + 1}px)`,
+        kind: 'viewport' as const,
+        source: 'inline',
+        sourceUrl: 'https://example.test/',
+      })),
+    ),
+  ).toHaveLength(200);
+});
 
-  test('keeps representative automatic widths within the safe browser viewport bound', () => {
-    expect(
-      selectResponsiveViewports([
-        { condition: '(min-width: 100000px)', kind: 'viewport', source: 'inline' },
-      ]),
-    ).toEqual([{ height: 900, id: 'auto-320', width: 320 }]);
-  });
+test('does not present a compound non-width media condition as complete width coverage', () => {
+  const plan = createResponsiveProbePlan([
+    {
+      condition: '(min-width: 600px) and (prefers-color-scheme: dark)',
+      kind: 'viewport',
+      source: 'inline',
+      sourceUrl: 'https://example.test/',
+    },
+  ]);
+  expect(plan.candidates.map((viewport) => viewport.width)).toEqual([320, 599, 600, 1440]);
+  expect(plan.uncertainty).toEqual([
+    'Viewport condition includes non-width media features that bounded width probes cannot fully evaluate: (min-width: 600px) and (prefers-color-scheme: dark)',
+  ]);
+});
+
+test('keeps representative automatic widths within the safe browser viewport bound', () => {
+  expect(
+    selectResponsiveViewports([
+      {
+        condition: '(min-width: 100000px)',
+        kind: 'viewport',
+        source: 'inline',
+        sourceUrl: 'https://example.test/',
+      },
+    ]),
+  ).toEqual([
+    { height: 900, id: 'auto-320', width: 320 },
+    { height: 900, id: 'auto-1440', width: 1440 },
+  ]);
 });
