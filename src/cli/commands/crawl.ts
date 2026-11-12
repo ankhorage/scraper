@@ -67,8 +67,9 @@ function parseCrawlInput(
   const values = collectCrawlOptions(tokens);
   const output = singleOption(values, '--output', true);
   const maxPages = positiveIntegerOption(values, '--max-pages');
-  const maxDepth = positiveIntegerOption(values, '--max-depth');
+  const maxDepth = nonnegativeIntegerOption(values, '--max-depth');
   const viewports = (values.get('--viewport') ?? []).map(parseViewport);
+  assertUniqueViewportIds(viewports);
   return { url, maxDepth, maxPages, outputPath: resolve(cwd, output), viewports };
 }
 
@@ -116,8 +117,33 @@ function positiveIntegerOption(
   if (options.length > 1) throw new Error(renderUsage());
   const [value] = options;
   if (value === undefined) return undefined;
-  if (!/^[1-9][0-9]*$/.test(value)) throw new Error(`${flag} must be a positive integer.`);
-  return Number(value);
+  return parseSafeInteger(value, flag, /^[1-9][0-9]*$/, 'a positive integer');
+}
+
+/*** Convert an optional nonnegative integer flag while preserving an explicit zero depth. */
+function nonnegativeIntegerOption(
+  values: ReadonlyMap<CrawlFlag, readonly string[]>,
+  flag: CrawlFlag,
+): number | undefined {
+  const options = values.get(flag) ?? [];
+  if (options.length > 1) throw new Error(renderUsage());
+  const [value] = options;
+  if (value === undefined) return undefined;
+  return parseSafeInteger(value, flag, /^(?:0|[1-9][0-9]*)$/, 'a nonnegative integer');
+}
+
+/*** Parse decimal CLI input only when it remains a finite safe integer at the runtime boundary. */
+function parseSafeInteger(
+  value: string,
+  flag: string,
+  pattern: RegExp,
+  description: string,
+): number {
+  if (!pattern.test(value)) throw new Error(`${flag} must be ${description}.`);
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || !Number.isSafeInteger(parsed))
+    throw new Error(`${flag} must be a safe integer.`);
+  return parsed;
 }
 
 /*** Parse one explicit viewport identifier and dimensions without inventing a viewport. */
@@ -133,7 +159,17 @@ function parseViewport(value: string): {
   const { id, width, height } = match.groups;
   if (id === undefined || width === undefined || height === undefined)
     throw new Error('--viewport must use id:WIDTHxHEIGHT.');
-  return { id, width: Number(width), height: Number(height) };
+  return {
+    id,
+    width: parseSafeInteger(width, '--viewport width', /^[1-9][0-9]*$/, 'a positive integer'),
+    height: parseSafeInteger(height, '--viewport height', /^[1-9][0-9]*$/, 'a positive integer'),
+  };
+}
+
+/*** Reject duplicate viewport identities before crawler composition can start the browser. */
+function assertUniqueViewportIds(viewports: readonly { readonly id: string }[]): void {
+  if (new Set(viewports.map((viewport) => viewport.id)).size !== viewports.length)
+    throw new Error('--viewport IDs must be unique.');
 }
 
 /*** Refuse an existing target before starting the potentially expensive crawl. */
