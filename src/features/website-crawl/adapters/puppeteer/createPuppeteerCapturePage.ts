@@ -5,7 +5,11 @@ import type {
   ElementObservation,
   PageObservation,
 } from '../../../../types/public.js';
-import type { CapturePageInput, CapturePagePort } from '../../ports/CapturePagePort.js';
+import type {
+  CapturePageInput,
+  CapturePagePort,
+  ResolvePageInput,
+} from '../../ports/CapturePagePort.js';
 import { assertPublicUrlAsync as assertPublicNetworkUrlAsync } from '../network/assertPublicUrlAsync.js';
 import type { LayoutCss, VisualCss } from './browserExtractionTypes.js';
 import { discoverBreakpointsAsync } from './discoverBreakpointsAsync.js';
@@ -36,6 +40,7 @@ export const createPuppeteerCapturePage = async (
 
   return {
     capturePageAsync: async (input) => capturePageAsync(browser, input, options),
+    resolvePageAsync: async (input) => resolvePageAsync(browser, input, options),
     discoverBreakpointsAsync: async (input) =>
       discoverBreakpointsAsync({
         assertBoundedDocumentAsync,
@@ -58,6 +63,26 @@ export const createPuppeteerCapturePage = async (
       }),
     closeAsync: async () => browser.close(),
   };
+};
+
+/*** Resolve one bounded browser navigation before responsive work establishes page identity. */
+const resolvePageAsync = async (
+  browser: Browser,
+  input: ResolvePageInput,
+  options: PuppeteerOptions,
+): Promise<{ readonly url: string }> => {
+  await assertPublicUrlAsync(input.url, options);
+  const page = await browser.newPage();
+  try {
+    await page.setViewport({ height: input.viewport.height, width: input.viewport.width });
+    await blockUnsafeRequestsAsync(page, options);
+    await page.goto(input.url, { timeout: input.timeoutMs, waitUntil: 'networkidle2' });
+    await assertPublicUrlAsync(page.url(), options);
+    await assertBoundedDocumentAsync(page, input.maxBytes);
+    return { url: page.url() };
+  } finally {
+    await page.close();
+  }
 };
 /*** Navigate one bounded viewport after installing only browser-context extraction functions. */
 const capturePageAsync = async (
