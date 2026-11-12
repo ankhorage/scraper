@@ -20,6 +20,11 @@ describe('createWebsiteCrawler public acceptance', () => {
     testCrawlerAsync,
     30_000,
   );
+  test(
+    'deduplicates redirected aliases through the real Chromium-backed public endpoint',
+    testRedirectCanonicalizationAsync,
+    30_000,
+  );
 });
 
 const testCrawlerAsync = async (): Promise<void> => {
@@ -58,10 +63,66 @@ const testCrawlerAsync = async (): Promise<void> => {
   expect(typeof home?.navigation[0]?.sourceRef).toBe('string');
 };
 
+const testRedirectCanonicalizationAsync = async (): Promise<void> => {
+  const crawler = createWebsiteCrawler({
+    allowPrivateHostsForTests: true,
+    launchArguments: chromiumLaunchArguments,
+  });
+  const result = await crawler.crawlWebsiteAsync({
+    maxDepth: 1,
+    maxPages: 3,
+    navigationTimeoutMs: 10_000,
+    url: `${origin}/aliases`,
+    viewports: [
+      { height: 900, id: 'desktop', width: 1440 },
+      { height: 844, id: 'mobile', width: 390 },
+    ],
+  });
+  const aliases = result.document.pages.find((page) => page.url === `${origin}/aliases`);
+  const contact = result.document.pages.find((page) => page.url === `${origin}/kontakt/`);
+  const contactMain = contact?.nodes.find((node) => node.dom.tagName === 'main');
+  const sourceRefs = contact?.nodes.map((node) => node.sourceRef) ?? [];
+  expect(result.document.pages).toHaveLength(2);
+  expect(contact?.viewports.map((viewport) => viewport.id)).toEqual(['desktop', 'mobile']);
+  expect(new Set(sourceRefs).size).toBe(sourceRefs.length);
+  expect(aliases?.navigation.map((item) => item.url)).toEqual([
+    `${origin}/kontakt`,
+    `${origin}/kontakt/`,
+  ]);
+  expect(contact?.assets.map((asset) => asset.url)).toEqual([`${origin}/contact.png`]);
+  expect(contactMain?.observations[0]?.css?.color).toBe('rgb(255, 0, 0)');
+  expect(contactMain?.observations[0]?.provenance.sourceUrl).toBe(`${origin}/kontakt/`);
+  expect(
+    contact?.nodes.every(
+      (node) =>
+        new Set(
+          node.observations.map(
+            (observation) => `${observation.viewportId}:${observation.stateId}`,
+          ),
+        ).size === node.observations.length,
+    ),
+  ).toBe(true);
+  expect(result.diagnostics.some((diagnostic) => diagnostic.code === 'redirect')).toBe(true);
+  expect(result.diagnostics.some((diagnostic) => diagnostic.code === 'duplicate')).toBe(true);
+};
+
 const createFixtureServer = (): Server =>
   createServer((request, response) => {
+    if (request.url === '/kontakt') {
+      response.writeHead(302, { location: '/kontakt/' });
+      response.end();
+      return;
+    }
     response.writeHead(200, { 'content-type': 'text/html' });
-    response.end(request.url === '/about' ? aboutPage : homePage);
+    response.end(
+      request.url === '/about'
+        ? aboutPage
+        : request.url === '/aliases'
+          ? aliasesPage
+          : request.url === '/kontakt/'
+            ? contactPage
+            : homePage,
+    );
   });
 
 const listenAsync = async (fixture: Server): Promise<string> => {
@@ -94,3 +155,7 @@ const homePage = `<!doctype html>
 </body></html>`;
 
 const aboutPage = '<!doctype html><html><body><main>About page</main></body></html>';
+const aliasesPage =
+  '<!doctype html><html><body><a href="/kontakt">Contact</a><a href="/kontakt/">Contact canonical</a></body></html>';
+const contactPage =
+  '<!doctype html><html><body><main style="color:red">Contact page</main><img src="/contact.png" alt="Contact"></body></html>';
