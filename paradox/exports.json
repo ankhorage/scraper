@@ -1,0 +1,256 @@
+[
+  {
+    "name": "BreakpointEvidence",
+    "title": null,
+    "description": null,
+    "isReadme": false,
+    "see": [],
+    "security": [],
+    "kind": "type",
+    "modulePath": "src/types/public.ts",
+    "sourceLocation": {
+      "filePath": "src/types/public.ts",
+      "line": 17,
+      "column": 1
+    },
+    "exportPaths": [
+      "src/index.ts"
+    ],
+    "relatedSymbols": [],
+    "signatures": [],
+    "members": [
+      {
+        "name": "condition",
+        "kind": "property",
+        "type": "string",
+        "required": true,
+        "description": null
+      },
+      {
+        "name": "kind",
+        "kind": "property",
+        "type": "\"container\" | \"diagnostic\" | \"viewport\"",
+        "required": true,
+        "description": null
+      },
+      {
+        "name": "source",
+        "kind": "property",
+        "type": "string",
+        "required": true,
+        "description": null
+      },
+      {
+        "name": "sourceUrl",
+        "kind": "property",
+        "type": "string",
+        "required": true,
+        "description": null
+      }
+    ],
+    "structuredRows": []
+  },
+  {
+    "name": "CrawlOptions",
+    "title": null,
+    "description": null,
+    "isReadme": false,
+    "see": [],
+    "security": [],
+    "kind": "type",
+    "modulePath": "src/types/public.ts",
+    "sourceLocation": {
+      "filePath": "src/types/public.ts",
+      "line": 7,
+      "column": 1
+    },
+    "exportPaths": [
+      "src/index.ts"
+    ],
+    "relatedSymbols": [
+      "CrawlViewport"
+    ],
+    "signatures": [],
+    "members": [
+      {
+        "name": "maxBytesPerPage",
+        "kind": "property",
+        "type": "number",
+        "required": false,
+        "description": null
+      },
+      {
+        "name": "maxDepth",
+        "kind": "property",
+        "type": "number",
+        "required": false,
+        "description": null
+      },
+      {
+        "name": "maxPages",
+        "kind": "property",
+        "type": "number",
+        "required": false,
+        "description": null
+      },
+      {
+        "name": "navigationTimeoutMs",
+        "kind": "property",
+        "type": "number",
+        "required": false,
+        "description": null
+      },
+      {
+        "name": "url",
+        "kind": "property",
+        "type": "string",
+        "required": true,
+        "description": null
+      },
+      {
+        "name": "viewports",
+        "kind": "property",
+        "type": "readonly CrawlViewport[]",
+        "required": false,
+        "description": null
+      }
+    ],
+    "structuredRows": []
+  },
+  {
+    "name": "CrawlResult",
+    "title": null,
+    "description": null,
+    "isReadme": false,
+    "see": [],
+    "security": [],
+    "kind": "type",
+    "modulePath": "src/types/public.ts",
+    "sourceLocation": {
+      "filePath": "src/types/public.ts",
+      "line": 105,
+      "column": 1
+    },
+    "exportPaths": [
+      "src/index.ts"
+    ],
+    "relatedSymbols": [
+      "BreakpointEvidence"
+    ],
+    "signatures": [],
+    "members": [
+      {
+        "name": "breakpointCoverage",
+        "kind": "property",
+        "type": "readonly BreakpointCoverage[]",
+        "required": true,
+        "description": null
+      },
+      {
+        "name": "breakpointEvidence",
+        "kind": "property",
+        "type": "readonly BreakpointEvidence[]",
+        "required": true,
+        "description": null
+      },
+      {
+        "name": "diagnostics",
+        "kind": "property",
+        "type": "readonly CrawlDiagnostic[]",
+        "required": true,
+        "description": null
+      },
+      {
+        "name": "document",
+        "kind": "property",
+        "type": "WebsiteObservationDocument",
+        "required": true,
+        "description": null
+      }
+    ],
+    "structuredRows": []
+  },
+  {
+    "name": "CrawlViewport",
+    "title": null,
+    "description": null,
+    "isReadme": false,
+    "see": [],
+    "security": [],
+    "kind": "type",
+    "modulePath": "src/types/public.ts",
+    "sourceLocation": {
+      "filePath": "src/types/public.ts",
+      "line": 1,
+      "column": 1
+    },
+    "exportPaths": [
+      "src/index.ts"
+    ],
+    "relatedSymbols": [],
+    "signatures": [],
+    "members": [
+      {
+        "name": "height",
+        "kind": "property",
+        "type": "number",
+        "required": true,
+        "description": null
+      },
+      {
+        "name": "id",
+        "kind": "property",
+        "type": "string",
+        "required": true,
+        "description": null
+      },
+      {
+        "name": "width",
+        "kind": "property",
+        "type": "number",
+        "required": true,
+        "description": null
+      }
+    ],
+    "structuredRows": []
+  },
+  {
+    "name": "createWebsiteCrawler",
+    "title": null,
+    "description": "Create the public, safe website-recognition crawler.",
+    "isReadme": false,
+    "see": [],
+    "security": [],
+    "kind": "value",
+    "modulePath": "src/features/website-crawl/composition/createWebsiteCrawler.ts",
+    "sourceLocation": {
+      "filePath": "src/features/website-crawl/composition/createWebsiteCrawler.ts",
+      "line": 12,
+      "column": 14
+    },
+    "exportPaths": [
+      "src/index.ts"
+    ],
+    "relatedSymbols": [
+      "CrawlOptions",
+      "CrawlResult"
+    ],
+    "signatures": [
+      {
+        "label": "(crawlerOptions?: WebsiteCrawlerOptions) => { readonly crawlWebsiteAsync: (options: CrawlOptions) => Promise<CrawlResult>; }",
+        "parameters": [
+          {
+            "name": "crawlerOptions",
+            "type": "WebsiteCrawlerOptions",
+            "required": false,
+            "description": null
+          }
+        ],
+        "returnType": "{ readonly crawlWebsiteAsync: (options: CrawlOptions) => Promise<CrawlResult>; }",
+        "returnDescription": null
+      }
+    ],
+    "members": [],
+    "structuredRows": []
+  }
+]
