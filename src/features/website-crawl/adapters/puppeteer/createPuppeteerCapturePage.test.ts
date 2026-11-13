@@ -111,6 +111,36 @@ const expectDynamicEvidence = (page: PageObservation): void => {
   ).toBe(true);
 };
 
+/*** Assert canonical state-scoped semantic evidence without expanding the browser test callback. */
+const expectCanonicalDynamicEvidence = (page: PageObservation): void => {
+  const document = toWebsiteObservationDocument(`${origin}/dynamic`, [page]);
+  const nodes = document.pages[0]?.nodes ?? [];
+  const byLabel = (label: string) =>
+    nodes.find((node) => node.dom.attributes['aria-label'] === label)?.observations;
+  const state = (label: string, stateId: string) =>
+    byLabel(label)?.find((observation) => observation.stateId === stateId);
+
+  expect(state('css', 'initial')?.semanticAttributes).toEqual({
+    'aria-label': 'css',
+    'aria-valuemax': '100',
+    'aria-valuemin': '0',
+    'aria-valuenow': '20',
+    role: 'progressbar',
+  });
+  expect(state('css', 'triggered')?.semanticAttributes?.['aria-valuenow']).toBe('72');
+  expect(state('css', 'settled')?.semanticAttributes?.['aria-valuetext']).toBe('72 percent');
+  expect(state('css', 'initial')?.semanticAttributes).not.toHaveProperty('aria-valuetext');
+  expect(state('css', 'settled')?.semanticAttributes).not.toHaveProperty('data-private-capture');
+  expect(state('zero', 'settled')?.semanticAttributes).toMatchObject({
+    'aria-valuenow': '0',
+    value: '0',
+  });
+  expect(state('false', 'incomplete')?.availability.status).toBe('missing');
+  expect(state('false', 'incomplete')?.semanticAttributes).toEqual({});
+  expect(state('false', 'incomplete')?.css).toBeNull();
+  expect(state('false', 'incomplete')?.rect).toBeNull();
+};
+
 describe('createPuppeteerCapturePage', () => {
   test('captures visible and hidden DOM state, computed CSS, and navigation', async () => {
     const page = await captureFixtureAsync('/', { height: 800, id: 'desktop', width: 1440 });
@@ -134,34 +164,7 @@ describe('createPuppeteerCapturePage', () => {
     });
     expectDynamicEvidence(page);
 
-    const document = toWebsiteObservationDocument(`${origin}/dynamic`, [page]);
-    const nodes = document.pages[0]?.nodes ?? [];
-    const byLabel = (label: string) =>
-      nodes.find((node) => node.dom.attributes['aria-label'] === label)?.observations;
-    const state = (label: string, stateId: string) =>
-      byLabel(label)?.find((observation) => observation.stateId === stateId);
-
-    expect(state('css', 'initial')?.semanticAttributes).toEqual({
-      'aria-label': 'css',
-      'aria-valuemax': '100',
-      'aria-valuemin': '0',
-      'aria-valuenow': '20',
-      role: 'progressbar',
-    });
-    expect(state('css', 'triggered')?.semanticAttributes?.['aria-valuenow']).toBe('72');
-    expect(state('css', 'settled')?.semanticAttributes?.['aria-valuetext']).toBe('72 percent');
-    expect(state('css', 'initial')?.semanticAttributes).not.toHaveProperty('aria-valuetext');
-    expect(state('css', 'settled')?.semanticAttributes).not.toHaveProperty(
-      'data-private-capture',
-    );
-    expect(state('zero', 'settled')?.semanticAttributes).toMatchObject({
-      'aria-valuenow': '0',
-      value: '0',
-    });
-    expect(state('false', 'incomplete')?.availability.status).toBe('missing');
-    expect(state('false', 'incomplete')?.semanticAttributes).toEqual({});
-    expect(state('false', 'incomplete')?.css).toBeNull();
-    expect(state('false', 'incomplete')?.rect).toBeNull();
+    expectCanonicalDynamicEvidence(page);
   });
 
   test('rejects invalid capture limits and preserves the hard candidate cap', async () => {

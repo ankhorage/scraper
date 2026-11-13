@@ -186,15 +186,11 @@ const dynamicObservation = (
 const observeSemanticAttributes = (
   element: PageObservation['elements'][number],
 ): NonNullable<WebsiteNodeObservation['semanticAttributes']> =>
-  semanticAttributeNames.reduce<NonNullable<WebsiteNodeObservation['semanticAttributes']>>(
-    (observed, name) => {
-      const value = element.attributes[name];
-      return value === undefined ? observed : { ...observed, [name]: value };
-    },
-    {},
+  Object.fromEntries(
+    Object.entries(element.attributes).filter(([name]) => semanticAttributeNames.has(name)),
   );
 
-const semanticAttributeNames = [
+const semanticAttributeNames: ReadonlySet<string> = new Set<WebsiteSemanticAttributeName>([
   'aria-label',
   'aria-valuemax',
   'aria-valuemin',
@@ -202,7 +198,7 @@ const semanticAttributeNames = [
   'aria-valuetext',
   'role',
   'value',
-] as const satisfies readonly WebsiteSemanticAttributeName[];
+]);
 
 /*** Declare only the browser states actually retained across the page's viewport captures. */
 const collectStates = (pages: readonly PageObservation[]) => {
