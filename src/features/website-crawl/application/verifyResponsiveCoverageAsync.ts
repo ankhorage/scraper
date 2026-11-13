@@ -51,12 +51,12 @@ export const verifyResponsiveCoverageAsync = async ({
   return { coverage, diagnostics: coverageDiagnostics(sourceUrl, url, coverage) };
 };
 
-/*** Bound lightweight probes while preserving the mobile and desktop baseline candidates. */
+/*** Bound lightweight probes while distributing samples across the discovered responsive range. */
 const boundProbeCandidates = (
   candidates: readonly number[],
 ): { readonly omitted: readonly BreakpointOmission[]; readonly selected: readonly number[] } => {
   if (candidates.length <= maximumAutomaticProbes) return { omitted: [], selected: candidates };
-  const selected = [...candidates.slice(0, maximumAutomaticProbes - 1), candidates.at(-1) ?? 1440];
+  const selected = evenlyDistributedCandidates(candidates, maximumAutomaticProbes);
   const selectedSet = new Set(selected);
   return {
     omitted: candidates
@@ -68,6 +68,16 @@ const boundProbeCandidates = (
     selected,
   };
 };
+
+/*** Select ordered candidate quantiles so neighbouring thresholds cannot exhaust the probe budget. */
+const evenlyDistributedCandidates = (
+  candidates: readonly number[],
+  limit: number,
+): readonly number[] =>
+  Array.from({ length: limit }, (_, index) => {
+    const candidateIndex = Math.round((index * (candidates.length - 1)) / (limit - 1));
+    return candidates.at(candidateIndex) ?? candidates.at(-1) ?? 1440;
+  });
 
 /*** Use browser probes to select one full observation for every meaningfully distinct state. */
 const verifiedCoverageAsync = async ({
@@ -118,7 +128,7 @@ const verifiedCoverageAsync = async ({
   };
 };
 
-/*** Retain the first ascending probe from each distinct navigation, layout, and overflow state. */
+/*** Retain the first ascending probe from each distinct semantic responsive state. */
 const selectVerifiedMeasurements = (
   probes: readonly BreakpointProbe[],
 ): readonly BreakpointMeasurement[] => {

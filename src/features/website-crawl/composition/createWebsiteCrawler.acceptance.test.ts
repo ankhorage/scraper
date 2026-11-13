@@ -187,8 +187,12 @@ const testJavaScriptResponsiveNavigationAsync = async (): Promise<void> => {
 const assertAutomaticBreakpointDiscovery = (result: CrawlResult): void => {
   const automatic = result.document.pages.find((page) => page.url === `${origin}/automatic`);
 
-  expect(automatic?.viewports.map((viewport) => viewport.width)).toEqual([320, 601]);
-  expect(automatic?.viewports.map((viewport) => viewport.id)).toEqual(['auto-320', 'auto-601']);
+  expect(automatic?.viewports.map((viewport) => viewport.width)).toEqual([320, 601, 900]);
+  expect(automatic?.viewports.map((viewport) => viewport.id)).toEqual([
+    'auto-320',
+    'auto-601',
+    'auto-900',
+  ]);
   expect(automatic?.navigation.map((item) => item.url)).toEqual([
     `${origin}/mobile-only`,
     `${origin}/desktop-only`,
@@ -210,6 +214,7 @@ const assertAutomaticBreakpointDiscovery = (result: CrawlResult): void => {
         diagnostic.message.includes('Container query retained as evidence'),
     ),
   ).toBe(true);
+  assertAutomaticGridCaptures(automatic);
   expect(
     result.diagnostics.some(
       (diagnostic) =>
@@ -227,6 +232,20 @@ const assertAutomaticBreakpointDiscovery = (result: CrawlResult): void => {
         ).size === node.observations.length,
     ),
   ).toBe(true);
+};
+
+/*** Assert the selected automatic captures retain distinct one-, two-, and three-column layouts. */
+const assertAutomaticGridCaptures = (
+  automatic: CrawlResult['document']['pages'][number] | undefined,
+): void => {
+  const responsiveGrid = automatic?.nodes.find((node) =>
+    node.observations.some((observation) => observation.css?.display === 'grid'),
+  );
+  expect(
+    responsiveGrid?.observations.map(
+      (observation) => observation.css?.gridTemplateColumns.trim().split(/\s+/u).length,
+    ),
+  ).toEqual([1, 2, 3]);
 };
 
 const createFixtureServer = (): Server =>
@@ -296,7 +315,7 @@ const contactPage =
   '<!doctype html><html><body><main style="color:red">Contact page</main><img src="/contact.png" alt="Contact"></body></html>';
 const responsivePage = `<!doctype html><html><body><script>document.write(window.innerWidth > 600 ? '<a href="/desktop-only">Desktop only</a>' : '<a href="/mobile-only">Mobile only</a>');</script></body></html>`;
 const automaticPage = (crossOriginStylesheetUrl: string): string =>
-  `<!doctype html><html><head><style>@media (max-width: 600px) { .mobile { display: block; } } @supports (display: grid) { @media (min-width: 601px) { .desktop { display: block; } } } @container (width > 20rem) { .container-only { display: grid; } }</style><link rel="stylesheet" href="/automatic.css"><link rel="stylesheet" href="${crossOriginStylesheetUrl}/cross-origin.css"></head><body><script>document.write(window.innerWidth > 600 ? '<a href="/desktop-only">Desktop only</a>' : '<a href="/mobile-only">Mobile only</a>');</script></body></html>`;
+  `<!doctype html><html><head><style>.responsive-grid { display: grid; grid-template-columns: 1fr; } @media (max-width: 600px) { .mobile { display: block; } } @supports (display: grid) { @media (min-width: 601px) { .desktop { display: block; } .responsive-grid { grid-template-columns: repeat(2, 1fr); } } } @media (min-width: 900px) { .responsive-grid { grid-template-columns: repeat(3, 1fr); } } @container (width > 20rem) { .container-only { display: grid; } }</style><link rel="stylesheet" href="/automatic.css"><link rel="stylesheet" href="${crossOriginStylesheetUrl}/cross-origin.css"></head><body><script>document.write(window.innerWidth > 600 ? '<a href="/desktop-only">Desktop only</a>' : '<a href="/mobile-only">Mobile only</a>');</script><section class="responsive-grid"><article>One</article><article>Two</article><article>Three</article></section></body></html>`;
 const automaticStyles = '@media (min-width: 900px) { .wide { display: grid; } }';
 const desktopOnlyPage = '<!doctype html><html><body><main>Desktop page</main></body></html>';
 const mobileOnlyPage = '<!doctype html><html><body><main>Mobile page</main></body></html>';
