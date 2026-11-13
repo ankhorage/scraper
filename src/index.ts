@@ -4,4 +4,5 @@ export type {
   CrawlOptions,
   CrawlResult,
   CrawlViewport,
+  DynamicCaptureOptions,
 } from './types/public.js';

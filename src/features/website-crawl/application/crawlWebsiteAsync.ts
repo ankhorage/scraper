@@ -6,6 +6,7 @@ import type {
   CrawlDiagnostic,
   CrawlOptions,
   CrawlResult,
+  DynamicCaptureOptions,
   PageObservation,
 } from '../../../types/public.js';
 import { isSameOrigin } from '../domain/isSameOrigin.js';
@@ -21,6 +22,7 @@ interface CrawlDependencies {
 }
 
 interface CrawlPlan {
+  readonly dynamicCapture?: DynamicCaptureOptions;
   readonly maxBytes: number;
   readonly maxDepth: number;
   readonly maxPages: number;
@@ -123,6 +125,7 @@ const captureEntryAsync = async (
   for (const viewport of viewports) {
     try {
       const page = await capturePage.capturePageAsync({
+        ...(plan.dynamicCapture ? { dynamicCapture: plan.dynamicCapture } : {}),
         maxBytes: plan.maxBytes,
         timeoutMs: plan.timeoutMs,
         url: entry.url,
@@ -284,6 +287,7 @@ const fingerprint = (page: PageObservation): string =>
 
 /*** Apply the explicit resource bounds used for every crawl invocation. */
 const createCrawlPlan = (options: CrawlOptions): CrawlPlan => ({
+  ...(options.dynamicCapture ? { dynamicCapture: options.dynamicCapture } : {}),
   maxBytes: options.maxBytesPerPage ?? 2_000_000,
   maxDepth: options.maxDepth ?? 1,
   maxPages: options.maxPages ?? 20,
