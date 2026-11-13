@@ -12,9 +12,11 @@ graph TD
   module_src_cli_commands_crawl_test_ts["src/cli/commands/crawl.test.ts"]
   package__ankhorage_scraper -.-> module_src_cli_commands_crawl_test_ts
   module_src_cli_commands_crawl_test_ts --> module_src_cli_commands_crawl_ts
+  module_src_cli_commands_crawl_test_ts --> module_src_types_public_ts
   module_src_cli_commands_crawl_ts["src/cli/commands/crawl.ts"]
   package__ankhorage_scraper -.-> module_src_cli_commands_crawl_ts
   module_src_cli_commands_crawl_ts --> module_src_index_ts
+  module_src_cli_commands_crawl_ts --> module_src_types_public_ts
   module_src_cli_index_test_ts["src/cli/index.test.ts"]
   package__ankhorage_scraper -.-> module_src_cli_index_test_ts
   module_src_cli_index_test_ts --> module_package_json

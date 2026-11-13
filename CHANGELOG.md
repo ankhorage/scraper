@@ -1,5 +1,11 @@
 # @ankhorage/scraper
 
+## 0.3.1
+
+### Patch Changes
+
+- 83d3e46: Prioritize representative mobile, tablet, and desktop responsive captures within bounded probe and capture budgets.
+
 ## 0.3.0
 
 ### Minor Changes

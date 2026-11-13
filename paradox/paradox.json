@@ -14,7 +14,7 @@
     {
       "id": "npm",
       "label": "npm",
-      "value": "v0.3.0",
+      "value": "v0.3.1",
       "color": "cb3837"
     },
     {
@@ -110,7 +110,8 @@
       "path": "src/cli/commands/crawl.test.ts",
       "isEntrypoint": false,
       "dependencies": [
-        "src/cli/commands/crawl.ts"
+        "src/cli/commands/crawl.ts",
+        "src/types/public.ts"
       ],
       "exports": []
     },
@@ -118,7 +119,8 @@
       "path": "src/cli/commands/crawl.ts",
       "isEntrypoint": false,
       "dependencies": [
-        "src/index.ts"
+        "src/index.ts",
+        "src/types/public.ts"
       ],
       "exports": [
         "crawl"
@@ -767,7 +769,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/cli/commands/crawl.test.ts",
-        "line": 28,
+        "line": 98,
         "column": 1
       }
     },
@@ -778,7 +780,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/cli/commands/crawl.ts",
-        "line": 10,
+        "line": 11,
         "column": 1
       }
     },
@@ -789,7 +791,40 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/cli/commands/crawl.ts",
-        "line": 65,
+        "line": 80,
+        "column": 1
+      }
+    },
+    {
+      "name": "renderBreakpointSummary",
+      "description": "Render bounded responsive coverage facts without flooding the terminal with per-width warnings.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/cli/commands/crawl.ts",
+        "line": 90,
+        "column": 1
+      }
+    },
+    {
+      "name": "summarizeOmissions",
+      "description": "Group omitted viewport candidates by cause while retaining a few representative widths.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/cli/commands/crawl.ts",
+        "line": 126,
+        "column": 1
+      }
+    },
+    {
+      "name": "hasBreakpointDiagnostics",
+      "description": "Identify breakpoint diagnostics that require the compact responsive-coverage terminal summary.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/cli/commands/crawl.ts",
+        "line": 142,
         "column": 1
       }
     },
@@ -800,7 +835,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/cli/commands/crawl.ts",
-        "line": 75,
+        "line": 150,
         "column": 1
       }
     },
@@ -811,7 +846,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/cli/commands/crawl.ts",
-        "line": 101,
+        "line": 176,
         "column": 1
       }
     },
@@ -822,7 +857,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/cli/commands/crawl.ts",
-        "line": 113,
+        "line": 188,
         "column": 1
       }
     },
@@ -833,7 +868,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/cli/commands/crawl.ts",
-        "line": 124,
+        "line": 199,
         "column": 1
       }
     },
@@ -844,7 +879,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/cli/commands/crawl.ts",
-        "line": 133,
+        "line": 208,
         "column": 1
       }
     },
@@ -855,7 +890,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/cli/commands/crawl.ts",
-        "line": 143,
+        "line": 218,
         "column": 1
       }
     },
@@ -866,7 +901,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/cli/commands/crawl.ts",
-        "line": 155,
+        "line": 230,
         "column": 1
       }
     },
@@ -877,7 +912,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/cli/commands/crawl.ts",
-        "line": 167,
+        "line": 242,
         "column": 1
       }
     },
@@ -888,7 +923,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/cli/commands/crawl.ts",
-        "line": 181,
+        "line": 256,
         "column": 1
       }
     },
@@ -899,7 +934,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/cli/commands/crawl.ts",
-        "line": 201,
+        "line": 276,
         "column": 1
       }
     },
@@ -910,7 +945,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/cli/commands/crawl.ts",
-        "line": 207,
+        "line": 282,
         "column": 1
       }
     },
@@ -921,7 +956,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/cli/commands/crawl.ts",
-        "line": 217,
+        "line": 292,
         "column": 1
       }
     },
@@ -932,7 +967,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/cli/commands/crawl.ts",
-        "line": 222,
+        "line": 297,
         "column": 1
       }
     },
@@ -943,7 +978,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/cli/commands/crawl.ts",
-        "line": 227,
+        "line": 302,
         "column": 1
       }
     },
@@ -954,7 +989,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/cli/commands/crawl.ts",
-        "line": 232,
+        "line": 307,
         "column": 1
       }
     },
@@ -1521,7 +1556,7 @@
     },
     {
       "name": "extractResponsiveProbe",
-      "description": "Extract only viewport-sensitive navigation, layout, overflow, and CSS-condition facts.",
+      "description": "Extract raw viewport-sensitive navigation, layout, overflow, and CSS-condition facts.",
       "see": [],
       "security": [],
       "sourceLocation": {
@@ -1812,7 +1847,29 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/crawlWebsiteAutomaticViewports.test.ts",
-        "line": 49,
+        "line": 79,
+        "column": 7
+      }
+    },
+    {
+      "name": "crowdedResponsiveDependencies",
+      "description": "Provide crowded authored thresholds whose structural browser states span three responsive regimes.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-crawl/application/crawlWebsiteAutomaticViewports.test.ts",
+        "line": 90,
+        "column": 7
+      }
+    },
+    {
+      "name": "fluidGridDependencies",
+      "description": "Model fluid computed Grid widths that retain one structural responsive state.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-crawl/application/crawlWebsiteAutomaticViewports.test.ts",
+        "line": 135,
         "column": 7
       }
     },
@@ -1823,7 +1880,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/crawlWebsiteAutomaticViewports.test.ts",
-        "line": 60,
+        "line": 180,
         "column": 7
       }
     },
@@ -1834,7 +1891,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/crawlWebsiteAutomaticViewports.test.ts",
-        "line": 76,
+        "line": 196,
         "column": 7
       }
     },
@@ -1845,7 +1902,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/crawlWebsiteAutomaticViewports.test.ts",
-        "line": 87,
+        "line": 207,
         "column": 7
       }
     },
@@ -2038,12 +2095,23 @@
     },
     {
       "name": "boundProbeCandidates",
-      "description": "Bound lightweight probes while preserving the mobile and desktop baseline candidates.",
+      "description": "Bound lightweight probes while distributing samples across the discovered responsive range.",
       "see": [],
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/verifyResponsiveCoverageAsync.ts",
         "line": 55,
+        "column": 7
+      }
+    },
+    {
+      "name": "evenlyDistributedCandidates",
+      "description": "Select ordered candidate quantiles so neighbouring thresholds cannot exhaust the probe budget.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-crawl/application/verifyResponsiveCoverageAsync.ts",
+        "line": 73,
         "column": 7
       }
     },
@@ -2054,18 +2122,40 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/verifyResponsiveCoverageAsync.ts",
-        "line": 73,
+        "line": 83,
         "column": 7
       }
     },
     {
       "name": "selectVerifiedMeasurements",
-      "description": "Retain the first ascending probe from each distinct navigation, layout, and overflow state.",
+      "description": "Retain the first ascending probe from each distinct semantic responsive state.",
       "see": [],
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/verifyResponsiveCoverageAsync.ts",
-        "line": 122,
+        "line": 132,
+        "column": 7
+      }
+    },
+    {
+      "name": "responsiveLayoutSignature",
+      "description": "Normalize fluid Grid measurements only while comparing responsive probe states.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-crawl/application/verifyResponsiveCoverageAsync.ts",
+        "line": 157,
+        "column": 7
+      }
+    },
+    {
+      "name": "gridTrackCount",
+      "description": "Count measured Grid tracks without retaining their fluid pixel widths in selection policy.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-crawl/application/verifyResponsiveCoverageAsync.ts",
+        "line": 169,
         "column": 7
       }
     },
@@ -2076,7 +2166,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/verifyResponsiveCoverageAsync.ts",
-        "line": 147,
+        "line": 175,
         "column": 7
       }
     },
@@ -2087,7 +2177,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/verifyResponsiveCoverageAsync.ts",
-        "line": 177,
+        "line": 205,
         "column": 7
       }
     },
@@ -2158,13 +2248,24 @@
       }
     },
     {
+      "name": "assertAutomaticGridCaptures",
+      "description": "Assert the selected automatic captures retain distinct one-, two-, and three-column layouts.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-crawl/composition/createWebsiteCrawler.acceptance.test.ts",
+        "line": 238,
+        "column": 7
+      }
+    },
+    {
       "name": "createFixtureServer",
       "description": null,
       "see": [],
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/composition/createWebsiteCrawler.acceptance.test.ts",
-        "line": 232,
+        "line": 251,
         "column": 7
       }
     },
@@ -2175,7 +2276,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/composition/createWebsiteCrawler.acceptance.test.ts",
-        "line": 269,
+        "line": 288,
         "column": 7
       }
     },
@@ -2186,7 +2287,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/composition/createWebsiteCrawler.acceptance.test.ts",
-        "line": 276,
+        "line": 295,
         "column": 7
       }
     },
@@ -2197,7 +2298,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/composition/createWebsiteCrawler.acceptance.test.ts",
-        "line": 298,
+        "line": 317,
         "column": 7
       }
     },
@@ -2301,13 +2402,24 @@
       }
     },
     {
+      "name": "isUniversalCondition",
+      "description": "Ignore universal media metadata because it carries no viewport transition to verify.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-crawl/domain/selectResponsiveViewports.ts",
+        "line": 62,
+        "column": 7
+      }
+    },
+    {
       "name": "containsNonWidthFeature",
       "description": "Identify media-feature clauses that width-only probes cannot independently exercise.",
       "see": [],
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/domain/selectResponsiveViewports.ts",
-        "line": 61,
+        "line": 65,
         "column": 7
       }
     },
@@ -2318,7 +2430,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/domain/selectResponsiveViewports.ts",
-        "line": 71,
+        "line": 75,
         "column": 7
       }
     },
@@ -2329,7 +2441,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/domain/selectResponsiveViewports.ts",
-        "line": 87,
+        "line": 91,
         "column": 7
       }
     },
@@ -2340,7 +2452,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/domain/selectResponsiveViewports.ts",
-        "line": 91,
+        "line": 95,
         "column": 7
       }
     },
@@ -2351,7 +2463,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/domain/selectResponsiveViewports.ts",
-        "line": 95,
+        "line": 99,
         "column": 7
       }
     },
@@ -2362,7 +2474,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/domain/selectResponsiveViewports.ts",
-        "line": 106,
+        "line": 110,
         "column": 7
       }
     },
@@ -2373,7 +2485,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/domain/selectResponsiveViewports.ts",
-        "line": 113,
+        "line": 117,
         "column": 7
       }
     },
@@ -2384,7 +2496,18 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/domain/selectResponsiveViewports.ts",
-        "line": 125,
+        "line": 129,
+        "column": 7
+      }
+    },
+    {
+      "name": "uniqueStrings",
+      "description": "Preserve one explanation for repeated authored conditions without losing raw evidence provenance.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-crawl/domain/selectResponsiveViewports.ts",
+        "line": 133,
         "column": 7
       }
     },
@@ -2498,12 +2621,22 @@
       },
       {
         "fromPath": "src/cli/commands/crawl.test.ts",
+        "toPath": "src/types/public.ts",
+        "sourcePath": "src/cli/commands/crawl.test.ts"
+      },
+      {
+        "fromPath": "src/cli/commands/crawl.test.ts",
         "toPath": "src/cli/commands/crawl.ts",
         "sourcePath": "src/cli/commands/crawl.test.ts"
       },
       {
         "fromPath": "src/cli/commands/crawl.ts",
         "toPath": "src/index.ts",
+        "sourcePath": "src/cli/commands/crawl.ts"
+      },
+      {
+        "fromPath": "src/cli/commands/crawl.ts",
+        "toPath": "src/types/public.ts",
         "sourcePath": "src/cli/commands/crawl.ts"
       },
       {
@@ -2903,6 +3036,36 @@
         "sourcePath": "src/cli/commands/crawl.test.ts"
       },
       {
+        "fromSymbol": "src/cli/commands/crawl.test.ts",
+        "toSymbol": "mkdtemp",
+        "callExpression": "mkdtemp",
+        "sourcePath": "src/cli/commands/crawl.test.ts"
+      },
+      {
+        "fromSymbol": "src/cli/commands/crawl.test.ts",
+        "toSymbol": "join",
+        "callExpression": "join",
+        "sourcePath": "src/cli/commands/crawl.test.ts"
+      },
+      {
+        "fromSymbol": "src/cli/commands/crawl.test.ts",
+        "toSymbol": "tmpdir",
+        "callExpression": "tmpdir",
+        "sourcePath": "src/cli/commands/crawl.test.ts"
+      },
+      {
+        "fromSymbol": "src/cli/commands/crawl.test.ts",
+        "toSymbol": "readFile",
+        "callExpression": "readFile",
+        "sourcePath": "src/cli/commands/crawl.test.ts"
+      },
+      {
+        "fromSymbol": "src/cli/commands/crawl.test.ts",
+        "toSymbol": "rm",
+        "callExpression": "rm",
+        "sourcePath": "src/cli/commands/crawl.test.ts"
+      },
+      {
         "fromSymbol": "crawl",
         "toSymbol": "parseCrawlInput",
         "callExpression": "parseCrawlInput",
@@ -2923,13 +3086,13 @@
       {
         "fromSymbol": "crawl",
         "toSymbol": "crawlWebsiteAsync",
-        "callExpression": "createWebsiteCrawler().crawlWebsiteAsync",
+        "callExpression": "(\n      dependencies.createWebsiteCrawler ?? createWebsiteCrawler\n    )().crawlWebsiteAsync",
         "sourcePath": "src/cli/commands/crawl.ts"
       },
       {
         "fromSymbol": "crawl",
-        "toSymbol": "createWebsiteCrawler",
-        "callExpression": "createWebsiteCrawler",
+        "toSymbol": "__function",
+        "callExpression": "(\n      dependencies.createWebsiteCrawler ?? createWebsiteCrawler\n    )",
         "sourcePath": "src/cli/commands/crawl.ts"
       },
       {
@@ -2946,8 +3109,26 @@
       },
       {
         "fromSymbol": "crawl",
+        "toSymbol": "hasBreakpointDiagnostics",
+        "callExpression": "hasBreakpointDiagnostics",
+        "sourcePath": "src/cli/commands/crawl.ts"
+      },
+      {
+        "fromSymbol": "crawl",
+        "toSymbol": "renderBreakpointSummary",
+        "callExpression": "renderBreakpointSummary",
+        "sourcePath": "src/cli/commands/crawl.ts"
+      },
+      {
+        "fromSymbol": "crawl",
         "toSymbol": "errorMessage",
         "callExpression": "errorMessage",
+        "sourcePath": "src/cli/commands/crawl.ts"
+      },
+      {
+        "fromSymbol": "renderBreakpointSummary",
+        "toSymbol": "summarizeOmissions",
+        "callExpression": "summarizeOmissions",
         "sourcePath": "src/cli/commands/crawl.ts"
       },
       {
@@ -3311,6 +3492,18 @@
         "sourcePath": "src/features/website-crawl/application/crawlWebsiteAutomaticViewports.test.ts"
       },
       {
+        "fromSymbol": "src/features/website-crawl/application/crawlWebsiteAutomaticViewports.test.ts",
+        "toSymbol": "crowdedResponsiveDependencies",
+        "callExpression": "crowdedResponsiveDependencies",
+        "sourcePath": "src/features/website-crawl/application/crawlWebsiteAutomaticViewports.test.ts"
+      },
+      {
+        "fromSymbol": "src/features/website-crawl/application/crawlWebsiteAutomaticViewports.test.ts",
+        "toSymbol": "fluidGridDependencies",
+        "callExpression": "fluidGridDependencies",
+        "sourcePath": "src/features/website-crawl/application/crawlWebsiteAutomaticViewports.test.ts"
+      },
+      {
         "fromSymbol": "automaticDependencies",
         "toSymbol": "capturePageAsync",
         "callExpression": "capturePageAsync",
@@ -3473,6 +3666,12 @@
         "sourcePath": "src/features/website-crawl/application/verifyResponsiveCoverageAsync.ts"
       },
       {
+        "fromSymbol": "boundProbeCandidates",
+        "toSymbol": "evenlyDistributedCandidates",
+        "callExpression": "evenlyDistributedCandidates",
+        "sourcePath": "src/features/website-crawl/application/verifyResponsiveCoverageAsync.ts"
+      },
+      {
         "fromSymbol": "verifiedCoverageAsync",
         "toSymbol": "probeResponsiveAsync",
         "callExpression": "capturePage.probeResponsiveAsync",
@@ -3482,6 +3681,12 @@
         "fromSymbol": "verifiedCoverageAsync",
         "toSymbol": "selectVerifiedMeasurements",
         "callExpression": "selectVerifiedMeasurements",
+        "sourcePath": "src/features/website-crawl/application/verifyResponsiveCoverageAsync.ts"
+      },
+      {
+        "fromSymbol": "responsiveLayoutSignature",
+        "toSymbol": "gridTrackCount",
+        "callExpression": "gridTrackCount",
         "sourcePath": "src/features/website-crawl/application/verifyResponsiveCoverageAsync.ts"
       },
       {
@@ -3623,6 +3828,18 @@
         "sourcePath": "src/features/website-crawl/composition/createWebsiteCrawler.acceptance.test.ts"
       },
       {
+        "fromSymbol": "assertAutomaticBreakpointDiscovery",
+        "toSymbol": "assertAutomaticGridCaptures",
+        "callExpression": "assertAutomaticGridCaptures",
+        "sourcePath": "src/features/website-crawl/composition/createWebsiteCrawler.acceptance.test.ts"
+      },
+      {
+        "fromSymbol": "assertAutomaticGridCaptures",
+        "toSymbol": "expect",
+        "callExpression": "expect",
+        "sourcePath": "src/features/website-crawl/composition/createWebsiteCrawler.acceptance.test.ts"
+      },
+      {
         "fromSymbol": "createFixtureServer",
         "toSymbol": "createServer",
         "callExpression": "createServer",
@@ -3707,9 +3924,21 @@
         "sourcePath": "src/features/website-crawl/domain/selectResponsiveViewports.ts"
       },
       {
+        "fromSymbol": "createResponsiveProbePlan",
+        "toSymbol": "uniqueStrings",
+        "callExpression": "uniqueStrings",
+        "sourcePath": "src/features/website-crawl/domain/selectResponsiveViewports.ts"
+      },
+      {
         "fromSymbol": "selectResponsiveViewports",
         "toSymbol": "createResponsiveProbePlan",
         "callExpression": "createResponsiveProbePlan",
+        "sourcePath": "src/features/website-crawl/domain/selectResponsiveViewports.ts"
+      },
+      {
+        "fromSymbol": "parseCondition",
+        "toSymbol": "isUniversalCondition",
+        "callExpression": "isUniversalCondition",
         "sourcePath": "src/features/website-crawl/domain/selectResponsiveViewports.ts"
       },
       {
@@ -3966,26 +4195,38 @@
       },
       {
         "fromSymbol": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts",
-        "toSymbol": "describe",
-        "callExpression": "describe",
-        "sourcePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts"
-      },
-      {
-        "fromSymbol": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts",
         "toSymbol": "test",
         "callExpression": "test",
         "sourcePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts"
       },
       {
         "fromSymbol": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts",
-        "toSymbol": "captureFixtureAsync",
-        "callExpression": "captureFixtureAsync",
+        "toSymbol": "createPuppeteerCapturePage",
+        "callExpression": "createPuppeteerCapturePage",
+        "sourcePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts"
+      },
+      {
+        "fromSymbol": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts",
+        "toSymbol": "probeResponsiveAsync",
+        "callExpression": "capture.probeResponsiveAsync",
         "sourcePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts"
       },
       {
         "fromSymbol": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts",
         "toSymbol": "expect",
         "callExpression": "expect",
+        "sourcePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts"
+      },
+      {
+        "fromSymbol": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts",
+        "toSymbol": "closeAsync",
+        "callExpression": "capture.closeAsync",
+        "sourcePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts"
+      },
+      {
+        "fromSymbol": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts",
+        "toSymbol": "captureFixtureAsync",
+        "callExpression": "captureFixtureAsync",
         "sourcePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts"
       },
       {

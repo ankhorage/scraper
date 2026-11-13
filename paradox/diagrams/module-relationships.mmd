@@ -36,7 +36,9 @@ graph LR
   module_src_types_public_ts["src/types/public.ts"]
   module_examples_crawl_websiteCrawler_ts --> module_dist_index_d_ts
   module_src_cli_commands_crawl_test_ts --> module_src_cli_commands_crawl_ts
+  module_src_cli_commands_crawl_test_ts --> module_src_types_public_ts
   module_src_cli_commands_crawl_ts --> module_src_index_ts
+  module_src_cli_commands_crawl_ts --> module_src_types_public_ts
   module_src_cli_index_test_ts --> module_package_json
   module_src_cli_index_test_ts --> module_src_capabilities_index_ts
   module_src_cli_index_test_ts --> module_src_cli_index_ts

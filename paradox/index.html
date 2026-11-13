@@ -134,7 +134,7 @@
   </li><li>
     <button class="nav-button" type="button" data-target="src/cli/commands/crawl.ts">
       src/cli/commands/crawl.ts
-      <small>17 functions</small>
+      <small>20 functions</small>
     </button>
   </li><li>
     <button class="nav-button" type="button" data-target="src/cli/index.ts">
@@ -199,7 +199,7 @@
   </li><li>
     <button class="nav-button" type="button" data-target="src/features/website-crawl/application/crawlWebsiteAutomaticViewports.test.ts">
       src/features/website-crawl/application/crawlWebsiteAutomaticViewports.test.ts
-      <small>4 functions</small>
+      <small>6 functions</small>
     </button>
   </li><li>
     <button class="nav-button" type="button" data-target="src/features/website-crawl/application/toWebsiteObservationDocument.ts">
@@ -209,12 +209,12 @@
   </li><li>
     <button class="nav-button" type="button" data-target="src/features/website-crawl/application/verifyResponsiveCoverageAsync.ts">
       src/features/website-crawl/application/verifyResponsiveCoverageAsync.ts
-      <small>6 functions</small>
+      <small>9 functions</small>
     </button>
   </li><li>
     <button class="nav-button" type="button" data-target="src/features/website-crawl/composition/createWebsiteCrawler.acceptance.test.ts">
       src/features/website-crawl/composition/createWebsiteCrawler.acceptance.test.ts
-      <small>10 functions</small>
+      <small>11 functions</small>
     </button>
   </li><li>
     <button class="nav-button" type="button" data-target="src/features/website-crawl/composition/createWebsiteCrawler.ts">
@@ -239,7 +239,7 @@
   </li><li>
     <button class="nav-button" type="button" data-target="src/features/website-crawl/domain/selectResponsiveViewports.ts">
       src/features/website-crawl/domain/selectResponsiveViewports.ts
-      <small>11 functions</small>
+      <small>13 functions</small>
     </button>
   </li><li>
     <button class="nav-button" type="button" data-target="src/standalone.test.ts">
@@ -298,15 +298,15 @@
     <p class="muted">Referenced module</p>
     <p><strong>Dependencies:</strong> <span class="empty">None</span></p>
     <p><strong>Exports:</strong> <code>CAPABILITIES</code></p>
-  </article><article class="item" data-search="src/cli/commands/crawl.test.ts src/cli/commands/crawl.ts">
+  </article><article class="item" data-search="src/cli/commands/crawl.test.ts src/cli/commands/crawl.ts src/types/public.ts">
     <h3>src/cli/commands/crawl.test.ts</h3>
     <p class="muted">Referenced module</p>
-    <p><strong>Dependencies:</strong> <code>src/cli/commands/crawl.ts</code></p>
+    <p><strong>Dependencies:</strong> <code>src/cli/commands/crawl.ts</code>, <code>src/types/public.ts</code></p>
     <p><strong>Exports:</strong> <span class="empty">None</span></p>
-  </article><article class="item" data-search="src/cli/commands/crawl.ts src/index.ts crawl">
+  </article><article class="item" data-search="src/cli/commands/crawl.ts src/index.ts src/types/public.ts crawl">
     <h3>src/cli/commands/crawl.ts</h3>
     <p class="muted">Referenced module</p>
-    <p><strong>Dependencies:</strong> <code>src/index.ts</code></p>
+    <p><strong>Dependencies:</strong> <code>src/index.ts</code>, <code>src/types/public.ts</code></p>
     <p><strong>Exports:</strong> <code>crawl</code></p>
   </article><article class="item" data-search="src/cli/index.test.ts package.json src/capabilities/index.ts src/cli/index.ts">
     <h3>src/cli/index.test.ts</h3>
@@ -727,9 +727,11 @@
   module_src_cli_commands_crawl_test_ts[&quot;src/cli/commands/crawl.test.ts&quot;]
   package__ankhorage_scraper -.-&gt; module_src_cli_commands_crawl_test_ts
   module_src_cli_commands_crawl_test_ts --&gt; module_src_cli_commands_crawl_ts
+  module_src_cli_commands_crawl_test_ts --&gt; module_src_types_public_ts
   module_src_cli_commands_crawl_ts[&quot;src/cli/commands/crawl.ts&quot;]
   package__ankhorage_scraper -.-&gt; module_src_cli_commands_crawl_ts
   module_src_cli_commands_crawl_ts --&gt; module_src_index_ts
+  module_src_cli_commands_crawl_ts --&gt; module_src_types_public_ts
   module_src_cli_index_test_ts[&quot;src/cli/index.test.ts&quot;]
   package__ankhorage_scraper -.-&gt; module_src_cli_index_test_ts
   module_src_cli_index_test_ts --&gt; module_package_json
@@ -855,9 +857,11 @@
   module_src_cli_commands_crawl_test_ts[&quot;src/cli/commands/crawl.test.ts&quot;]
   package__ankhorage_scraper -.-&gt; module_src_cli_commands_crawl_test_ts
   module_src_cli_commands_crawl_test_ts --&gt; module_src_cli_commands_crawl_ts
+  module_src_cli_commands_crawl_test_ts --&gt; module_src_types_public_ts
   module_src_cli_commands_crawl_ts[&quot;src/cli/commands/crawl.ts&quot;]
   package__ankhorage_scraper -.-&gt; module_src_cli_commands_crawl_ts
   module_src_cli_commands_crawl_ts --&gt; module_src_index_ts
+  module_src_cli_commands_crawl_ts --&gt; module_src_types_public_ts
   module_src_cli_index_test_ts[&quot;src/cli/index.test.ts&quot;]
   package__ankhorage_scraper -.-&gt; module_src_cli_index_test_ts
   module_src_cli_index_test_ts --&gt; module_package_json
@@ -1009,7 +1013,9 @@
   module_src_types_public_ts[&quot;src/types/public.ts&quot;]
   module_examples_crawl_websiteCrawler_ts --&gt; module_dist_index_d_ts
   module_src_cli_commands_crawl_test_ts --&gt; module_src_cli_commands_crawl_ts
+  module_src_cli_commands_crawl_test_ts --&gt; module_src_types_public_ts
   module_src_cli_commands_crawl_ts --&gt; module_src_index_ts
+  module_src_cli_commands_crawl_ts --&gt; module_src_types_public_ts
   module_src_cli_index_test_ts --&gt; module_package_json
   module_src_cli_index_test_ts --&gt; module_src_capabilities_index_ts
   module_src_cli_index_test_ts --&gt; module_src_cli_index_ts
@@ -1100,7 +1106,9 @@
   module_src_types_public_ts[&quot;src/types/public.ts&quot;]
   module_examples_crawl_websiteCrawler_ts --&gt; module_dist_index_d_ts
   module_src_cli_commands_crawl_test_ts --&gt; module_src_cli_commands_crawl_ts
+  module_src_cli_commands_crawl_test_ts --&gt; module_src_types_public_ts
   module_src_cli_commands_crawl_ts --&gt; module_src_index_ts
+  module_src_cli_commands_crawl_ts --&gt; module_src_types_public_ts
   module_src_cli_index_test_ts --&gt; module_package_json
   module_src_cli_index_test_ts --&gt; module_src_capabilities_index_ts
   module_src_cli_index_test_ts --&gt; module_src_cli_index_ts
@@ -1274,7 +1282,7 @@
       <h2>src/cli/commands/crawl.test.ts</h2>
       <article class="item" data-search="createContext src/cli/commands/crawl.test.ts Creates the command boundary context used to verify that rejected input has no crawl output.">
     <h3>createContext</h3>
-    <p class="muted"><code>src/cli/commands/crawl.test.ts:28:1</code></p>
+    <p class="muted"><code>src/cli/commands/crawl.test.ts:98:1</code></p>
     <p>Creates the command boundary context used to verify that rejected input has no crawl output.</p>
     
   </article>
@@ -1284,87 +1292,102 @@
       <h2>src/cli/commands/crawl.ts</h2>
       <article class="item" data-search="crawl src/cli/commands/crawl.ts Adapt `ankh scraper crawl` arguments to the package&#39;s public crawler API.">
     <h3>crawl</h3>
-    <p class="muted"><code>src/cli/commands/crawl.ts:10:1</code></p>
+    <p class="muted"><code>src/cli/commands/crawl.ts:11:1</code></p>
     <p>Adapt `ankh scraper crawl` arguments to the package&#39;s public crawler API.</p>
     
   </article><article class="item" data-search="crawlOptions src/cli/commands/crawl.ts Preserve absent optional crawler options instead of passing explicit undefined values.">
     <h3>crawlOptions</h3>
-    <p class="muted"><code>src/cli/commands/crawl.ts:65:1</code></p>
+    <p class="muted"><code>src/cli/commands/crawl.ts:80:1</code></p>
     <p>Preserve absent optional crawler options instead of passing explicit undefined values.</p>
+    
+  </article><article class="item" data-search="renderBreakpointSummary src/cli/commands/crawl.ts Render bounded responsive coverage facts without flooding the terminal with per-width warnings.">
+    <h3>renderBreakpointSummary</h3>
+    <p class="muted"><code>src/cli/commands/crawl.ts:90:1</code></p>
+    <p>Render bounded responsive coverage facts without flooding the terminal with per-width warnings.</p>
+    
+  </article><article class="item" data-search="summarizeOmissions src/cli/commands/crawl.ts Group omitted viewport candidates by cause while retaining a few representative widths.">
+    <h3>summarizeOmissions</h3>
+    <p class="muted"><code>src/cli/commands/crawl.ts:126:1</code></p>
+    <p>Group omitted viewport candidates by cause while retaining a few representative widths.</p>
+    
+  </article><article class="item" data-search="hasBreakpointDiagnostics src/cli/commands/crawl.ts Identify breakpoint diagnostics that require the compact responsive-coverage terminal summary.">
+    <h3>hasBreakpointDiagnostics</h3>
+    <p class="muted"><code>src/cli/commands/crawl.ts:142:1</code></p>
+    <p>Identify breakpoint diagnostics that require the compact responsive-coverage terminal summary.</p>
     
   </article><article class="item" data-search="parseCrawlInput src/cli/commands/crawl.ts Parse a bounded crawl request and reject unknown, duplicate, or incomplete options.">
     <h3>parseCrawlInput</h3>
-    <p class="muted"><code>src/cli/commands/crawl.ts:75:1</code></p>
+    <p class="muted"><code>src/cli/commands/crawl.ts:150:1</code></p>
     <p>Parse a bounded crawl request and reject unknown, duplicate, or incomplete options.</p>
     
   </article><article class="item" data-search="collectCrawlOptions src/cli/commands/crawl.ts Collect repeated flags from complete argument pairs without indexing user-controlled arrays.">
     <h3>collectCrawlOptions</h3>
-    <p class="muted"><code>src/cli/commands/crawl.ts:101:1</code></p>
+    <p class="muted"><code>src/cli/commands/crawl.ts:176:1</code></p>
     <p>Collect repeated flags from complete argument pairs without indexing user-controlled arrays.</p>
     
   </article><article class="item" data-search="isCrawlFlag src/cli/commands/crawl.ts ">
     <h3>isCrawlFlag</h3>
-    <p class="muted"><code>src/cli/commands/crawl.ts:113:1</code></p>
+    <p class="muted"><code>src/cli/commands/crawl.ts:188:1</code></p>
     <p class="empty">No description available.</p>
     
   </article><article class="item" data-search="singleOption src/cli/commands/crawl.ts Read one non-repeating flag value and make required options explicit.">
     <h3>singleOption</h3>
-    <p class="muted"><code>src/cli/commands/crawl.ts:124:1</code></p>
+    <p class="muted"><code>src/cli/commands/crawl.ts:199:1</code></p>
     <p>Read one non-repeating flag value and make required options explicit.</p>
     
   </article><article class="item" data-search="optionalSingleOption src/cli/commands/crawl.ts Read one optional non-repeating output path without creating a default sidecar.">
     <h3>optionalSingleOption</h3>
-    <p class="muted"><code>src/cli/commands/crawl.ts:133:1</code></p>
+    <p class="muted"><code>src/cli/commands/crawl.ts:208:1</code></p>
     <p>Read one optional non-repeating output path without creating a default sidecar.</p>
     
   </article><article class="item" data-search="positiveIntegerOption src/cli/commands/crawl.ts Convert an optional positive integer flag without coercing malformed values.">
     <h3>positiveIntegerOption</h3>
-    <p class="muted"><code>src/cli/commands/crawl.ts:143:1</code></p>
+    <p class="muted"><code>src/cli/commands/crawl.ts:218:1</code></p>
     <p>Convert an optional positive integer flag without coercing malformed values.</p>
     
   </article><article class="item" data-search="nonnegativeIntegerOption src/cli/commands/crawl.ts Convert an optional nonnegative integer flag while preserving an explicit zero depth.">
     <h3>nonnegativeIntegerOption</h3>
-    <p class="muted"><code>src/cli/commands/crawl.ts:155:1</code></p>
+    <p class="muted"><code>src/cli/commands/crawl.ts:230:1</code></p>
     <p>Convert an optional nonnegative integer flag while preserving an explicit zero depth.</p>
     
   </article><article class="item" data-search="parseSafeInteger src/cli/commands/crawl.ts Parse decimal CLI input only when it remains a finite safe integer at the runtime boundary.">
     <h3>parseSafeInteger</h3>
-    <p class="muted"><code>src/cli/commands/crawl.ts:167:1</code></p>
+    <p class="muted"><code>src/cli/commands/crawl.ts:242:1</code></p>
     <p>Parse decimal CLI input only when it remains a finite safe integer at the runtime boundary.</p>
     
   </article><article class="item" data-search="parseViewport src/cli/commands/crawl.ts Parse one explicit viewport identifier and dimensions without inventing a viewport.">
     <h3>parseViewport</h3>
-    <p class="muted"><code>src/cli/commands/crawl.ts:181:1</code></p>
+    <p class="muted"><code>src/cli/commands/crawl.ts:256:1</code></p>
     <p>Parse one explicit viewport identifier and dimensions without inventing a viewport.</p>
     
   </article><article class="item" data-search="assertUniqueViewportIds src/cli/commands/crawl.ts Reject duplicate viewport identities before crawler composition can start the browser.">
     <h3>assertUniqueViewportIds</h3>
-    <p class="muted"><code>src/cli/commands/crawl.ts:201:1</code></p>
+    <p class="muted"><code>src/cli/commands/crawl.ts:276:1</code></p>
     <p>Reject duplicate viewport identities before crawler composition can start the browser.</p>
     
   </article><article class="item" data-search="assertOutputDoesNotExistAsync src/cli/commands/crawl.ts Refuse an existing target before starting the potentially expensive crawl.">
     <h3>assertOutputDoesNotExistAsync</h3>
-    <p class="muted"><code>src/cli/commands/crawl.ts:207:1</code></p>
+    <p class="muted"><code>src/cli/commands/crawl.ts:282:1</code></p>
     <p>Refuse an existing target before starting the potentially expensive crawl.</p>
     
   </article><article class="item" data-search="isHelpToken src/cli/commands/crawl.ts Identify the command help tokens supported by the Ankh delivery surface.">
     <h3>isHelpToken</h3>
-    <p class="muted"><code>src/cli/commands/crawl.ts:217:1</code></p>
+    <p class="muted"><code>src/cli/commands/crawl.ts:292:1</code></p>
     <p>Identify the command help tokens supported by the Ankh delivery surface.</p>
     
   </article><article class="item" data-search="renderHelp src/cli/commands/crawl.ts Render short command-specific help for direct dispatcher invocation.">
     <h3>renderHelp</h3>
-    <p class="muted"><code>src/cli/commands/crawl.ts:222:1</code></p>
+    <p class="muted"><code>src/cli/commands/crawl.ts:297:1</code></p>
     <p>Render short command-specific help for direct dispatcher invocation.</p>
     
   </article><article class="item" data-search="renderUsage src/cli/commands/crawl.ts Render the canonical crawl invocation shape.">
     <h3>renderUsage</h3>
-    <p class="muted"><code>src/cli/commands/crawl.ts:227:1</code></p>
+    <p class="muted"><code>src/cli/commands/crawl.ts:302:1</code></p>
     <p>Render the canonical crawl invocation shape.</p>
     
   </article><article class="item" data-search="errorMessage src/cli/commands/crawl.ts Convert an unknown boundary failure to a safe command diagnostic.">
     <h3>errorMessage</h3>
-    <p class="muted"><code>src/cli/commands/crawl.ts:232:1</code></p>
+    <p class="muted"><code>src/cli/commands/crawl.ts:307:1</code></p>
     <p>Convert an unknown boundary failure to a safe command diagnostic.</p>
     
   </article>
@@ -1667,10 +1690,10 @@
     <p class="muted"><code>src/features/website-crawl/adapters/puppeteer/probeResponsiveAsync.ts:23:14</code></p>
     <p>Probe bounded responsive browser facts without collecting full page observations.</p>
     
-  </article><article class="item" data-search="extractResponsiveProbe src/features/website-crawl/adapters/puppeteer/probeResponsiveAsync.ts Extract only viewport-sensitive navigation, layout, overflow, and CSS-condition facts.">
+  </article><article class="item" data-search="extractResponsiveProbe src/features/website-crawl/adapters/puppeteer/probeResponsiveAsync.ts Extract raw viewport-sensitive navigation, layout, overflow, and CSS-condition facts.">
     <h3>extractResponsiveProbe</h3>
     <p class="muted"><code>src/features/website-crawl/adapters/puppeteer/probeResponsiveAsync.ts:55:7</code></p>
-    <p>Extract only viewport-sensitive navigation, layout, overflow, and CSS-condition facts.</p>
+    <p>Extract raw viewport-sensitive navigation, layout, overflow, and CSS-condition facts.</p>
     
   </article><article class="item" data-search="isVisible src/features/website-crawl/adapters/puppeteer/probeResponsiveAsync.ts ">
     <h3>isVisible</h3>
@@ -1819,22 +1842,32 @@
       <h2>src/features/website-crawl/application/crawlWebsiteAutomaticViewports.test.ts</h2>
       <article class="item" data-search="automaticDependencies src/features/website-crawl/application/crawlWebsiteAutomaticViewports.test.ts Provide deterministic page-local stylesheet evidence without a browser dependency.">
     <h3>automaticDependencies</h3>
-    <p class="muted"><code>src/features/website-crawl/application/crawlWebsiteAutomaticViewports.test.ts:49:7</code></p>
+    <p class="muted"><code>src/features/website-crawl/application/crawlWebsiteAutomaticViewports.test.ts:79:7</code></p>
     <p>Provide deterministic page-local stylesheet evidence without a browser dependency.</p>
+    
+  </article><article class="item" data-search="crowdedResponsiveDependencies src/features/website-crawl/application/crawlWebsiteAutomaticViewports.test.ts Provide crowded authored thresholds whose structural browser states span three responsive regimes.">
+    <h3>crowdedResponsiveDependencies</h3>
+    <p class="muted"><code>src/features/website-crawl/application/crawlWebsiteAutomaticViewports.test.ts:90:7</code></p>
+    <p>Provide crowded authored thresholds whose structural browser states span three responsive regimes.</p>
+    
+  </article><article class="item" data-search="fluidGridDependencies src/features/website-crawl/application/crawlWebsiteAutomaticViewports.test.ts Model fluid computed Grid widths that retain one structural responsive state.">
+    <h3>fluidGridDependencies</h3>
+    <p class="muted"><code>src/features/website-crawl/application/crawlWebsiteAutomaticViewports.test.ts:135:7</code></p>
+    <p>Model fluid computed Grid widths that retain one structural responsive state.</p>
     
   </article><article class="item" data-search="capturePageAsync src/features/website-crawl/application/crawlWebsiteAutomaticViewports.test.ts Record deterministic captures while reproducing one responsive page-local link.">
     <h3>capturePageAsync</h3>
-    <p class="muted"><code>src/features/website-crawl/application/crawlWebsiteAutomaticViewports.test.ts:60:7</code></p>
+    <p class="muted"><code>src/features/website-crawl/application/crawlWebsiteAutomaticViewports.test.ts:180:7</code></p>
     <p>Record deterministic captures while reproducing one responsive page-local link.</p>
     
   </article><article class="item" data-search="discoverBreakpointsAsync src/features/website-crawl/application/crawlWebsiteAutomaticViewports.test.ts Return the responsive CSS condition associated with each deterministic fixture page.">
     <h3>discoverBreakpointsAsync</h3>
-    <p class="muted"><code>src/features/website-crawl/application/crawlWebsiteAutomaticViewports.test.ts:76:7</code></p>
+    <p class="muted"><code>src/features/website-crawl/application/crawlWebsiteAutomaticViewports.test.ts:196:7</code></p>
     <p>Return the responsive CSS condition associated with each deterministic fixture page.</p>
     
   </article><article class="item" data-search="probeResponsiveAsync src/features/website-crawl/application/crawlWebsiteAutomaticViewports.test.ts Model distinct browser layout signatures on either side of the page-local breakpoint.">
     <h3>probeResponsiveAsync</h3>
-    <p class="muted"><code>src/features/website-crawl/application/crawlWebsiteAutomaticViewports.test.ts:87:7</code></p>
+    <p class="muted"><code>src/features/website-crawl/application/crawlWebsiteAutomaticViewports.test.ts:207:7</code></p>
     <p>Model distinct browser layout signatures on either side of the page-local breakpoint.</p>
     
   </article>
@@ -1932,29 +1965,44 @@
     <p class="muted"><code>src/features/website-crawl/application/verifyResponsiveCoverageAsync.ts:30:14</code></p>
     <p>Verify responsive candidates in the browser and report bounded coverage truthfully.</p>
     
-  </article><article class="item" data-search="boundProbeCandidates src/features/website-crawl/application/verifyResponsiveCoverageAsync.ts Bound lightweight probes while preserving the mobile and desktop baseline candidates.">
+  </article><article class="item" data-search="boundProbeCandidates src/features/website-crawl/application/verifyResponsiveCoverageAsync.ts Bound lightweight probes while distributing samples across the discovered responsive range.">
     <h3>boundProbeCandidates</h3>
     <p class="muted"><code>src/features/website-crawl/application/verifyResponsiveCoverageAsync.ts:55:7</code></p>
-    <p>Bound lightweight probes while preserving the mobile and desktop baseline candidates.</p>
+    <p>Bound lightweight probes while distributing samples across the discovered responsive range.</p>
+    
+  </article><article class="item" data-search="evenlyDistributedCandidates src/features/website-crawl/application/verifyResponsiveCoverageAsync.ts Select ordered candidate quantiles so neighbouring thresholds cannot exhaust the probe budget.">
+    <h3>evenlyDistributedCandidates</h3>
+    <p class="muted"><code>src/features/website-crawl/application/verifyResponsiveCoverageAsync.ts:73:7</code></p>
+    <p>Select ordered candidate quantiles so neighbouring thresholds cannot exhaust the probe budget.</p>
     
   </article><article class="item" data-search="verifiedCoverageAsync src/features/website-crawl/application/verifyResponsiveCoverageAsync.ts Use browser probes to select one full observation for every meaningfully distinct state.">
     <h3>verifiedCoverageAsync</h3>
-    <p class="muted"><code>src/features/website-crawl/application/verifyResponsiveCoverageAsync.ts:73:7</code></p>
+    <p class="muted"><code>src/features/website-crawl/application/verifyResponsiveCoverageAsync.ts:83:7</code></p>
     <p>Use browser probes to select one full observation for every meaningfully distinct state.</p>
     
-  </article><article class="item" data-search="selectVerifiedMeasurements src/features/website-crawl/application/verifyResponsiveCoverageAsync.ts Retain the first ascending probe from each distinct navigation, layout, and overflow state.">
+  </article><article class="item" data-search="selectVerifiedMeasurements src/features/website-crawl/application/verifyResponsiveCoverageAsync.ts Retain the first ascending probe from each distinct semantic responsive state.">
     <h3>selectVerifiedMeasurements</h3>
-    <p class="muted"><code>src/features/website-crawl/application/verifyResponsiveCoverageAsync.ts:122:7</code></p>
-    <p>Retain the first ascending probe from each distinct navigation, layout, and overflow state.</p>
+    <p class="muted"><code>src/features/website-crawl/application/verifyResponsiveCoverageAsync.ts:132:7</code></p>
+    <p>Retain the first ascending probe from each distinct semantic responsive state.</p>
+    
+  </article><article class="item" data-search="responsiveLayoutSignature src/features/website-crawl/application/verifyResponsiveCoverageAsync.ts Normalize fluid Grid measurements only while comparing responsive probe states.">
+    <h3>responsiveLayoutSignature</h3>
+    <p class="muted"><code>src/features/website-crawl/application/verifyResponsiveCoverageAsync.ts:157:7</code></p>
+    <p>Normalize fluid Grid measurements only while comparing responsive probe states.</p>
+    
+  </article><article class="item" data-search="gridTrackCount src/features/website-crawl/application/verifyResponsiveCoverageAsync.ts Count measured Grid tracks without retaining their fluid pixel widths in selection policy.">
+    <h3>gridTrackCount</h3>
+    <p class="muted"><code>src/features/website-crawl/application/verifyResponsiveCoverageAsync.ts:169:7</code></p>
+    <p>Count measured Grid tracks without retaining their fluid pixel widths in selection policy.</p>
     
   </article><article class="item" data-search="unverifiedCoverage src/features/website-crawl/application/verifyResponsiveCoverageAsync.ts Report conservative bounded captures when the adapter cannot supply responsive probes.">
     <h3>unverifiedCoverage</h3>
-    <p class="muted"><code>src/features/website-crawl/application/verifyResponsiveCoverageAsync.ts:147:7</code></p>
+    <p class="muted"><code>src/features/website-crawl/application/verifyResponsiveCoverageAsync.ts:175:7</code></p>
     <p>Report conservative bounded captures when the adapter cannot supply responsive probes.</p>
     
   </article><article class="item" data-search="coverageDiagnostics src/features/website-crawl/application/verifyResponsiveCoverageAsync.ts Convert explicit coverage omissions and uncertainties into crawler diagnostics.">
     <h3>coverageDiagnostics</h3>
-    <p class="muted"><code>src/features/website-crawl/application/verifyResponsiveCoverageAsync.ts:177:7</code></p>
+    <p class="muted"><code>src/features/website-crawl/application/verifyResponsiveCoverageAsync.ts:205:7</code></p>
     <p>Convert explicit coverage omissions and uncertainties into crawler diagnostics.</p>
     
   </article>
@@ -1992,24 +2040,29 @@
     <p class="muted"><code>src/features/website-crawl/composition/createWebsiteCrawler.acceptance.test.ts:187:7</code></p>
     <p class="empty">No description available.</p>
     
+  </article><article class="item" data-search="assertAutomaticGridCaptures src/features/website-crawl/composition/createWebsiteCrawler.acceptance.test.ts Assert the selected automatic captures retain distinct one-, two-, and three-column layouts.">
+    <h3>assertAutomaticGridCaptures</h3>
+    <p class="muted"><code>src/features/website-crawl/composition/createWebsiteCrawler.acceptance.test.ts:238:7</code></p>
+    <p>Assert the selected automatic captures retain distinct one-, two-, and three-column layouts.</p>
+    
   </article><article class="item" data-search="createFixtureServer src/features/website-crawl/composition/createWebsiteCrawler.acceptance.test.ts ">
     <h3>createFixtureServer</h3>
-    <p class="muted"><code>src/features/website-crawl/composition/createWebsiteCrawler.acceptance.test.ts:232:7</code></p>
+    <p class="muted"><code>src/features/website-crawl/composition/createWebsiteCrawler.acceptance.test.ts:251:7</code></p>
     <p class="empty">No description available.</p>
     
   </article><article class="item" data-search="listenAsync src/features/website-crawl/composition/createWebsiteCrawler.acceptance.test.ts ">
     <h3>listenAsync</h3>
-    <p class="muted"><code>src/features/website-crawl/composition/createWebsiteCrawler.acceptance.test.ts:269:7</code></p>
+    <p class="muted"><code>src/features/website-crawl/composition/createWebsiteCrawler.acceptance.test.ts:288:7</code></p>
     <p class="empty">No description available.</p>
     
   </article><article class="item" data-search="closeAsync src/features/website-crawl/composition/createWebsiteCrawler.acceptance.test.ts ">
     <h3>closeAsync</h3>
-    <p class="muted"><code>src/features/website-crawl/composition/createWebsiteCrawler.acceptance.test.ts:276:7</code></p>
+    <p class="muted"><code>src/features/website-crawl/composition/createWebsiteCrawler.acceptance.test.ts:295:7</code></p>
     <p class="empty">No description available.</p>
     
   </article><article class="item" data-search="automaticPage src/features/website-crawl/composition/createWebsiteCrawler.acceptance.test.ts ">
     <h3>automaticPage</h3>
-    <p class="muted"><code>src/features/website-crawl/composition/createWebsiteCrawler.acceptance.test.ts:298:7</code></p>
+    <p class="muted"><code>src/features/website-crawl/composition/createWebsiteCrawler.acceptance.test.ts:317:7</code></p>
     <p class="empty">No description available.</p>
     
   </article>
@@ -2082,45 +2135,55 @@
     <p class="muted"><code>src/features/website-crawl/domain/selectResponsiveViewports.ts:35:7</code></p>
     <p>Extract every measurable width transition from one authored CSS media condition.</p>
     
+  </article><article class="item" data-search="isUniversalCondition src/features/website-crawl/domain/selectResponsiveViewports.ts Ignore universal media metadata because it carries no viewport transition to verify.">
+    <h3>isUniversalCondition</h3>
+    <p class="muted"><code>src/features/website-crawl/domain/selectResponsiveViewports.ts:62:7</code></p>
+    <p>Ignore universal media metadata because it carries no viewport transition to verify.</p>
+    
   </article><article class="item" data-search="containsNonWidthFeature src/features/website-crawl/domain/selectResponsiveViewports.ts Identify media-feature clauses that width-only probes cannot independently exercise.">
     <h3>containsNonWidthFeature</h3>
-    <p class="muted"><code>src/features/website-crawl/domain/selectResponsiveViewports.ts:61:7</code></p>
+    <p class="muted"><code>src/features/website-crawl/domain/selectResponsiveViewports.ts:65:7</code></p>
     <p>Identify media-feature clauses that width-only probes cannot independently exercise.</p>
     
   </article><article class="item" data-search="transitionWidths src/features/website-crawl/domain/selectResponsiveViewports.ts Convert one CSS width comparison into the first integer width of each adjacent regime.">
     <h3>transitionWidths</h3>
-    <p class="muted"><code>src/features/website-crawl/domain/selectResponsiveViewports.ts:71:7</code></p>
+    <p class="muted"><code>src/features/website-crawl/domain/selectResponsiveViewports.ts:75:7</code></p>
     <p>Convert one CSS width comparison into the first integer width of each adjacent regime.</p>
     
   </article><article class="item" data-search="firstMatchedPart src/features/website-crawl/domain/selectResponsiveViewports.ts Return the first defined capture group from equivalent media-syntax alternatives.">
     <h3>firstMatchedPart</h3>
-    <p class="muted"><code>src/features/website-crawl/domain/selectResponsiveViewports.ts:87:7</code></p>
+    <p class="muted"><code>src/features/website-crawl/domain/selectResponsiveViewports.ts:91:7</code></p>
     <p>Return the first defined capture group from equivalent media-syntax alternatives.</p>
     
   </article><article class="item" data-search="legacyOperator src/features/website-crawl/domain/selectResponsiveViewports.ts Normalize the legacy min-width and max-width feature names to comparison operators.">
     <h3>legacyOperator</h3>
-    <p class="muted"><code>src/features/website-crawl/domain/selectResponsiveViewports.ts:91:7</code></p>
+    <p class="muted"><code>src/features/website-crawl/domain/selectResponsiveViewports.ts:95:7</code></p>
     <p>Normalize the legacy min-width and max-width feature names to comparison operators.</p>
     
   </article><article class="item" data-search="adjacentIntegerWidths src/features/website-crawl/domain/selectResponsiveViewports.ts Map a comparison to integer samples immediately on both sides of its boundary.">
     <h3>adjacentIntegerWidths</h3>
-    <p class="muted"><code>src/features/website-crawl/domain/selectResponsiveViewports.ts:95:7</code></p>
+    <p class="muted"><code>src/features/website-crawl/domain/selectResponsiveViewports.ts:99:7</code></p>
     <p>Map a comparison to integer samples immediately on both sides of its boundary.</p>
     
   </article><article class="item" data-search="toPixels src/features/website-crawl/domain/selectResponsiveViewports.ts Convert CSS media-query lengths using the specified initial font-size basis.">
     <h3>toPixels</h3>
-    <p class="muted"><code>src/features/website-crawl/domain/selectResponsiveViewports.ts:106:7</code></p>
+    <p class="muted"><code>src/features/website-crawl/domain/selectResponsiveViewports.ts:110:7</code></p>
     <p>Convert CSS media-query lengths using the specified initial font-size basis.</p>
     
   </article><article class="item" data-search="reverseComparison src/features/website-crawl/domain/selectResponsiveViewports.ts Reverse a comparison whose numeric value appears before `width`.">
     <h3>reverseComparison</h3>
-    <p class="muted"><code>src/features/website-crawl/domain/selectResponsiveViewports.ts:113:7</code></p>
+    <p class="muted"><code>src/features/website-crawl/domain/selectResponsiveViewports.ts:117:7</code></p>
     <p>Reverse a comparison whose numeric value appears before `width`.</p>
     
   </article><article class="item" data-search="uniqueSorted src/features/website-crawl/domain/selectResponsiveViewports.ts Sort and deduplicate finite candidate widths before browser probing.">
     <h3>uniqueSorted</h3>
-    <p class="muted"><code>src/features/website-crawl/domain/selectResponsiveViewports.ts:125:7</code></p>
+    <p class="muted"><code>src/features/website-crawl/domain/selectResponsiveViewports.ts:129:7</code></p>
     <p>Sort and deduplicate finite candidate widths before browser probing.</p>
+    
+  </article><article class="item" data-search="uniqueStrings src/features/website-crawl/domain/selectResponsiveViewports.ts Preserve one explanation for repeated authored conditions without losing raw evidence provenance.">
+    <h3>uniqueStrings</h3>
+    <p class="muted"><code>src/features/website-crawl/domain/selectResponsiveViewports.ts:133:7</code></p>
+    <p>Preserve one explanation for repeated authored conditions without losing raw evidence provenance.</p>
     
   </article>
     </section>

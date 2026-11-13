@@ -1,6 +1,6 @@
 {
   "name": "@ankhorage/scraper",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "Safe, bounded browser observations for public websites.",
   "license": "MIT",
   "keywords": [
