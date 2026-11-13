@@ -2,11 +2,37 @@ import { createServer } from 'node:http';
 
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test';
 
+import type { DynamicCaptureOptions, PageObservation } from '../../../../types/public.js';
 import { createPuppeteerCapturePage } from './createPuppeteerCapturePage.js';
+
+const transitionNoise = Array.from(
+  { length: 30 },
+  (_, index) => `<div class="noise">noise ${index}</div>`,
+).join('');
 
 const fixtureBody = (url: string | undefined): string =>
   url === '/dynamic'
-    ? `<style>body{margin:0}.spacer{height:1200px}.track{width:200px;height:20px}.progress-fill{width:0;height:20px;transition:width 80ms linear;background:green}</style><div class="spacer"></div><div class="track"><div class="progress-fill" role="progressbar" aria-valuenow="72"></div></div><script>new IntersectionObserver(([entry])=>{if(entry.isIntersecting)requestAnimationFrame(()=>document.querySelector('.progress-fill').style.width='144px')}).observe(document.querySelector('.progress-fill'))</script>`
+    ? `<style>
+      body{margin:0}.noise{height:8px;transition:color 80ms linear}.spacer{height:900px}
+      .track{width:200px;height:20px;margin:16px 0}.rowgap{height:500px}.fill{width:0;height:20px;background:green;transition:width 80ms linear}
+      .reveal{height:20px;opacity:0;transition:opacity 80ms linear}.stuck{animation:spin 2s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+    </style>${transitionNoise}<div class="spacer"></div>
+    <div class="track" role="progressbar" aria-label="zero" aria-valuenow="0" id="zero"><div class="fill"></div></div><div class="rowgap"></div>
+    <div class="track" role="progressbar" aria-label="css" aria-valuenow="20" id="css"><div class="fill"></div></div><div class="rowgap"></div>
+    <div class="track" role="progressbar" aria-label="web" aria-valuenow="40" id="web"><div class="fill"></div></div><div class="rowgap"></div>
+    <div class="track" role="progressbar" aria-label="stuck" aria-valuenow="13" id="stuck"><div class="fill stuck"></div></div><div class="rowgap"></div>
+    <div class="track" role="progressbar" aria-label="false" aria-valuenow="9" id="false"><span class="noise">unchanged target</span></div><div class="rowgap"></div>
+    <div class="reveal" id="reveal">reveal</div>
+    <script>
+      const activate=(entry)=>{if(!entry.isIntersecting)return;entry.target.dataset.seen='true';
+        if(entry.target.id==='css'){entry.target.setAttribute('aria-valuenow','72');entry.target.firstElementChild.style.width='144px'}
+        if(entry.target.id==='web'){entry.target.firstElementChild.animate([{transform:'scaleX(0)'},{transform:'scaleX(1)'}],{duration:80,fill:'forwards'})}
+        if(entry.target.id==='false')setTimeout(()=>entry.target.lastElementChild.textContent='unrelated mutation',20)
+        if(entry.target.id==='reveal')entry.target.style.opacity='1';
+      };
+      const observer=new IntersectionObserver((entries)=>entries.forEach(activate));
+      document.querySelectorAll('[role="progressbar"],.reveal').forEach((element)=>observer.observe(element));
+    </script>`
     : url === '/about'
       ? '<title>About</title><main>About page</main>'
       : `<title>Fixture</title><nav><a href="/about">About</a></nav><section class="grid"><article>One <span style="color: red">red</span></article><article hidden>Hidden</article><article>Three</article></section>`;
@@ -38,6 +64,7 @@ afterAll(
 const captureFixtureAsync = async (
   path: string,
   viewport: { height: number; id: string; width: number },
+  dynamicCapture?: DynamicCaptureOptions,
   timeoutMs = 10_000,
 ) => {
   const capture = await createPuppeteerCapturePage({
@@ -52,6 +79,7 @@ const captureFixtureAsync = async (
   });
   try {
     return await capture.capturePageAsync({
+      ...(dynamicCapture ? { dynamicCapture } : {}),
       maxBytes: 100_000,
       timeoutMs,
       url: `${origin}${path}`,
@@ -60,6 +88,26 @@ const captureFixtureAsync = async (
   } finally {
     await capture.closeAsync();
   }
+};
+
+/*** Assert the complete dynamic-state contract without relying on fixture DOM paths. */
+const expectDynamicEvidence = (page: PageObservation): void => {
+  const evidence = page.dynamicElements ?? [];
+  const byLabel = (label: string) =>
+    evidence.find((item) => item.initial.element.attributes['aria-label'] === label);
+
+  expect(evidence.length).toBeGreaterThanOrEqual(6);
+  expect(evidence.length).toBeLessThanOrEqual(24);
+  expect(byLabel('zero')?.outcome).toBe('settled');
+  expect(byLabel('css')?.initial.element.attributes['aria-valuenow']).toBe('20');
+  expect(byLabel('css')?.settled?.element.attributes['aria-valuenow']).toBe('72');
+  expect(byLabel('css')?.settled?.element.rect.width).toBe(200);
+  expect(byLabel('web')?.outcome).toBe('settled');
+  expect(byLabel('stuck')?.outcome).toBe('incomplete');
+  expect(byLabel('false')?.outcome).toBe('incomplete');
+  expect(
+    evidence.some((item) => item.initial.element.text === 'reveal' && item.outcome === 'settled'),
+  ).toBe(true);
 };
 
 describe('createPuppeteerCapturePage', () => {
@@ -73,18 +121,43 @@ describe('createPuppeteerCapturePage', () => {
     expect(page.elements.some((element) => element.css.display === 'grid')).toBe(true);
   });
 
-  test('retains initial zero-width and settled viewport-triggered progress evidence', async () => {
+  test.each([
+    { height: 900, id: 'desktop', width: 1440 },
+    { height: 700, id: 'tablet', width: 768 },
+    { height: 400, id: 'narrow', width: 320 },
+  ])('captures prioritized dynamic evidence at $id viewport', async (viewport) => {
+    const page = await captureFixtureAsync('/dynamic', viewport, {
+      overallTimeoutMs: 1_000,
+      perTargetTimeoutMs: 200,
+      stabilityWindowMs: 20,
+    });
+    expectDynamicEvidence(page);
+  });
+
+  test('rejects invalid capture limits and preserves the hard candidate cap', async () => {
+    const invalidCaptureError = await captureFixtureAsync(
+      '/dynamic',
+      { height: 400, id: 'narrow', width: 320 },
+      { maxCandidates: -1 },
+    ).then(
+      () => null,
+      (error: unknown) => error,
+    );
+    expect(invalidCaptureError).toBeInstanceOf(RangeError);
+    expect(invalidCaptureError).toHaveProperty(
+      'message',
+      'dynamicCapture.maxCandidates must be a positive finite integer.',
+    );
     const page = await captureFixtureAsync(
       '/dynamic',
       { height: 400, id: 'narrow', width: 320 },
-      2_000,
+      {
+        maxCandidates: 99,
+        overallTimeoutMs: 1_000,
+        perTargetTimeoutMs: 200,
+        stabilityWindowMs: 20,
+      },
     );
-
-    const progress = page.dynamicElements?.find(
-      (evidence) => evidence.initial.element.attributes['aria-valuenow'] === '72',
-    );
-    expect(progress?.initial.element.rect.width).toBe(0);
-    expect(progress?.outcome).toBe('settled');
-    expect(progress?.settled?.element.rect.width).toBe(144);
-  });
+    expect(page.dynamicElements?.length).toBeLessThanOrEqual(24);
+  }, 10_000);
 });

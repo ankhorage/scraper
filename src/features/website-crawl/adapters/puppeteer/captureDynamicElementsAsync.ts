@@ -19,6 +19,12 @@ interface SettlingResult {
   readonly timedOut: boolean;
 }
 
+interface CandidateSource {
+  readonly priority: number;
+  readonly sourceRef: string;
+  readonly top: number;
+}
+
 const defaultBudget: DynamicCaptureBudget = {
   overallMs: 4_000,
   perTargetMs: 1_200,
@@ -64,18 +70,53 @@ const toCaptureBudget = (
   timeoutMs: number,
   configured: DynamicCaptureOptions | undefined,
 ): DynamicCaptureBudget => {
-  const availableMs = Math.max(defaultBudget.quietMs, timeoutMs - 250);
-  const requestedQuietMs = configured?.stabilityWindowMs ?? defaultBudget.quietMs;
+  const availableMs = Math.max(1, assertPositiveFiniteInteger(timeoutMs, 'timeoutMs') - 250);
+  const overallMs = Math.min(
+    assertPositiveFiniteInteger(
+      configured?.overallTimeoutMs ?? defaultBudget.overallMs,
+      'dynamicCapture.overallTimeoutMs',
+    ),
+    defaultBudget.overallMs,
+    availableMs,
+  );
+  const perTargetMs = Math.min(
+    assertPositiveFiniteInteger(
+      configured?.perTargetTimeoutMs ?? defaultBudget.perTargetMs,
+      'dynamicCapture.perTargetTimeoutMs',
+    ),
+    defaultBudget.perTargetMs,
+    overallMs,
+  );
   return {
-    ...defaultBudget,
-    overallMs: Math.min(configured?.overallTimeoutMs ?? defaultBudget.overallMs, availableMs),
-    perTargetMs: Math.min(configured?.perTargetTimeoutMs ?? defaultBudget.perTargetMs, availableMs),
-    quietMs: Math.min(requestedQuietMs, availableMs),
-    targetLimit: configured?.maxCandidates ?? defaultBudget.targetLimit,
+    overallMs,
+    perTargetMs,
+    quietMs: Math.min(
+      assertPositiveFiniteInteger(
+        configured?.stabilityWindowMs ?? defaultBudget.quietMs,
+        'dynamicCapture.stabilityWindowMs',
+      ),
+      defaultBudget.quietMs,
+      perTargetMs,
+    ),
+    targetLimit: Math.min(
+      assertPositiveFiniteInteger(
+        configured?.maxCandidates ?? defaultBudget.targetLimit,
+        'dynamicCapture.maxCandidates',
+      ),
+      defaultBudget.targetLimit,
+    ),
   };
 };
 
-/*** Discover stable DOM references for meaningful animated candidates in document order. */
+/*** Reject invalid public resource limits before they can weaken bounded browser capture. */
+const assertPositiveFiniteInteger = (value: number, name: string): number => {
+  if (!Number.isSafeInteger(value) || value <= 0) {
+    throw new RangeError(`${name} must be a positive finite integer.`);
+  }
+  return value;
+};
+
+/*** Discover stable DOM references for prioritized animated candidates. */
 const discoverCandidateSourceRefsAsync = async (
   page: Page,
   limit: number,
@@ -91,12 +132,12 @@ const captureCandidateEvidenceAsync = async (
   const initial = await snapshotDynamicElementAsync(page, sourceRef);
   await activateViewportAsync(page, sourceRef);
   const triggered = await snapshotDynamicElementAsync(page, sourceRef);
-  const remainingMs = Math.max(budget.quietMs, budget.overallMs - (Date.now() - startedAt));
+  const remainingMs = budget.overallMs - (Date.now() - startedAt);
   const settling = await waitForSettlingAsync(
     page,
     sourceRef,
     budget.quietMs,
-    Math.min(remainingMs, budget.perTargetMs),
+    Math.max(0, Math.min(remainingMs, budget.perTargetMs)),
   );
   const settled = await snapshotDynamicElementAsync(page, sourceRef);
   return toDynamicEvidence(sourceRef, initial, triggered, settled, settling);
@@ -113,7 +154,7 @@ const activateViewportAsync = async (page: Page, sourceRef: string): Promise<voi
   await page.evaluate(activateViewport, sourceRef);
 };
 
-/*** Sample geometry, computed style, mutation, and Web Animations state until locally quiet. */
+/*** Sample relevant geometry, semantics, and Web Animations state until locally quiet. */
 const waitForSettlingAsync = async (
   page: Page,
   sourceRef: string,
@@ -149,35 +190,53 @@ const toDynamicEvidence = (
   };
 };
 
-/*** Locate candidate elements in the page context without coupling the adapter to site-specific selectors. */
-const discoverCandidateSourceRefs = (limit: number): readonly string[] =>
-  [...document.querySelectorAll('body *')]
+/*** Locate candidates without coupling the adapter to site-specific selectors. */
+const discoverCandidateSourceRefs = (limit: number): readonly string[] => {
+  const candidates = [...document.querySelectorAll('body *')]
     .filter((element) => !element.closest('header, footer'))
-    .filter((element) => {
+    .flatMap((element): CandidateSource[] => {
       const style = getComputedStyle(element);
+      if (
+        style.display === 'none' ||
+        style.visibility === 'hidden' ||
+        element.getBoundingClientRect().height <= 0
+      ) {
+        return [];
+      }
       const className = element.getAttribute('class') ?? '';
-      return (
-        element.matches('progress, [role="progressbar"], [aria-valuenow]') ||
-        element
-          .getAttributeNames()
-          .some((name) => /^(data-(progress|count|value)|aria-valuenow)$/i.test(name)) ||
-        /(?:progress|counter|reveal|animate|motion)/i.test(className) ||
-        style.animationName !== 'none' ||
-        style.transitionDuration !== '0s'
-      );
-    })
-    .filter((element) => {
-      const style = getComputedStyle(element);
-      return (
-        style.display !== 'none' &&
-        style.visibility !== 'hidden' &&
-        style.opacity !== '0' &&
-        element.getBoundingClientRect().height > 0
-      );
-    })
-    .sort((left, right) => left.getBoundingClientRect().top - right.getBoundingClientRect().top)
+      const priority = element.matches('progress, [role="progressbar"], [aria-valuenow]')
+        ? 0
+        : element
+              .getAttributeNames()
+              .some((name) => /^(data-(progress|count|value)|aria-valuenow)$/i.test(name))
+          ? 1
+          : /(?:progress|counter|reveal|animate|motion)/i.test(className)
+            ? 2
+            : style.animationName !== 'none'
+              ? 3
+              : style.transitionDuration !== '0s'
+                ? 4
+                : null;
+      return priority === null
+        ? []
+        : [
+            {
+              priority,
+              sourceRef: globalThis.__ankhorageScraperElementPath(element),
+              top: element.getBoundingClientRect().top + scrollY,
+            },
+          ];
+    });
+  return [...new Map(candidates.map((candidate) => [candidate.sourceRef, candidate])).values()]
+    .sort(
+      (left, right) =>
+        left.priority - right.priority ||
+        Math.abs(left.top - scrollY) - Math.abs(right.top - scrollY) ||
+        left.sourceRef.localeCompare(right.sourceRef),
+    )
     .slice(0, limit)
-    .map(globalThis.__ankhorageScraperElementPath);
+    .map(({ sourceRef }) => sourceRef);
+};
 
 /*** Snapshot a single installed source reference in the page context. */
 const snapshotDynamicElement = (sourceRef: string): DynamicElementSnapshot => {
@@ -214,13 +273,9 @@ const waitForSettling = async ({
   const startedAt = performance.now();
   let changed = false;
   let lastChangeAt = startedAt;
-  const initialRect = element.getBoundingClientRect();
-  let previous = `${initialRect.x}:${initialRect.y}:${initialRect.width}:${initialRect.height}:${element.getAttribute('aria-valuenow')}:${getComputedStyle(element).transform}`;
+  let previous = globalThis.__ankhorageScraperReadRelevantState(element);
   return new Promise((resolve) => {
-    const observer = new MutationObserver(() => {
-      changed = true;
-      lastChangeAt = performance.now();
-    });
+    const observer = new MutationObserver(() => undefined);
     observer.observe(element, {
       attributes: true,
       characterData: true,
@@ -229,8 +284,7 @@ const waitForSettling = async ({
     });
     const sample = () => {
       const now = performance.now();
-      const rect = element.getBoundingClientRect();
-      const current = `${rect.x}:${rect.y}:${rect.width}:${rect.height}:${element.getAttribute('aria-valuenow')}:${getComputedStyle(element).transform}`;
+      const current = globalThis.__ankhorageScraperReadRelevantState(element);
       const running = element
         .getAnimations({ subtree: true })
         .some(({ playState }) => playState === 'running');

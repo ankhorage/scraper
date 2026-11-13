@@ -11,6 +11,7 @@ import { assertPublicUrlAsync as assertPublicNetworkUrlAsync } from '../network/
 import type { LayoutCss, VisualCss } from './browserExtractionTypes.js';
 import { captureDynamicElementsAsync } from './captureDynamicElementsAsync.js';
 import { discoverBreakpointsAsync } from './discoverBreakpointsAsync.js';
+import { installBrowserRelevantState } from './installBrowserRelevantState.js';
 import { probeResponsiveAsync } from './probeResponsiveAsync.js';
 interface PuppeteerOptions {
   readonly allowPrivateHostsForTests?: boolean;
@@ -101,6 +102,7 @@ const installBrowserExtractionAsync = async (page: Page): Promise<void> => {
   await page.evaluateOnNewDocument(installBrowserLayoutCss);
   await page.evaluateOnNewDocument(installBrowserVisualCss);
   await page.evaluateOnNewDocument(installBrowserCss);
+  await page.evaluateOnNewDocument(installBrowserRelevantState);
   await page.evaluateOnNewDocument(installBrowserElement);
 };
 /*** Reject browser requests and redirects that resolve to non-public network targets. */
