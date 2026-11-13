@@ -14,7 +14,7 @@
     {
       "id": "npm",
       "label": "npm",
-      "value": "v0.2.0",
+      "value": "v0.3.0",
       "color": "cb3837"
     },
     {
@@ -167,10 +167,22 @@
       ]
     },
     {
+      "path": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts",
+      "isEntrypoint": false,
+      "dependencies": [
+        "src/types/public.ts"
+      ],
+      "exports": [
+        "captureDynamicElementsAsync"
+      ]
+    },
+    {
       "path": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts",
       "isEntrypoint": false,
       "dependencies": [
-        "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.ts"
+        "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.ts",
+        "src/features/website-crawl/application/toWebsiteObservationDocument.ts",
+        "src/types/public.ts"
       ],
       "exports": []
     },
@@ -180,7 +192,9 @@
       "dependencies": [
         "src/features/website-crawl/adapters/network/assertPublicUrlAsync.ts",
         "src/features/website-crawl/adapters/puppeteer/browserExtractionTypes.ts",
+        "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts",
         "src/features/website-crawl/adapters/puppeteer/discoverBreakpointsAsync.ts",
+        "src/features/website-crawl/adapters/puppeteer/installBrowserRelevantState.ts",
         "src/features/website-crawl/adapters/puppeteer/probeResponsiveAsync.ts",
         "src/features/website-crawl/ports/CapturePagePort.ts",
         "src/types/public.ts"
@@ -208,6 +222,14 @@
       ],
       "exports": [
         "extractBreakpointEvidence"
+      ]
+    },
+    {
+      "path": "src/features/website-crawl/adapters/puppeteer/installBrowserRelevantState.ts",
+      "isEntrypoint": false,
+      "dependencies": [],
+      "exports": [
+        "installBrowserRelevantState"
       ]
     },
     {
@@ -388,7 +410,8 @@
         "CrawlOptions",
         "CrawlResult",
         "CrawlViewport",
-        "createWebsiteCrawler"
+        "createWebsiteCrawler",
+        "DynamicCaptureOptions"
       ]
     },
     {
@@ -412,6 +435,9 @@
         "CrawlResult",
         "CrawlViewport",
         "CssObservation",
+        "DynamicCaptureOptions",
+        "DynamicElementEvidence",
+        "DynamicElementSnapshot",
         "ElementObservation",
         "PageObservation"
       ]
@@ -429,7 +455,7 @@
       "modulePath": "src/types/public.ts",
       "sourceLocation": {
         "filePath": "src/types/public.ts",
-        "line": 17,
+        "line": 27,
         "column": 1
       },
       "exportPaths": [
@@ -487,10 +513,18 @@
         "src/index.ts"
       ],
       "relatedSymbols": [
-        "CrawlViewport"
+        "CrawlViewport",
+        "DynamicCaptureOptions"
       ],
       "signatures": [],
       "members": [
+        {
+          "name": "dynamicCapture",
+          "kind": "property",
+          "type": "DynamicCaptureOptions",
+          "required": false,
+          "description": null
+        },
         {
           "name": "maxBytesPerPage",
           "kind": "property",
@@ -547,7 +581,7 @@
       "modulePath": "src/types/public.ts",
       "sourceLocation": {
         "filePath": "src/types/public.ts",
-        "line": 105,
+        "line": 132,
         "column": 1
       },
       "exportPaths": [
@@ -670,6 +704,57 @@
         }
       ],
       "members": [],
+      "structuredRows": []
+    },
+    {
+      "name": "DynamicCaptureOptions",
+      "title": null,
+      "description": null,
+      "isReadme": false,
+      "see": [],
+      "security": [],
+      "kind": "type",
+      "modulePath": "src/types/public.ts",
+      "sourceLocation": {
+        "filePath": "src/types/public.ts",
+        "line": 19,
+        "column": 1
+      },
+      "exportPaths": [
+        "src/index.ts"
+      ],
+      "relatedSymbols": [],
+      "signatures": [],
+      "members": [
+        {
+          "name": "maxCandidates",
+          "kind": "property",
+          "type": "number",
+          "required": false,
+          "description": null
+        },
+        {
+          "name": "overallTimeoutMs",
+          "kind": "property",
+          "type": "number",
+          "required": false,
+          "description": null
+        },
+        {
+          "name": "perTargetTimeoutMs",
+          "kind": "property",
+          "type": "number",
+          "required": false,
+          "description": null
+        },
+        {
+          "name": "stabilityWindowMs",
+          "kind": "property",
+          "type": "number",
+          "required": false,
+          "description": null
+        }
+      ],
       "structuredRows": []
     }
   ],
@@ -907,13 +992,266 @@
       }
     },
     {
+      "name": "captureDynamicElementsAsync",
+      "description": "Capture bounded viewport-activation evidence without treating a timeout as a settled value.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts",
+        "line": 36,
+        "column": 14
+      }
+    },
+    {
+      "name": "readScrollPosition",
+      "description": "Read the scroll origin so dynamic capture leaves the rendered page layout where it found it.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts",
+        "line": 58,
+        "column": 7
+      }
+    },
+    {
+      "name": "restoreScrollPosition",
+      "description": "Restore the page origin after successful, timed-out, or failed candidate sampling.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts",
+        "line": 64,
+        "column": 7
+      }
+    },
+    {
+      "name": "toCaptureBudget",
+      "description": "Fit dynamic work inside the caller's navigation budget while retaining explicit resource caps.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts",
+        "line": 69,
+        "column": 7
+      }
+    },
+    {
+      "name": "assertPositiveFiniteInteger",
+      "description": "Reject invalid public resource limits before they can weaken bounded browser capture.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts",
+        "line": 112,
+        "column": 7
+      }
+    },
+    {
+      "name": "discoverCandidateSourceRefsAsync",
+      "description": "Discover stable DOM references for prioritized animated candidates.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts",
+        "line": 120,
+        "column": 7
+      }
+    },
+    {
+      "name": "captureCandidateEvidenceAsync",
+      "description": "Retain initial, activated, and defensibly settled snapshots for one candidate.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts",
+        "line": 126,
+        "column": 7
+      }
+    },
+    {
+      "name": "snapshotDynamicElementAsync",
+      "description": "Extract one timestamped browser snapshot through the installed element extractor.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts",
+        "line": 147,
+        "column": 7
+      }
+    },
+    {
+      "name": "activateViewportAsync",
+      "description": "Scroll one candidate into the viewport and allow native intersection work through two frames.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts",
+        "line": 153,
+        "column": 7
+      }
+    },
+    {
+      "name": "waitForSettlingAsync",
+      "description": "Sample relevant geometry, semantics, and Web Animations state until locally quiet.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts",
+        "line": 158,
+        "column": 7
+      }
+    },
+    {
+      "name": "toDynamicEvidence",
+      "description": "Classify settling evidence without fabricating a value from an unchanged initial geometry.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts",
+        "line": 166,
+        "column": 7
+      }
+    },
+    {
+      "name": "discoverCandidateSourceRefs",
+      "description": "Locate candidates without coupling the adapter to site-specific selectors.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts",
+        "line": 194,
+        "column": 7
+      }
+    },
+    {
+      "name": "snapshotDynamicElement",
+      "description": "Snapshot a single installed source reference in the page context.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts",
+        "line": 242,
+        "column": 7
+      }
+    },
+    {
+      "name": "activateViewport",
+      "description": "Trigger native viewport observers without invoking synthetic application events.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts",
+        "line": 252,
+        "column": 7
+      }
+    },
+    {
+      "name": "waitForSettling",
+      "description": "Determine local stability with deterministic observer cleanup on both quiet and timeout paths.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts",
+        "line": 262,
+        "column": 7
+      }
+    },
+    {
+      "name": "sample",
+      "description": null,
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts",
+        "line": 285,
+        "column": 11
+      }
+    },
+    {
+      "name": "fixtureBody",
+      "description": null,
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts",
+        "line": 14,
+        "column": 7
+      }
+    },
+    {
+      "name": "captureFixtureAsync",
+      "description": null,
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts",
+        "line": 65,
+        "column": 7
+      }
+    },
+    {
+      "name": "expectDynamicEvidence",
+      "description": "Assert the complete dynamic-state contract without relying on fixture DOM paths.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts",
+        "line": 95,
+        "column": 7
+      }
+    },
+    {
+      "name": "byLabel",
+      "description": null,
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts",
+        "line": 97,
+        "column": 9
+      }
+    },
+    {
+      "name": "expectCanonicalDynamicEvidence",
+      "description": "Assert canonical state-scoped semantic evidence without expanding the browser test callback.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts",
+        "line": 115,
+        "column": 7
+      }
+    },
+    {
+      "name": "byLabel",
+      "description": null,
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts",
+        "line": 118,
+        "column": 9
+      }
+    },
+    {
+      "name": "state",
+      "description": null,
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts",
+        "line": 120,
+        "column": 9
+      }
+    },
+    {
       "name": "createPuppeteerCapturePage",
       "description": "Create the Puppeteer edge adapter used to collect serializable browser evidence.",
       "see": [],
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.ts",
-        "line": 29,
+        "line": 34,
         "column": 14
       }
     },
@@ -924,7 +1262,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.ts",
-        "line": 63,
+        "line": 68,
         "column": 7
       }
     },
@@ -935,7 +1273,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.ts",
-        "line": 89,
+        "line": 100,
         "column": 7
       }
     },
@@ -946,7 +1284,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.ts",
-        "line": 97,
+        "line": 109,
         "column": 7
       }
     },
@@ -957,7 +1295,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.ts",
-        "line": 105,
+        "line": 117,
         "column": 7
       }
     },
@@ -968,7 +1306,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.ts",
-        "line": 120,
+        "line": 132,
         "column": 7
       }
     },
@@ -979,7 +1317,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.ts",
-        "line": 126,
+        "line": 138,
         "column": 7
       }
     },
@@ -990,7 +1328,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.ts",
-        "line": 134,
+        "line": 146,
         "column": 7
       }
     },
@@ -1001,7 +1339,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.ts",
-        "line": 155,
+        "line": 168,
         "column": 7
       }
     },
@@ -1012,7 +1350,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.ts",
-        "line": 169,
+        "line": 189,
         "column": 7
       }
     },
@@ -1023,7 +1361,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.ts",
-        "line": 207,
+        "line": 227,
         "column": 7
       }
     },
@@ -1034,7 +1372,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.ts",
-        "line": 233,
+        "line": 253,
         "column": 7
       }
     },
@@ -1045,7 +1383,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.ts",
-        "line": 253,
+        "line": 273,
         "column": 7
       }
     },
@@ -1157,6 +1495,17 @@
         "filePath": "src/features/website-crawl/adapters/puppeteer/extractBreakpointEvidence.ts",
         "line": 128,
         "column": 1
+      }
+    },
+    {
+      "name": "installBrowserRelevantState",
+      "description": "Install relevant target-state extraction without treating incidental descendant mutations as progress.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-crawl/adapters/puppeteer/installBrowserRelevantState.ts",
+        "line": 6,
+        "column": 14
       }
     },
     {
@@ -1331,7 +1680,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts",
-        "line": 51,
+        "line": 53,
         "column": 14
       }
     },
@@ -1342,7 +1691,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts",
-        "line": 92,
+        "line": 94,
         "column": 7
       }
     },
@@ -1353,7 +1702,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts",
-        "line": 115,
+        "line": 117,
         "column": 7
       }
     },
@@ -1364,7 +1713,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts",
-        "line": 145,
+        "line": 148,
         "column": 7
       }
     },
@@ -1375,7 +1724,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts",
-        "line": 188,
+        "line": 191,
         "column": 7
       }
     },
@@ -1386,7 +1735,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts",
-        "line": 207,
+        "line": 210,
         "column": 7
       }
     },
@@ -1397,7 +1746,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts",
-        "line": 249,
+        "line": 252,
         "column": 7
       }
     },
@@ -1408,7 +1757,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts",
-        "line": 269,
+        "line": 272,
         "column": 7
       }
     },
@@ -1419,7 +1768,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts",
-        "line": 282,
+        "line": 285,
         "column": 7
       }
     },
@@ -1430,7 +1779,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts",
-        "line": 286,
+        "line": 289,
         "column": 7
       }
     },
@@ -1441,7 +1790,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts",
-        "line": 294,
+        "line": 298,
         "column": 7
       }
     },
@@ -1452,7 +1801,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts",
-        "line": 320,
+        "line": 324,
         "column": 7
       }
     },
@@ -1507,7 +1856,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/toWebsiteObservationDocument.ts",
-        "line": 12,
+        "line": 14,
         "column": 14
       }
     },
@@ -1518,7 +1867,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/toWebsiteObservationDocument.ts",
-        "line": 34,
+        "line": 36,
         "column": 7
       }
     },
@@ -1529,7 +1878,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/toWebsiteObservationDocument.ts",
-        "line": 52,
+        "line": 54,
         "column": 7
       }
     },
@@ -1540,7 +1889,73 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/toWebsiteObservationDocument.ts",
-        "line": 63,
+        "line": 65,
+        "column": 7
+      }
+    },
+    {
+      "name": "collectElementObservations",
+      "description": "Map one stable DOM node across default and retained dynamic browser states.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-crawl/application/toWebsiteObservationDocument.ts",
+        "line": 103,
+        "column": 7
+      }
+    },
+    {
+      "name": "defaultNodeObservation",
+      "description": "Map the ordinary page extraction into the canonical default state.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-crawl/application/toWebsiteObservationDocument.ts",
+        "line": 124,
+        "column": 7
+      }
+    },
+    {
+      "name": "dynamicNodeObservations",
+      "description": "Retain the dynamic browser evidence as canonical state-specific node observations.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-crawl/application/toWebsiteObservationDocument.ts",
+        "line": 139,
+        "column": 7
+      }
+    },
+    {
+      "name": "dynamicObservation",
+      "description": "Convert one timestamped browser snapshot into a portable node observation.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-crawl/application/toWebsiteObservationDocument.ts",
+        "line": 171,
+        "column": 7
+      }
+    },
+    {
+      "name": "observeSemanticAttributes",
+      "description": "Only publish state-specific semantic values directly observed on this browser element.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-crawl/application/toWebsiteObservationDocument.ts",
+        "line": 186,
+        "column": 7
+      }
+    },
+    {
+      "name": "collectStates",
+      "description": "Declare only the browser states actually retained across the page's viewport captures.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-crawl/application/toWebsiteObservationDocument.ts",
+        "line": 204,
         "column": 7
       }
     },
@@ -1551,7 +1966,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/toWebsiteObservationDocument.ts",
-        "line": 111,
+        "line": 230,
         "column": 7
       }
     },
@@ -1562,7 +1977,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/toWebsiteObservationDocument.ts",
-        "line": 121,
+        "line": 240,
         "column": 7
       }
     },
@@ -1573,7 +1988,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/toWebsiteObservationDocument.ts",
-        "line": 134,
+        "line": 253,
         "column": 7
       }
     },
@@ -1584,7 +1999,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/toWebsiteObservationDocument.ts",
-        "line": 141,
+        "line": 260,
         "column": 7
       }
     },
@@ -1595,7 +2010,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/toWebsiteObservationDocument.ts",
-        "line": 144,
+        "line": 263,
         "column": 7
       }
     },
@@ -1606,7 +2021,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/toWebsiteObservationDocument.ts",
-        "line": 154,
+        "line": 273,
         "column": 7
       }
     },
@@ -2222,6 +2637,21 @@
         "sourcePath": "src/features/website-crawl/adapters/puppeteer/browserExtractionTypes.ts"
       },
       {
+        "fromPath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts",
+        "toPath": "src/types/public.ts",
+        "sourcePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts"
+      },
+      {
+        "fromPath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts",
+        "toPath": "src/types/public.ts",
+        "sourcePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts"
+      },
+      {
+        "fromPath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts",
+        "toPath": "src/features/website-crawl/application/toWebsiteObservationDocument.ts",
+        "sourcePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts"
+      },
+      {
         "fromPath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts",
         "toPath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.ts",
         "sourcePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts"
@@ -2248,7 +2678,17 @@
       },
       {
         "fromPath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.ts",
+        "toPath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts",
+        "sourcePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.ts"
+      },
+      {
+        "fromPath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.ts",
         "toPath": "src/features/website-crawl/adapters/puppeteer/discoverBreakpointsAsync.ts",
+        "sourcePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.ts"
+      },
+      {
+        "fromPath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.ts",
+        "toPath": "src/features/website-crawl/adapters/puppeteer/installBrowserRelevantState.ts",
         "sourcePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.ts"
       },
       {
@@ -2938,6 +3378,12 @@
       },
       {
         "fromSymbol": "src/features/website-crawl/application/toWebsiteObservationDocument.ts",
+        "toSymbol": "collectStates",
+        "callExpression": "collectStates",
+        "sourcePath": "src/features/website-crawl/application/toWebsiteObservationDocument.ts"
+      },
+      {
+        "fromSymbol": "src/features/website-crawl/application/toWebsiteObservationDocument.ts",
         "toSymbol": "ancestors",
         "callExpression": "ancestors",
         "sourcePath": "src/features/website-crawl/application/toWebsiteObservationDocument.ts"
@@ -2952,6 +3398,42 @@
         "fromSymbol": "src/features/website-crawl/application/toWebsiteObservationDocument.ts",
         "toSymbol": "mediaKind",
         "callExpression": "mediaKind",
+        "sourcePath": "src/features/website-crawl/application/toWebsiteObservationDocument.ts"
+      },
+      {
+        "fromSymbol": "src/features/website-crawl/application/toWebsiteObservationDocument.ts",
+        "toSymbol": "collectElementObservations",
+        "callExpression": "collectElementObservations",
+        "sourcePath": "src/features/website-crawl/application/toWebsiteObservationDocument.ts"
+      },
+      {
+        "fromSymbol": "src/features/website-crawl/application/toWebsiteObservationDocument.ts",
+        "toSymbol": "defaultNodeObservation",
+        "callExpression": "defaultNodeObservation",
+        "sourcePath": "src/features/website-crawl/application/toWebsiteObservationDocument.ts"
+      },
+      {
+        "fromSymbol": "src/features/website-crawl/application/toWebsiteObservationDocument.ts",
+        "toSymbol": "dynamicNodeObservations",
+        "callExpression": "dynamicNodeObservations",
+        "sourcePath": "src/features/website-crawl/application/toWebsiteObservationDocument.ts"
+      },
+      {
+        "fromSymbol": "defaultNodeObservation",
+        "toSymbol": "observeSemanticAttributes",
+        "callExpression": "observeSemanticAttributes",
+        "sourcePath": "src/features/website-crawl/application/toWebsiteObservationDocument.ts"
+      },
+      {
+        "fromSymbol": "src/features/website-crawl/application/toWebsiteObservationDocument.ts",
+        "toSymbol": "dynamicObservation",
+        "callExpression": "dynamicObservation",
+        "sourcePath": "src/features/website-crawl/application/toWebsiteObservationDocument.ts"
+      },
+      {
+        "fromSymbol": "dynamicObservation",
+        "toSymbol": "observeSemanticAttributes",
+        "callExpression": "observeSemanticAttributes",
         "sourcePath": "src/features/website-crawl/application/toWebsiteObservationDocument.ts"
       },
       {
@@ -3291,9 +3773,117 @@
         "sourcePath": "src/features/website-crawl/adapters/network/assertPublicUrlAsync.ts"
       },
       {
+        "fromSymbol": "captureDynamicElementsAsync",
+        "toSymbol": "toCaptureBudget",
+        "callExpression": "toCaptureBudget",
+        "sourcePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts"
+      },
+      {
+        "fromSymbol": "captureDynamicElementsAsync",
+        "toSymbol": "discoverCandidateSourceRefsAsync",
+        "callExpression": "discoverCandidateSourceRefsAsync",
+        "sourcePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts"
+      },
+      {
+        "fromSymbol": "captureDynamicElementsAsync",
+        "toSymbol": "captureCandidateEvidenceAsync",
+        "callExpression": "captureCandidateEvidenceAsync",
+        "sourcePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts"
+      },
+      {
+        "fromSymbol": "toCaptureBudget",
+        "toSymbol": "assertPositiveFiniteInteger",
+        "callExpression": "assertPositiveFiniteInteger",
+        "sourcePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts"
+      },
+      {
+        "fromSymbol": "captureCandidateEvidenceAsync",
+        "toSymbol": "snapshotDynamicElementAsync",
+        "callExpression": "snapshotDynamicElementAsync",
+        "sourcePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts"
+      },
+      {
+        "fromSymbol": "captureCandidateEvidenceAsync",
+        "toSymbol": "activateViewportAsync",
+        "callExpression": "activateViewportAsync",
+        "sourcePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts"
+      },
+      {
+        "fromSymbol": "captureCandidateEvidenceAsync",
+        "toSymbol": "waitForSettlingAsync",
+        "callExpression": "waitForSettlingAsync",
+        "sourcePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts"
+      },
+      {
+        "fromSymbol": "captureCandidateEvidenceAsync",
+        "toSymbol": "toDynamicEvidence",
+        "callExpression": "toDynamicEvidence",
+        "sourcePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts"
+      },
+      {
+        "fromSymbol": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts",
+        "toSymbol": "__ankhorageScraperElementPath",
+        "callExpression": "globalThis.__ankhorageScraperElementPath",
+        "sourcePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts"
+      },
+      {
+        "fromSymbol": "snapshotDynamicElement",
+        "toSymbol": "__ankhorageScraperFindElement",
+        "callExpression": "globalThis.__ankhorageScraperFindElement",
+        "sourcePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts"
+      },
+      {
+        "fromSymbol": "snapshotDynamicElement",
+        "toSymbol": "__ankhorageScraperExtractElement",
+        "callExpression": "globalThis.__ankhorageScraperExtractElement",
+        "sourcePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts"
+      },
+      {
+        "fromSymbol": "activateViewport",
+        "toSymbol": "__ankhorageScraperFindElement",
+        "callExpression": "globalThis.__ankhorageScraperFindElement",
+        "sourcePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts"
+      },
+      {
+        "fromSymbol": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts",
+        "toSymbol": "resolve",
+        "callExpression": "resolve",
+        "sourcePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts"
+      },
+      {
+        "fromSymbol": "waitForSettling",
+        "toSymbol": "__ankhorageScraperFindElement",
+        "callExpression": "globalThis.__ankhorageScraperFindElement",
+        "sourcePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts"
+      },
+      {
+        "fromSymbol": "waitForSettling",
+        "toSymbol": "__ankhorageScraperReadRelevantState",
+        "callExpression": "globalThis.__ankhorageScraperReadRelevantState",
+        "sourcePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts"
+      },
+      {
+        "fromSymbol": "sample",
+        "toSymbol": "__ankhorageScraperReadRelevantState",
+        "callExpression": "globalThis.__ankhorageScraperReadRelevantState",
+        "sourcePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts"
+      },
+      {
+        "fromSymbol": "sample",
+        "toSymbol": "resolve",
+        "callExpression": "resolve",
+        "sourcePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts"
+      },
+      {
         "fromSymbol": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts",
         "toSymbol": "createServer",
         "callExpression": "createServer",
+        "sourcePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts"
+      },
+      {
+        "fromSymbol": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts",
+        "toSymbol": "fixtureBody",
+        "callExpression": "fixtureBody",
         "sourcePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts"
       },
       {
@@ -3321,6 +3911,60 @@
         "sourcePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts"
       },
       {
+        "fromSymbol": "captureFixtureAsync",
+        "toSymbol": "createPuppeteerCapturePage",
+        "callExpression": "createPuppeteerCapturePage",
+        "sourcePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts"
+      },
+      {
+        "fromSymbol": "captureFixtureAsync",
+        "toSymbol": "capturePageAsync",
+        "callExpression": "capture.capturePageAsync",
+        "sourcePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts"
+      },
+      {
+        "fromSymbol": "captureFixtureAsync",
+        "toSymbol": "closeAsync",
+        "callExpression": "capture.closeAsync",
+        "sourcePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts"
+      },
+      {
+        "fromSymbol": "expectDynamicEvidence",
+        "toSymbol": "expect",
+        "callExpression": "expect",
+        "sourcePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts"
+      },
+      {
+        "fromSymbol": "expectDynamicEvidence",
+        "toSymbol": "byLabel",
+        "callExpression": "byLabel",
+        "sourcePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts"
+      },
+      {
+        "fromSymbol": "expectCanonicalDynamicEvidence",
+        "toSymbol": "toWebsiteObservationDocument",
+        "callExpression": "toWebsiteObservationDocument",
+        "sourcePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts"
+      },
+      {
+        "fromSymbol": "state",
+        "toSymbol": "byLabel",
+        "callExpression": "byLabel",
+        "sourcePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts"
+      },
+      {
+        "fromSymbol": "expectCanonicalDynamicEvidence",
+        "toSymbol": "expect",
+        "callExpression": "expect",
+        "sourcePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts"
+      },
+      {
+        "fromSymbol": "expectCanonicalDynamicEvidence",
+        "toSymbol": "state",
+        "callExpression": "state",
+        "sourcePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts"
+      },
+      {
         "fromSymbol": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts",
         "toSymbol": "describe",
         "callExpression": "describe",
@@ -3334,26 +3978,26 @@
       },
       {
         "fromSymbol": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts",
-        "toSymbol": "createPuppeteerCapturePage",
-        "callExpression": "createPuppeteerCapturePage",
-        "sourcePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts"
-      },
-      {
-        "fromSymbol": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts",
-        "toSymbol": "capturePageAsync",
-        "callExpression": "capture.capturePageAsync",
-        "sourcePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts"
-      },
-      {
-        "fromSymbol": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts",
-        "toSymbol": "closeAsync",
-        "callExpression": "capture.closeAsync",
+        "toSymbol": "captureFixtureAsync",
+        "callExpression": "captureFixtureAsync",
         "sourcePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts"
       },
       {
         "fromSymbol": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts",
         "toSymbol": "expect",
         "callExpression": "expect",
+        "sourcePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts"
+      },
+      {
+        "fromSymbol": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts",
+        "toSymbol": "expectDynamicEvidence",
+        "callExpression": "expectDynamicEvidence",
+        "sourcePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts"
+      },
+      {
+        "fromSymbol": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts",
+        "toSymbol": "expectCanonicalDynamicEvidence",
+        "callExpression": "expectCanonicalDynamicEvidence",
         "sourcePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts"
       },
       {
@@ -3396,6 +4040,12 @@
         "fromSymbol": "capturePageAsync",
         "toSymbol": "assertBoundedDocumentAsync",
         "callExpression": "assertBoundedDocumentAsync",
+        "sourcePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.ts"
+      },
+      {
+        "fromSymbol": "capturePageAsync",
+        "toSymbol": "captureDynamicElementsAsync",
+        "callExpression": "captureDynamicElementsAsync",
         "sourcePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.ts"
       },
       {
@@ -3531,6 +4181,12 @@
         "sourcePath": "src/features/website-crawl/adapters/puppeteer/extractBreakpointEvidence.ts"
       },
       {
+        "fromSymbol": "src/features/website-crawl/adapters/puppeteer/installBrowserRelevantState.ts",
+        "toSymbol": "__ankhorageScraperElementPath",
+        "callExpression": "globalThis.__ankhorageScraperElementPath",
+        "sourcePath": "src/features/website-crawl/adapters/puppeteer/installBrowserRelevantState.ts"
+      },
+      {
         "fromSymbol": "probeResponsiveAsync",
         "toSymbol": "assertPublicUrlAsync",
         "callExpression": "assertPublicUrlAsync",
@@ -3616,6 +4272,11 @@
       {
         "fromSymbol": "CrawlOptions",
         "toType": "CrawlViewport",
+        "sourcePath": "src/types/public.ts"
+      },
+      {
+        "fromSymbol": "CrawlOptions",
+        "toType": "DynamicCaptureOptions",
         "sourcePath": "src/types/public.ts"
       },
       {

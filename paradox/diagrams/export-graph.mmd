@@ -8,10 +8,12 @@ graph LR
   module_src_cli_index_ts["src/cli/index.ts"]
   module_src_features_website_crawl_adapters_network_assertPublicUrlAsync_ts["src/features/website-crawl/adapters/network/assertPublicUrlAsync.ts"]
   module_src_features_website_crawl_adapters_puppeteer_browserExtractionTypes_ts["src/features/website-crawl/adapters/puppeteer/browserExtractionTypes.ts"]
+  module_src_features_website_crawl_adapters_puppeteer_captureDynamicElementsAsync_ts["src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts"]
   module_src_features_website_crawl_adapters_puppeteer_createPuppeteerCapturePage_test_ts["src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.test.ts"]
   module_src_features_website_crawl_adapters_puppeteer_createPuppeteerCapturePage_ts["src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.ts"]
   module_src_features_website_crawl_adapters_puppeteer_discoverBreakpointsAsync_ts["src/features/website-crawl/adapters/puppeteer/discoverBreakpointsAsync.ts"]
   module_src_features_website_crawl_adapters_puppeteer_extractBreakpointEvidence_ts["src/features/website-crawl/adapters/puppeteer/extractBreakpointEvidence.ts"]
+  module_src_features_website_crawl_adapters_puppeteer_installBrowserRelevantState_ts["src/features/website-crawl/adapters/puppeteer/installBrowserRelevantState.ts"]
   module_src_features_website_crawl_adapters_puppeteer_probeResponsiveAsync_ts["src/features/website-crawl/adapters/puppeteer/probeResponsiveAsync.ts"]
   module_src_features_website_crawl_adapters_robots_robotsPort_ts["src/features/website-crawl/adapters/robots/robotsPort.ts"]
   module_src_features_website_crawl_application_crawlWebsiteAsync_test_ts["src/features/website-crawl/application/crawlWebsiteAsync.test.ts"]
@@ -37,6 +39,7 @@ graph LR
   export_CrawlOptions["CrawlOptions"]
   module_src_types_public_ts --> export_CrawlOptions
   export_CrawlOptions -.-> export_CrawlViewport
+  export_CrawlOptions -.-> export_DynamicCaptureOptions
   export_CrawlResult["CrawlResult"]
   module_src_types_public_ts --> export_CrawlResult
   export_CrawlResult -.-> export_BreakpointEvidence
@@ -46,3 +49,5 @@ graph LR
   module_src_features_website_crawl_composition_createWebsiteCrawler_ts --> export_createWebsiteCrawler
   export_createWebsiteCrawler -.-> export_CrawlOptions
   export_createWebsiteCrawler -.-> export_CrawlResult
+  export_DynamicCaptureOptions["DynamicCaptureOptions"]
+  module_src_types_public_ts --> export_DynamicCaptureOptions

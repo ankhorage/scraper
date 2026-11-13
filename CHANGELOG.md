@@ -1,5 +1,11 @@
 # @ankhorage/scraper
 
+## 0.3.0
+
+### Minor Changes
+
+- fbf1736: Capture bounded initial, triggered, and settled evidence for viewport-activated dynamic elements.
+
 ## 0.2.0
 
 ### Minor Changes

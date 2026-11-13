@@ -4,7 +4,7 @@
 
 Kind: `type`
 Module: `src/types/public.ts`
-Source: `src/types/public.ts:17:1`
+Source: `src/types/public.ts:27:1`
 
 ### Members
 
@@ -25,6 +25,7 @@ Source: `src/types/public.ts:7:1`
 
 | Name | Kind | Type | Required | Description |
 | --- | --- | --- | --- | --- |
+| dynamicCapture | property | `DynamicCaptureOptions` | no |  |
 | maxBytesPerPage | property | `number` | no |  |
 | maxDepth | property | `number` | no |  |
 | maxPages | property | `number` | no |  |
@@ -36,7 +37,7 @@ Source: `src/types/public.ts:7:1`
 
 Kind: `type`
 Module: `src/types/public.ts`
-Source: `src/types/public.ts:105:1`
+Source: `src/types/public.ts:132:1`
 
 ### Members
 
@@ -74,3 +75,18 @@ Create the public, safe website-recognition crawler.
 - `(crawlerOptions?: WebsiteCrawlerOptions) => { readonly crawlWebsiteAsync: (options: CrawlOptions) => Promise<CrawlResult>; }`
   - crawlerOptions: `WebsiteCrawlerOptions` (optional)
   - returns: `{ readonly crawlWebsiteAsync: (options: CrawlOptions) => Promise<CrawlResult>; }`
+
+## DynamicCaptureOptions
+
+Kind: `type`
+Module: `src/types/public.ts`
+Source: `src/types/public.ts:19:1`
+
+### Members
+
+| Name | Kind | Type | Required | Description |
+| --- | --- | --- | --- | --- |
+| maxCandidates | property | `number` | no |  |
+| overallTimeoutMs | property | `number` | no |  |
+| perTargetTimeoutMs | property | `number` | no |  |
+| stabilityWindowMs | property | `number` | no |  |

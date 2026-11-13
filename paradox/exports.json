@@ -10,7 +10,7 @@
     "modulePath": "src/types/public.ts",
     "sourceLocation": {
       "filePath": "src/types/public.ts",
-      "line": 17,
+      "line": 27,
       "column": 1
     },
     "exportPaths": [
@@ -68,10 +68,18 @@
       "src/index.ts"
     ],
     "relatedSymbols": [
-      "CrawlViewport"
+      "CrawlViewport",
+      "DynamicCaptureOptions"
     ],
     "signatures": [],
     "members": [
+      {
+        "name": "dynamicCapture",
+        "kind": "property",
+        "type": "DynamicCaptureOptions",
+        "required": false,
+        "description": null
+      },
       {
         "name": "maxBytesPerPage",
         "kind": "property",
@@ -128,7 +136,7 @@
     "modulePath": "src/types/public.ts",
     "sourceLocation": {
       "filePath": "src/types/public.ts",
-      "line": 105,
+      "line": 132,
       "column": 1
     },
     "exportPaths": [
@@ -251,6 +259,57 @@
       }
     ],
     "members": [],
+    "structuredRows": []
+  },
+  {
+    "name": "DynamicCaptureOptions",
+    "title": null,
+    "description": null,
+    "isReadme": false,
+    "see": [],
+    "security": [],
+    "kind": "type",
+    "modulePath": "src/types/public.ts",
+    "sourceLocation": {
+      "filePath": "src/types/public.ts",
+      "line": 19,
+      "column": 1
+    },
+    "exportPaths": [
+      "src/index.ts"
+    ],
+    "relatedSymbols": [],
+    "signatures": [],
+    "members": [
+      {
+        "name": "maxCandidates",
+        "kind": "property",
+        "type": "number",
+        "required": false,
+        "description": null
+      },
+      {
+        "name": "overallTimeoutMs",
+        "kind": "property",
+        "type": "number",
+        "required": false,
+        "description": null
+      },
+      {
+        "name": "perTargetTimeoutMs",
+        "kind": "property",
+        "type": "number",
+        "required": false,
+        "description": null
+      },
+      {
+        "name": "stabilityWindowMs",
+        "kind": "property",
+        "type": "number",
+        "required": false,
+        "description": null
+      }
+    ],
     "structuredRows": []
   }
 ]
