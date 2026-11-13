@@ -2,24 +2,29 @@ import puppeteer, { type Browser, type HTTPRequest, type Page } from 'puppeteer'
 
 import type {
   CssObservation,
+  DynamicElementEvidence,
   ElementObservation,
   PageObservation,
 } from '../../../../types/public.js';
 import type { CapturePageInput, CapturePagePort } from '../../ports/CapturePagePort.js';
 import { assertPublicUrlAsync as assertPublicNetworkUrlAsync } from '../network/assertPublicUrlAsync.js';
 import type { LayoutCss, VisualCss } from './browserExtractionTypes.js';
+import { captureDynamicElementsAsync } from './captureDynamicElementsAsync.js';
 import { discoverBreakpointsAsync } from './discoverBreakpointsAsync.js';
+import { installBrowserRelevantState } from './installBrowserRelevantState.js';
 import { probeResponsiveAsync } from './probeResponsiveAsync.js';
 interface PuppeteerOptions {
   readonly allowPrivateHostsForTests?: boolean;
   readonly launchArguments?: readonly string[];
 }
 interface BrowserExtractionInput {
+  readonly dynamicElements: readonly DynamicElementEvidence[];
   readonly statusCode: number;
   readonly viewport: { readonly height: number; readonly id: string; readonly width: number };
 }
 declare global {
   var __ankhorageScraperElementPath: (element: Element) => string;
+  var __ankhorageScraperFindElement: (sourceRef: string) => Element | null;
   var __ankhorageScraperExtractLayoutCss: (style: CSSStyleDeclaration) => LayoutCss;
   var __ankhorageScraperExtractVisualCss: (style: CSSStyleDeclaration) => VisualCss;
   var __ankhorageScraperExtractCss: (style: CSSStyleDeclaration) => CssObservation;
@@ -77,7 +82,13 @@ const capturePageAsync = async (
     });
     await assertPublicUrlAsync(page.url(), options);
     await assertBoundedDocumentAsync(page, input.maxBytes);
+    const dynamicElements = await captureDynamicElementsAsync(
+      page,
+      input.timeoutMs,
+      input.dynamicCapture,
+    );
     return page.evaluate(extractPage, {
+      dynamicElements,
       statusCode: response?.status() ?? 0,
       viewport: input.viewport,
     });
@@ -91,6 +102,7 @@ const installBrowserExtractionAsync = async (page: Page): Promise<void> => {
   await page.evaluateOnNewDocument(installBrowserLayoutCss);
   await page.evaluateOnNewDocument(installBrowserVisualCss);
   await page.evaluateOnNewDocument(installBrowserCss);
+  await page.evaluateOnNewDocument(installBrowserRelevantState);
   await page.evaluateOnNewDocument(installBrowserElement);
 };
 /*** Reject browser requests and redirects that resolve to non-public network targets. */
@@ -137,6 +149,7 @@ const extractPage = (input: BrowserExtractionInput): PageObservation => ({
     .filter((source): source is string => source !== null)
     .map((source) => new URL(source, location.href).href)
     .sort(),
+  dynamicElements: input.dynamicElements,
   elements: [...document.querySelectorAll('body *')].map(
     globalThis.__ankhorageScraperExtractElement,
   ),
@@ -163,6 +176,13 @@ const installBrowserPath = (): void => {
     }
     return parts.join('/');
   };
+  globalThis.__ankhorageScraperFindElement = (sourceRef) =>
+    sourceRef.split('/').reduce<Element | null>((parent, segment, index) => {
+      if (!parent) return null;
+      return index === 0
+        ? document.documentElement
+        : parent.children.item(Number(segment.split(':').at(-1)));
+    }, document.documentElement);
 };
 
 /*** Install layout-specific computed CSS extraction in the browser context. */
@@ -254,7 +274,20 @@ const installBrowserElement = (): void => {
   globalThis.__ankhorageScraperExtractElement = (element) => {
     const style = getComputedStyle(element);
     const rect = element.getBoundingClientRect();
-    const attributes = ['alt', 'aria-label', 'href', 'role', 'src', 'target', 'type'].reduce(
+    const attributes = [
+      'alt',
+      'aria-label',
+      'aria-valuemax',
+      'aria-valuemin',
+      'aria-valuenow',
+      'aria-valuetext',
+      'href',
+      'role',
+      'src',
+      'target',
+      'type',
+      'value',
+    ].reduce(
       (result, name) => {
         const value = element.getAttribute(name);
         if (value === null) return result;

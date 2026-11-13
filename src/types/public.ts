@@ -5,12 +5,22 @@ export interface CrawlViewport {
 }
 
 export interface CrawlOptions {
+  /** Bounded browser sampling policy for viewport-triggered dynamic elements. */
+  readonly dynamicCapture?: DynamicCaptureOptions;
   readonly url: string;
   readonly maxDepth?: number;
   readonly maxPages?: number;
   readonly maxBytesPerPage?: number;
   readonly navigationTimeoutMs?: number;
   readonly viewports?: readonly CrawlViewport[];
+}
+
+/** Resource limits for viewport activation and adaptive dynamic-element settling. */
+export interface DynamicCaptureOptions {
+  readonly maxCandidates?: number;
+  readonly overallTimeoutMs?: number;
+  readonly perTargetTimeoutMs?: number;
+  readonly stabilityWindowMs?: number;
 }
 
 /** Raw responsive evidence retained by the scraper outside the portable observation document. */
@@ -73,8 +83,25 @@ export interface ElementObservation {
   readonly visible: boolean;
 }
 
+/** A timestamped browser measurement of one viewport-activated element. */
+export interface DynamicElementSnapshot {
+  readonly capturedAt: string;
+  readonly element: ElementObservation;
+}
+
+/** Browser evidence collected while activating a dynamic element in its own viewport. */
+export interface DynamicElementEvidence {
+  readonly initial: DynamicElementSnapshot;
+  readonly outcome: 'incomplete' | 'settled';
+  readonly reason: string | null;
+  readonly settled: DynamicElementSnapshot | null;
+  readonly sourceRef: string;
+  readonly triggered: DynamicElementSnapshot;
+}
+
 export interface PageObservation {
   readonly assets: readonly string[];
+  readonly dynamicElements?: readonly DynamicElementEvidence[];
   readonly elements: readonly ElementObservation[];
   readonly links: readonly string[];
   readonly statusCode: number;

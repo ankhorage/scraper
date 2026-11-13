@@ -2,10 +2,12 @@ import type {
   BreakpointEvidence,
   BreakpointProbe,
   CrawlViewport,
+  DynamicCaptureOptions,
   PageObservation,
 } from '../../../types/public.js';
 
 export interface CapturePageInput {
+  readonly dynamicCapture?: DynamicCaptureOptions;
   readonly maxBytes: number;
   readonly timeoutMs: number;
   readonly url: string;

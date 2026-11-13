@@ -1,9 +1,11 @@
 import { createHash } from 'node:crypto';
 
 import type {
+  WebsiteNodeObservation,
   WebsiteObservationDocument,
   WebsiteObservedNode,
   WebsitePageObservation,
+  WebsiteSemanticAttributeName,
 } from '@ankhorage/contracts/website';
 
 import type { PageObservation } from '../../../types/public.js';
@@ -41,7 +43,7 @@ const groupPages = (
     navigation: collectNavigation(captures),
     nodes: collectNodes(captures, collectedAt),
     path: new URL(url).pathname,
-    states: [{ id: 'default', name: 'default' }],
+    states: collectStates(captures),
     url,
     viewports: captures
       .map(({ viewport }) => ({ ...viewport, devicePixelRatio: 1 }))
@@ -87,17 +89,7 @@ const collectNodes = (
             },
           ]
         : [],
-      observations: elements
-        .filter((candidate) => candidate.element.id === element.id)
-        .map(({ element: captured, page }) => ({
-          availability: { missing: null, status: 'available' as const },
-          css: captured.css,
-          provenance: { capturedAt: collectedAt, method: 'browser' as const, sourceUrl: page.url },
-          rect: captured.rect,
-          stateId: 'default',
-          viewportId: page.viewport.id,
-        }))
-        .sort((left, right) => left.viewportId.localeCompare(right.viewportId)),
+      observations: collectElementObservations(elements, element.id, collectedAt),
       parentSourceRef: element.parentId ?? null,
       sourceRef: element.id,
       textRuns: element.text
@@ -105,6 +97,133 @@ const collectNodes = (
         : [],
     }),
   );
+};
+
+/*** Map one stable DOM node across default and retained dynamic browser states. */
+const collectElementObservations = (
+  elements: readonly {
+    readonly element: PageObservation['elements'][number];
+    readonly page: PageObservation;
+  }[],
+  sourceRef: string,
+  collectedAt: string,
+) =>
+  elements
+    .filter((candidate) => candidate.element.id === sourceRef)
+    .flatMap(({ element, page }) => [
+      defaultNodeObservation(page, element, collectedAt),
+      ...dynamicNodeObservations(page, sourceRef),
+    ])
+    .sort(
+      (left, right) =>
+        left.viewportId.localeCompare(right.viewportId) ||
+        left.stateId.localeCompare(right.stateId),
+    );
+
+/*** Map the ordinary page extraction into the canonical default state. */
+const defaultNodeObservation = (
+  page: PageObservation,
+  element: PageObservation['elements'][number],
+  collectedAt: string,
+) => ({
+  availability: { missing: null, status: 'available' as const },
+  css: element.css,
+  provenance: { capturedAt: collectedAt, method: 'browser' as const, sourceUrl: page.url },
+  rect: element.rect,
+  semanticAttributes: observeSemanticAttributes(element),
+  stateId: 'default',
+  viewportId: page.viewport.id,
+});
+
+/*** Retain the dynamic browser evidence as canonical state-specific node observations. */
+const dynamicNodeObservations = (page: PageObservation, sourceRef: string) =>
+  (page.dynamicElements ?? [])
+    .filter((evidence) => evidence.sourceRef === sourceRef)
+    .flatMap((evidence) => [
+      dynamicObservation(page, evidence.initial, 'initial'),
+      dynamicObservation(page, evidence.triggered, 'triggered'),
+      ...(evidence.settled
+        ? [dynamicObservation(page, evidence.settled, 'settled')]
+        : [
+            {
+              availability: {
+                missing: {
+                  code: 'animation-incomplete',
+                  message: evidence.reason ?? 'Unknown reason.',
+                },
+                status: 'missing' as const,
+              },
+              css: null,
+              provenance: {
+                capturedAt: evidence.triggered.capturedAt,
+                method: 'browser' as const,
+                sourceUrl: page.url,
+              },
+              rect: null,
+              semanticAttributes: {},
+              stateId: 'incomplete',
+              viewportId: page.viewport.id,
+            },
+          ]),
+    ]);
+
+/*** Convert one timestamped browser snapshot into a portable node observation. */
+const dynamicObservation = (
+  page: PageObservation,
+  snapshot: NonNullable<PageObservation['dynamicElements']>[number]['initial'],
+  stateId: 'initial' | 'triggered' | 'settled',
+) => ({
+  availability: { missing: null, status: 'available' as const },
+  css: snapshot.element.css,
+  provenance: { capturedAt: snapshot.capturedAt, method: 'browser' as const, sourceUrl: page.url },
+  rect: snapshot.element.rect,
+  semanticAttributes: observeSemanticAttributes(snapshot.element),
+  stateId,
+  viewportId: page.viewport.id,
+});
+
+/*** Only publish state-specific semantic values directly observed on this browser element. */
+const observeSemanticAttributes = (
+  element: PageObservation['elements'][number],
+): NonNullable<WebsiteNodeObservation['semanticAttributes']> =>
+  Object.fromEntries(
+    Object.entries(element.attributes).filter(([name]) => semanticAttributeNames.has(name)),
+  );
+
+const semanticAttributeNames: ReadonlySet<string> = new Set<WebsiteSemanticAttributeName>([
+  'aria-label',
+  'aria-valuemax',
+  'aria-valuemin',
+  'aria-valuenow',
+  'aria-valuetext',
+  'role',
+  'value',
+]);
+
+/*** Declare only the browser states actually retained across the page's viewport captures. */
+const collectStates = (pages: readonly PageObservation[]) => {
+  const hasDynamicEvidence = pages.some((page) => (page.dynamicElements?.length ?? 0) > 0);
+  const hasSettledEvidence = pages.some((page) =>
+    page.dynamicElements?.some((evidence) => evidence.outcome === 'settled'),
+  );
+  const hasIncompleteEvidence = pages.some((page) =>
+    page.dynamicElements?.some((evidence) => evidence.outcome === 'incomplete'),
+  );
+  return [
+    { id: 'default', name: 'default' },
+    ...(hasDynamicEvidence
+      ? [
+          { id: 'initial', name: 'initial before viewport activation' },
+          { id: 'triggered', name: 'after viewport activation' },
+          ...(hasSettledEvidence
+            ? [{ id: 'settled', name: 'settled after viewport activation' }]
+            : []),
+        ]
+      : []),
+    ...(hasIncompleteEvidence
+      ? [{ id: 'incomplete', name: 'viewport activation incomplete' }]
+      : []),
+  ];
 };
 
 /*** Deduplicate source-linked navigation observations while preserving DOM order. */
