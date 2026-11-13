@@ -2,8 +2,9 @@ import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { expect, mock, test } from 'bun:test';
+import { expect, test } from 'bun:test';
 
+import type { CrawlResult } from '../../types/public.js';
 import { crawl } from './crawl.js';
 
 const invalidRequests = [
@@ -31,12 +32,6 @@ for (const request of invalidRequests) {
 test('summarizes many omitted responsive candidates while retaining JSON detail', async () => {
   const directory = await mkdtemp(join(tmpdir(), 'scraper-cli-'));
   const output = createContext(directory);
-  await mock.module('../../index.js', () => ({
-    createWebsiteCrawler: () => ({
-      crawlWebsiteAsync: () => Promise.resolve(responsiveCoverageResult),
-    }),
-  }));
-
   try {
     const result = await crawl(
       [
@@ -47,6 +42,11 @@ test('summarizes many omitted responsive candidates while retaining JSON detail'
         'breakpoints.json',
       ],
       output,
+      {
+        createWebsiteCrawler: () => ({
+          crawlWebsiteAsync: () => Promise.resolve(responsiveCoverageResult),
+        }),
+      },
     );
 
     const breakpointOutput = JSON.parse(
@@ -63,7 +63,7 @@ test('summarizes many omitted responsive candidates while retaining JSON detail'
   }
 });
 
-const responsiveCoverageResult = {
+const responsiveCoverageResult: CrawlResult = {
   breakpointCoverage: [
     {
       evidence: [],
@@ -79,7 +79,19 @@ const responsiveCoverageResult = {
   ],
   breakpointEvidence: [],
   diagnostics: [],
-  document: { pages: [] },
+  document: {
+    collectedAt: '2026-11-13T00:00:00.000Z',
+    documentId: 'website:example',
+    pages: [],
+    schemaVersion: 1,
+    site: { id: 'example', url: 'https://example.test/' },
+    source: {
+      crawlId: 'crawl:example',
+      crawlerId: '@ankhorage/scraper',
+      crawlerVersion: 'test',
+      revision: null,
+    },
+  },
 };
 
 /*** Creates the command boundary context used to verify that rejected input has no crawl output. */

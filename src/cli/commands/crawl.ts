@@ -11,6 +11,7 @@ import type { CrawlResult } from '../../types/public.js';
 export async function crawl(
   argv: readonly string[],
   context: AnkhCommandContext,
+  dependencies: CrawlDependencies = {},
 ): Promise<{ readonly exitCode: number }> {
   try {
     const input = parseCrawlInput(argv, context.cwd);
@@ -20,7 +21,9 @@ export async function crawl(
     }
     await assertOutputDoesNotExistAsync(input.outputPath);
     if (input.breakpointOutputPath) await assertOutputDoesNotExistAsync(input.breakpointOutputPath);
-    const result = await createWebsiteCrawler().crawlWebsiteAsync(crawlOptions(input));
+    const result = await (
+      dependencies.createWebsiteCrawler ?? createWebsiteCrawler
+    )().crawlWebsiteAsync(crawlOptions(input));
     await writeFile(input.outputPath, `${JSON.stringify(result.document, null, 2)}\n`, {
       encoding: 'utf8',
       flag: 'wx',
@@ -51,6 +54,13 @@ export async function crawl(
     context.writeStderr(`${errorMessage(error)}\n`);
     return { exitCode: 1 };
   }
+}
+
+interface CrawlDependencies {
+  readonly createWebsiteCrawler?: () => Pick<
+    ReturnType<typeof createWebsiteCrawler>,
+    'crawlWebsiteAsync'
+  >;
 }
 
 interface CrawlInput {
