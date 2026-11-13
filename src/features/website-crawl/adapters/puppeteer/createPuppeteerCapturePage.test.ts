@@ -3,6 +3,7 @@ import { createServer } from 'node:http';
 import { afterAll, beforeAll, describe, expect, test } from 'bun:test';
 
 import type { DynamicCaptureOptions, PageObservation } from '../../../../types/public.js';
+import { toWebsiteObservationDocument } from '../../application/toWebsiteObservationDocument.js';
 import { createPuppeteerCapturePage } from './createPuppeteerCapturePage.js';
 
 const transitionNoise = Array.from(
@@ -17,15 +18,15 @@ const fixtureBody = (url: string | undefined): string =>
       .track{width:200px;height:20px;margin:16px 0}.rowgap{height:500px}.fill{width:0;height:20px;background:green;transition:width 80ms linear}
       .reveal{height:20px;opacity:0;transition:opacity 80ms linear}.stuck{animation:spin 2s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
     </style>${transitionNoise}<div class="spacer"></div>
-    <div class="track" role="progressbar" aria-label="zero" aria-valuenow="0" id="zero"><div class="fill"></div></div><div class="rowgap"></div>
-    <div class="track" role="progressbar" aria-label="css" aria-valuenow="20" id="css"><div class="fill"></div></div><div class="rowgap"></div>
+    <div class="track" role="progressbar" aria-label="zero" aria-valuenow="0" value="0" id="zero"><div class="fill"></div></div><div class="rowgap"></div>
+    <div class="track" role="progressbar" aria-label="css" aria-valuemin="0" aria-valuemax="100" aria-valuenow="20" data-private-capture="never" id="css"><div class="fill"></div></div><div class="rowgap"></div>
     <div class="track" role="progressbar" aria-label="web" aria-valuenow="40" id="web"><div class="fill"></div></div><div class="rowgap"></div>
     <div class="track" role="progressbar" aria-label="stuck" aria-valuenow="13" id="stuck"><div class="fill stuck"></div></div><div class="rowgap"></div>
     <div class="track" role="progressbar" aria-label="false" aria-valuenow="9" id="false"><span class="noise">unchanged target</span></div><div class="rowgap"></div>
     <div class="reveal" id="reveal">reveal</div>
     <script>
       const activate=(entry)=>{if(!entry.isIntersecting)return;entry.target.dataset.seen='true';
-        if(entry.target.id==='css'){entry.target.setAttribute('aria-valuenow','72');entry.target.firstElementChild.style.width='144px'}
+        if(entry.target.id==='css'){entry.target.setAttribute('aria-valuenow','72');entry.target.setAttribute('aria-valuetext','72 percent');entry.target.firstElementChild.style.width='144px'}
         if(entry.target.id==='web'){entry.target.firstElementChild.animate([{transform:'scaleX(0)'},{transform:'scaleX(1)'}],{duration:80,fill:'forwards'})}
         if(entry.target.id==='false')setTimeout(()=>entry.target.lastElementChild.textContent='unrelated mutation',20)
         if(entry.target.id==='reveal')entry.target.style.opacity='1';
@@ -132,6 +133,35 @@ describe('createPuppeteerCapturePage', () => {
       stabilityWindowMs: 20,
     });
     expectDynamicEvidence(page);
+
+    const document = toWebsiteObservationDocument(`${origin}/dynamic`, [page]);
+    const nodes = document.pages[0]?.nodes ?? [];
+    const byLabel = (label: string) =>
+      nodes.find((node) => node.dom.attributes['aria-label'] === label)?.observations;
+    const state = (label: string, stateId: string) =>
+      byLabel(label)?.find((observation) => observation.stateId === stateId);
+
+    expect(state('css', 'initial')?.semanticAttributes).toEqual({
+      'aria-label': 'css',
+      'aria-valuemax': '100',
+      'aria-valuemin': '0',
+      'aria-valuenow': '20',
+      role: 'progressbar',
+    });
+    expect(state('css', 'triggered')?.semanticAttributes?.['aria-valuenow']).toBe('72');
+    expect(state('css', 'settled')?.semanticAttributes?.['aria-valuetext']).toBe('72 percent');
+    expect(state('css', 'initial')?.semanticAttributes).not.toHaveProperty('aria-valuetext');
+    expect(state('css', 'settled')?.semanticAttributes).not.toHaveProperty(
+      'data-private-capture',
+    );
+    expect(state('zero', 'settled')?.semanticAttributes).toMatchObject({
+      'aria-valuenow': '0',
+      value: '0',
+    });
+    expect(state('false', 'incomplete')?.availability.status).toBe('missing');
+    expect(state('false', 'incomplete')?.semanticAttributes).toEqual({});
+    expect(state('false', 'incomplete')?.css).toBeNull();
+    expect(state('false', 'incomplete')?.rect).toBeNull();
   });
 
   test('rejects invalid capture limits and preserves the hard candidate cap', async () => {

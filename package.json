@@ -93,7 +93,7 @@
   "dependencies": {
     "@ankhorage/ankh": "^0.13.4",
     "@ankhorage/capability": "^0.2.2",
-    "@ankhorage/contracts": "^26.6.0",
+    "@ankhorage/contracts": "^26.8.0",
     "puppeteer": "^24.4.0"
   },
   "devDependencies": {

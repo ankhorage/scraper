@@ -277,7 +277,10 @@ const installBrowserElement = (): void => {
     const attributes = [
       'alt',
       'aria-label',
+      'aria-valuemax',
+      'aria-valuemin',
       'aria-valuenow',
+      'aria-valuetext',
       'href',
       'role',
       'src',

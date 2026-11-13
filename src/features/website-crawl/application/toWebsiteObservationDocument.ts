@@ -1,9 +1,11 @@
 import { createHash } from 'node:crypto';
 
 import type {
+  WebsiteNodeObservation,
   WebsiteObservationDocument,
   WebsiteObservedNode,
   WebsitePageObservation,
+  WebsiteSemanticAttributeName,
 } from '@ankhorage/contracts/website';
 
 import type { PageObservation } from '../../../types/public.js';
@@ -128,6 +130,7 @@ const defaultNodeObservation = (
   css: element.css,
   provenance: { capturedAt: collectedAt, method: 'browser' as const, sourceUrl: page.url },
   rect: element.rect,
+  semanticAttributes: observeSemanticAttributes(element),
   stateId: 'default',
   viewportId: page.viewport.id,
 });
@@ -157,6 +160,7 @@ const dynamicNodeObservations = (page: PageObservation, sourceRef: string) =>
                 sourceUrl: page.url,
               },
               rect: null,
+              semanticAttributes: {},
               stateId: 'incomplete',
               viewportId: page.viewport.id,
             },
@@ -173,9 +177,32 @@ const dynamicObservation = (
   css: snapshot.element.css,
   provenance: { capturedAt: snapshot.capturedAt, method: 'browser' as const, sourceUrl: page.url },
   rect: snapshot.element.rect,
+  semanticAttributes: observeSemanticAttributes(snapshot.element),
   stateId,
   viewportId: page.viewport.id,
 });
+
+/*** Only publish state-specific semantic values directly observed on this browser element. */
+const observeSemanticAttributes = (
+  element: PageObservation['elements'][number],
+): NonNullable<WebsiteNodeObservation['semanticAttributes']> =>
+  semanticAttributeNames.reduce<NonNullable<WebsiteNodeObservation['semanticAttributes']>>(
+    (observed, name) => {
+      const value = element.attributes[name];
+      return value === undefined ? observed : { ...observed, [name]: value };
+    },
+    {},
+  );
+
+const semanticAttributeNames = [
+  'aria-label',
+  'aria-valuemax',
+  'aria-valuemin',
+  'aria-valuenow',
+  'aria-valuetext',
+  'role',
+  'value',
+] as const satisfies readonly WebsiteSemanticAttributeName[];
 
 /*** Declare only the browser states actually retained across the page's viewport captures. */
 const collectStates = (pages: readonly PageObservation[]) => {
