@@ -126,3 +126,39 @@ test('keeps representative automatic widths within the safe browser viewport bou
     { height: 900, id: 'auto-1440', width: 1440 },
   ]);
 });
+
+test('retains comma-separated width alternatives while ignoring universal and invalid transitions', () => {
+  const plan = createResponsiveProbePlan([
+    {
+      condition: '(max-width: 599px), (min-width: 1024px)',
+      kind: 'viewport',
+      source: 'inline',
+      sourceUrl: 'https://example.test/',
+    },
+    {
+      condition: 'all',
+      kind: 'viewport',
+      source: 'first',
+      sourceUrl: 'https://example.test/',
+    },
+    {
+      condition: 'all',
+      kind: 'viewport',
+      source: 'second',
+      sourceUrl: 'https://example.test/',
+    },
+    {
+      condition: '(min-width: -1px)',
+      kind: 'viewport',
+      source: 'vendor',
+      sourceUrl: 'https://example.test/',
+    },
+  ]);
+
+  expect(plan.candidates.map((viewport) => viewport.width)).toEqual([
+    320, 599, 600, 1023, 1024, 1440,
+  ]);
+  expect(plan.uncertainty).toEqual([
+    'Unsupported viewport-width condition was retained but could not produce a numeric probe: (min-width: -1px)',
+  ]);
+});

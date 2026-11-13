@@ -17,7 +17,7 @@ export const createResponsiveProbePlan = (
   );
   return {
     candidates: candidates.map((width) => ({ height: 900, id: `auto-${width}`, width })),
-    uncertainty: parsed.flatMap((item) => item.uncertainty),
+    uncertainty: uniqueStrings(parsed.flatMap((item) => item.uncertainty)),
   };
 };
 
@@ -33,6 +33,7 @@ interface ParsedCondition {
 
 /*** Extract every measurable width transition from one authored CSS media condition. */
 const parseCondition = (evidence: BreakpointEvidence): ParsedCondition => {
+  if (isUniversalCondition(evidence.condition)) return { uncertainty: [], widths: [] };
   const comparisons = [
     ...evidence.condition.matchAll(widthComparisonPattern),
     ...evidence.condition.matchAll(widthFirstPattern),
@@ -56,6 +57,9 @@ const parseCondition = (evidence: BreakpointEvidence): ParsedCondition => {
           ],
   };
 };
+
+/*** Ignore universal media metadata because it carries no viewport transition to verify. */
+const isUniversalCondition = (condition: string): boolean => /^\s*all\s*$/iu.test(condition);
 
 /*** Identify media-feature clauses that width-only probes cannot independently exercise. */
 const containsNonWidthFeature = (condition: string): boolean =>
@@ -124,3 +128,6 @@ const reverseComparison = (operator: string | undefined): string | undefined =>
 /*** Sort and deduplicate finite candidate widths before browser probing. */
 const uniqueSorted = (widths: readonly number[]): readonly number[] =>
   [...new Set(widths.filter(Number.isSafeInteger))].sort((left, right) => left - right);
+
+/*** Preserve one explanation for repeated authored conditions without losing raw evidence provenance. */
+const uniqueStrings = (values: readonly string[]): readonly string[] => [...new Set(values)];

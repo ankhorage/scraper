@@ -51,7 +51,7 @@ export const probeResponsiveAsync = async ({
   }
 };
 
-/*** Extract only viewport-sensitive navigation, layout, overflow, and CSS-condition facts. */
+/*** Extract raw viewport-sensitive navigation, layout, overflow, and CSS-condition facts. */
 const extractResponsiveProbe = (conditions: readonly string[]): Omit<BreakpointProbe, 'width'> => {
   const isVisible = (element: Element, style: CSSStyleDeclaration, rect: DOMRect): boolean =>
     !element.hasAttribute('hidden') &&

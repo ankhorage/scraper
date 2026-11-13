@@ -51,12 +51,12 @@ export const verifyResponsiveCoverageAsync = async ({
   return { coverage, diagnostics: coverageDiagnostics(sourceUrl, url, coverage) };
 };
 
-/*** Bound lightweight probes while preserving the mobile and desktop baseline candidates. */
+/*** Bound lightweight probes while distributing samples across the discovered responsive range. */
 const boundProbeCandidates = (
   candidates: readonly number[],
 ): { readonly omitted: readonly BreakpointOmission[]; readonly selected: readonly number[] } => {
   if (candidates.length <= maximumAutomaticProbes) return { omitted: [], selected: candidates };
-  const selected = [...candidates.slice(0, maximumAutomaticProbes - 1), candidates.at(-1) ?? 1440];
+  const selected = evenlyDistributedCandidates(candidates, maximumAutomaticProbes);
   const selectedSet = new Set(selected);
   return {
     omitted: candidates
@@ -68,6 +68,16 @@ const boundProbeCandidates = (
     selected,
   };
 };
+
+/*** Select ordered candidate quantiles so neighbouring thresholds cannot exhaust the probe budget. */
+const evenlyDistributedCandidates = (
+  candidates: readonly number[],
+  limit: number,
+): readonly number[] =>
+  Array.from({ length: limit }, (_, index) => {
+    const candidateIndex = Math.round((index * (candidates.length - 1)) / (limit - 1));
+    return candidates.at(candidateIndex) ?? candidates.at(-1) ?? 1440;
+  });
 
 /*** Use browser probes to select one full observation for every meaningfully distinct state. */
 const verifiedCoverageAsync = async ({
@@ -118,7 +128,7 @@ const verifiedCoverageAsync = async ({
   };
 };
 
-/*** Retain the first ascending probe from each distinct navigation, layout, and overflow state. */
+/*** Retain the first ascending probe from each distinct semantic responsive state. */
 const selectVerifiedMeasurements = (
   probes: readonly BreakpointProbe[],
 ): readonly BreakpointMeasurement[] => {
@@ -127,7 +137,7 @@ const selectVerifiedMeasurements = (
     .filter((probe) => {
       const signature = JSON.stringify({
         hasHorizontalOverflow: probe.hasHorizontalOverflow,
-        layout: probe.layout,
+        layout: probe.layout.map(responsiveLayoutSignature),
         navigation: probe.navigation,
       });
       if (signatures.has(signature)) return false;
@@ -141,6 +151,24 @@ const selectVerifiedMeasurements = (
           : 'Browser-responsive state differs in navigation, layout, or overflow from earlier probes.',
       width: probe.width,
     }));
+};
+
+/*** Normalize fluid Grid measurements only while comparing responsive probe states. */
+const responsiveLayoutSignature = (layout: string): string => {
+  const parts = layout.split(':');
+  if (parts[2] !== 'grid') return layout;
+  const gridTemplateColumns = parts[3] ?? '';
+  return [
+    ...parts.slice(0, 3),
+    `grid-tracks=${gridTrackCount(gridTemplateColumns)}`,
+    ...parts.slice(4),
+  ].join(':');
+};
+
+/*** Count measured Grid tracks without retaining their fluid pixel widths in selection policy. */
+const gridTrackCount = (gridTemplateColumns: string): number => {
+  const tracks = gridTemplateColumns.trim();
+  return tracks === '' || tracks === 'none' ? 0 : tracks.split(/\s+/u).length;
 };
 
 /*** Report conservative bounded captures when the adapter cannot supply responsive probes. */

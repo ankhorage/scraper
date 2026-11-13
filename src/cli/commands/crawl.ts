@@ -5,11 +5,13 @@ import { resolve } from 'node:path';
 import type { AnkhCommandContext } from '@ankhorage/ankh';
 
 import { createWebsiteCrawler } from '../../index.js';
+import type { CrawlResult } from '../../types/public.js';
 
 /*** Adapt `ankh scraper crawl` arguments to the package's public crawler API. */
 export async function crawl(
   argv: readonly string[],
   context: AnkhCommandContext,
+  dependencies: CrawlDependencies = {},
 ): Promise<{ readonly exitCode: number }> {
   try {
     const input = parseCrawlInput(argv, context.cwd);
@@ -19,7 +21,9 @@ export async function crawl(
     }
     await assertOutputDoesNotExistAsync(input.outputPath);
     if (input.breakpointOutputPath) await assertOutputDoesNotExistAsync(input.breakpointOutputPath);
-    const result = await createWebsiteCrawler().crawlWebsiteAsync(crawlOptions(input));
+    const result = await (
+      dependencies.createWebsiteCrawler ?? createWebsiteCrawler
+    )().crawlWebsiteAsync(crawlOptions(input));
     await writeFile(input.outputPath, `${JSON.stringify(result.document, null, 2)}\n`, {
       encoding: 'utf8',
       flag: 'wx',
@@ -38,14 +42,25 @@ export async function crawl(
         { encoding: 'utf8', flag: 'wx' },
       );
     context.writeStdout(`Wrote website observation document to ${input.outputPath}.\n`);
-    if (result.diagnostics.length > 0) {
-      context.writeStderr(`${JSON.stringify(result.diagnostics, null, 2)}\n`);
-    }
+    if (hasBreakpointDiagnostics(result))
+      context.writeStderr(renderBreakpointSummary(result, input.breakpointOutputPath));
+    const nonBreakpointDiagnostics = result.diagnostics.filter(
+      (diagnostic) => diagnostic.code !== 'breakpoint',
+    );
+    if (nonBreakpointDiagnostics.length > 0)
+      context.writeStderr(`${JSON.stringify(nonBreakpointDiagnostics, null, 2)}\n`);
     return { exitCode: 0 };
   } catch (error) {
     context.writeStderr(`${errorMessage(error)}\n`);
     return { exitCode: 1 };
   }
+}
+
+interface CrawlDependencies {
+  readonly createWebsiteCrawler?: () => Pick<
+    ReturnType<typeof createWebsiteCrawler>,
+    'crawlWebsiteAsync'
+  >;
 }
 
 interface CrawlInput {
@@ -69,6 +84,66 @@ function crawlOptions(input: CrawlInput) {
     ...(input.maxPages === undefined ? {} : { maxPages: input.maxPages }),
     ...(input.viewports.length === 0 ? {} : { viewports: input.viewports }),
   };
+}
+
+/*** Render bounded responsive coverage facts without flooding the terminal with per-width warnings. */
+function renderBreakpointSummary(
+  result: CrawlResult,
+  breakpointOutputPath: string | undefined,
+): string {
+  const coverage = result.breakpointCoverage;
+  const probes = coverage.reduce((count, item) => count + item.probes.length, 0);
+  const omissions = coverage.flatMap((item) => item.omissions);
+  const verified = coverage.reduce(
+    (count, item) =>
+      count +
+      item.measurements.length +
+      item.omissions.filter((item) => item.reason.startsWith('Verified responsive state')).length,
+    0,
+  );
+  const capturedWidths = [
+    ...new Set(
+      result.document.pages.flatMap((page) => page.viewports.map((viewport) => viewport.width)),
+    ),
+  ].sort((left, right) => left - right);
+  const captured = result.document.pages.reduce((count, page) => count + page.viewports.length, 0);
+  const details =
+    breakpointOutputPath === undefined
+      ? 'Use --breakpoint-output <file> for complete breakpoint evidence.'
+      : `Full breakpoint evidence: ${breakpointOutputPath}.`;
+  const lines = [
+    `Breakpoint coverage: probed ${probes}; verified responsive states ${verified}; fully captured ${captured}; omitted ${omissions.length}.`,
+    capturedWidths.length === 0
+      ? undefined
+      : `Fully captured widths: ${capturedWidths.join(', ')}px.`,
+    ...summarizeOmissions(omissions),
+    details,
+  ].filter((line): line is string => line !== undefined);
+  return `${lines.join('\n')}\n`;
+}
+
+/*** Group omitted viewport candidates by cause while retaining a few representative widths. */
+function summarizeOmissions(
+  omissions: readonly CrawlResult['breakpointCoverage'][number]['omissions'][number][],
+): readonly string[] {
+  const grouped = new Map<string, number[]>();
+  for (const omission of omissions) {
+    const widths = grouped.get(omission.reason) ?? [];
+    grouped.set(omission.reason, [...widths, omission.width]);
+  }
+  return [...grouped.entries()].map(([reason, widths]) => {
+    const representativeWidths = widths.slice(0, 3).join(', ');
+    const remaining = widths.length > 3 ? ', …' : '';
+    return `Omitted regime (${widths.length}): ${reason} Representative widths: ${representativeWidths}${remaining}px.`;
+  });
+}
+
+/*** Identify breakpoint diagnostics that require the compact responsive-coverage terminal summary. */
+function hasBreakpointDiagnostics(result: CrawlResult): boolean {
+  return (
+    result.breakpointCoverage.length > 0 ||
+    result.diagnostics.some((diagnostic) => diagnostic.code === 'breakpoint')
+  );
 }
 
 /*** Parse a bounded crawl request and reject unknown, duplicate, or incomplete options. */

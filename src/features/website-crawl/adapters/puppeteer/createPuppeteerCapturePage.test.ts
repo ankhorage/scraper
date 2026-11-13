@@ -1,6 +1,6 @@
 import { createServer } from 'node:http';
 
-import { afterAll, beforeAll, describe, expect, test } from 'bun:test';
+import { afterAll, beforeAll, expect, test } from 'bun:test';
 
 import type { DynamicCaptureOptions, PageObservation } from '../../../../types/public.js';
 import { toWebsiteObservationDocument } from '../../application/toWebsiteObservationDocument.js';
@@ -141,56 +141,86 @@ const expectCanonicalDynamicEvidence = (page: PageObservation): void => {
   expect(state('false', 'incomplete')?.rect).toBeNull();
 };
 
-describe('createPuppeteerCapturePage', () => {
-  test('captures visible and hidden DOM state, computed CSS, and navigation', async () => {
-    const page = await captureFixtureAsync('/', { height: 800, id: 'desktop', width: 1440 });
-
-    expect(page.links).toEqual([`${origin}/about`]);
-    expect(page.elements.find((element) => element.text === 'red')?.css.color).toContain('255');
-    expect(page.elements.find((element) => element.text === 'One ')?.tagName).toBe('article');
-    expect(page.elements.find((element) => element.text === 'Hidden')?.visible).toBe(false);
-    expect(page.elements.some((element) => element.css.display === 'grid')).toBe(true);
+test('retains exact computed Grid tracks in raw responsive probes', async () => {
+  const capture = await createPuppeteerCapturePage({
+    allowPrivateHostsForTests: true,
+    launchArguments: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-dev-shm-usage',
+      '--disable-crash-reporter',
+      '--single-process',
+    ],
   });
+  try {
+    const probes = await capture.probeResponsiveAsync?.({
+      conditions: [],
+      maxBytes: 100_000,
+      timeoutMs: 10_000,
+      url: `${origin}/`,
+      widths: [320, 1440],
+    });
+    const layouts = probes?.map((probe) =>
+      probe.layout.find((layout) => layout.startsWith('SECTION:BODY:grid:')),
+    );
+    expect(layouts).toEqual([
+      expect.stringMatching(/^SECTION:BODY:grid:[0-9.]+px [0-9.]+px [0-9.]+px:row:true$/u),
+      expect.stringMatching(/^SECTION:BODY:grid:[0-9.]+px [0-9.]+px [0-9.]+px:row:true$/u),
+    ]);
+    expect(layouts?.[0]).not.toBe(layouts?.[1]);
+  } finally {
+    await capture.closeAsync();
+  }
+});
 
-  test.each([
-    { height: 900, id: 'desktop', width: 1440 },
-    { height: 700, id: 'tablet', width: 768 },
+test('captures visible and hidden DOM state, computed CSS, and navigation', async () => {
+  const page = await captureFixtureAsync('/', { height: 800, id: 'desktop', width: 1440 });
+
+  expect(page.links).toEqual([`${origin}/about`]);
+  expect(page.elements.find((element) => element.text === 'red')?.css.color).toContain('255');
+  expect(page.elements.find((element) => element.text === 'One ')?.tagName).toBe('article');
+  expect(page.elements.find((element) => element.text === 'Hidden')?.visible).toBe(false);
+  expect(page.elements.some((element) => element.css.display === 'grid')).toBe(true);
+});
+
+test.each([
+  { height: 900, id: 'desktop', width: 1440 },
+  { height: 700, id: 'tablet', width: 768 },
+  { height: 400, id: 'narrow', width: 320 },
+])('captures prioritized dynamic evidence at $id viewport', async (viewport) => {
+  const page = await captureFixtureAsync('/dynamic', viewport, {
+    overallTimeoutMs: 1_000,
+    perTargetTimeoutMs: 200,
+    stabilityWindowMs: 20,
+  });
+  expectDynamicEvidence(page);
+
+  expectCanonicalDynamicEvidence(page);
+});
+
+test('rejects invalid capture limits and preserves the hard candidate cap', async () => {
+  const invalidCaptureError = await captureFixtureAsync(
+    '/dynamic',
     { height: 400, id: 'narrow', width: 320 },
-  ])('captures prioritized dynamic evidence at $id viewport', async (viewport) => {
-    const page = await captureFixtureAsync('/dynamic', viewport, {
+    { maxCandidates: -1 },
+  ).then(
+    () => null,
+    (error: unknown) => error,
+  );
+  expect(invalidCaptureError).toBeInstanceOf(RangeError);
+  expect(invalidCaptureError).toHaveProperty(
+    'message',
+    'dynamicCapture.maxCandidates must be a positive finite integer.',
+  );
+  const page = await captureFixtureAsync(
+    '/dynamic',
+    { height: 400, id: 'narrow', width: 320 },
+    {
+      maxCandidates: 99,
       overallTimeoutMs: 1_000,
       perTargetTimeoutMs: 200,
       stabilityWindowMs: 20,
-    });
-    expectDynamicEvidence(page);
-
-    expectCanonicalDynamicEvidence(page);
-  });
-
-  test('rejects invalid capture limits and preserves the hard candidate cap', async () => {
-    const invalidCaptureError = await captureFixtureAsync(
-      '/dynamic',
-      { height: 400, id: 'narrow', width: 320 },
-      { maxCandidates: -1 },
-    ).then(
-      () => null,
-      (error: unknown) => error,
-    );
-    expect(invalidCaptureError).toBeInstanceOf(RangeError);
-    expect(invalidCaptureError).toHaveProperty(
-      'message',
-      'dynamicCapture.maxCandidates must be a positive finite integer.',
-    );
-    const page = await captureFixtureAsync(
-      '/dynamic',
-      { height: 400, id: 'narrow', width: 320 },
-      {
-        maxCandidates: 99,
-        overallTimeoutMs: 1_000,
-        perTargetTimeoutMs: 200,
-        stabilityWindowMs: 20,
-      },
-    );
-    expect(page.dynamicElements?.length).toBeLessThanOrEqual(24);
-  }, 10_000);
-});
+    },
+  );
+  expect(page.dynamicElements?.length).toBeLessThanOrEqual(24);
+}, 10_000);
