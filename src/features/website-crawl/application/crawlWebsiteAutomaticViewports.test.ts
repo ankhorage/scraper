@@ -60,6 +60,21 @@ test('distributes crowded responsive probes across mobile, tablet, and desktop r
   expect(captured.some((width) => width >= 1024)).toBe(true);
 });
 
+test('selects one capture for fluid widths with the same Grid-track structure', async () => {
+  const captured: number[] = [];
+  const result = await crawlWebsiteAsync(
+    { maxDepth: 0, maxPages: 1, url: 'https://example.test/' },
+    fluidGridDependencies(captured),
+  );
+
+  expect(result.breakpointCoverage[0]?.probes.map((probe) => probe.layout)).toEqual([
+    ['SECTION:BODY:grid:180px 360px:row:true'],
+    ['SECTION:BODY:grid:100px 200px:row:true'],
+    ['SECTION:BODY:grid:180px 360px:row:true'],
+  ]);
+  expect(captured).toEqual([319]);
+});
+
 /*** Provide deterministic page-local stylesheet evidence without a browser dependency. */
 const automaticDependencies = (captured: string[]) => ({
   capturePage: {
@@ -108,6 +123,51 @@ const crowdedResponsiveDependencies = (captured: number[]) => ({
           conditionMatches: [],
           hasHorizontalOverflow: false,
           layout: [width < 600 ? 'mobile' : width < 1024 ? 'tablet' : 'desktop'],
+          navigation: [],
+          width,
+        })),
+      ),
+  },
+  robots: { isAllowedAsync: () => Promise.resolve(true) },
+});
+
+/*** Model fluid computed Grid widths that retain one structural responsive state. */
+const fluidGridDependencies = (captured: number[]) => ({
+  capturePage: {
+    capturePageAsync: ({
+      url,
+      viewport,
+    }: {
+      readonly url: string;
+      readonly viewport: { readonly width: number };
+    }) => {
+      captured.push(viewport.width);
+      return Promise.resolve({
+        assets: [],
+        elements: [],
+        links: [],
+        statusCode: 200,
+        title: url,
+        url,
+        viewport: { ...viewport, height: 900, id: `auto-${viewport.width}` },
+      });
+    },
+    closeAsync: () => Promise.resolve(),
+    discoverBreakpointsAsync: () =>
+      Promise.resolve([
+        {
+          condition: '(min-width: 320px)',
+          kind: 'viewport' as const,
+          source: 'fixture',
+          sourceUrl: 'https://example.test/',
+        },
+      ]),
+    probeResponsiveAsync: ({ widths }: { readonly widths: readonly number[] }) =>
+      Promise.resolve(
+        widths.map((width) => ({
+          conditionMatches: [],
+          hasHorizontalOverflow: false,
+          layout: [`SECTION:BODY:grid:${width === 320 ? '100px 200px' : '180px 360px'}:row:true`],
           navigation: [],
           width,
         })),

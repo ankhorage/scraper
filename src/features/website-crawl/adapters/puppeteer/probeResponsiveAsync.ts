@@ -51,7 +51,7 @@ export const probeResponsiveAsync = async ({
   }
 };
 
-/*** Extract semantic viewport-sensitive navigation, layout, overflow, and CSS-condition facts. */
+/*** Extract raw viewport-sensitive navigation, layout, overflow, and CSS-condition facts. */
 const extractResponsiveProbe = (conditions: readonly string[]): Omit<BreakpointProbe, 'width'> => {
   const isVisible = (element: Element, style: CSSStyleDeclaration, rect: DOMRect): boolean =>
     !element.hasAttribute('hidden') &&
@@ -59,17 +59,13 @@ const extractResponsiveProbe = (conditions: readonly string[]): Omit<BreakpointP
     style.visibility !== 'hidden' &&
     style.opacity !== '0' &&
     (rect.width > 0 || rect.height > 0);
-  const gridTrackCount = (gridTemplateColumns: string): number => {
-    const tracks = gridTemplateColumns.trim();
-    return tracks === '' || tracks === 'none' ? 0 : tracks.split(/\s+/u).length;
-  };
   return {
     conditionMatches: conditions.filter((condition) => window.matchMedia(condition).matches).sort(),
     hasHorizontalOverflow: document.documentElement.scrollWidth > window.innerWidth,
     layout: [...document.body.querySelectorAll('*')].slice(0, 256).map((element) => {
       const style = getComputedStyle(element);
       const rect = element.getBoundingClientRect();
-      return `${element.tagName}:${element.parentElement?.tagName ?? ''}:${style.display}:grid-tracks=${gridTrackCount(style.gridTemplateColumns)}:flex-direction=${style.flexDirection}:flex-wrap=${style.flexWrap}:visible=${isVisible(element, style, rect)}`;
+      return `${element.tagName}:${element.parentElement?.tagName ?? ''}:${style.display}:${style.gridTemplateColumns}:${style.flexDirection}:${isVisible(element, style, rect)}`;
     }),
     navigation: [...document.querySelectorAll<HTMLAnchorElement>('a[href]')]
       .filter((element) =>

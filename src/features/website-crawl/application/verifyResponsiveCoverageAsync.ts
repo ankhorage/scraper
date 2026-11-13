@@ -137,7 +137,7 @@ const selectVerifiedMeasurements = (
     .filter((probe) => {
       const signature = JSON.stringify({
         hasHorizontalOverflow: probe.hasHorizontalOverflow,
-        layout: probe.layout,
+        layout: probe.layout.map(responsiveLayoutSignature),
         navigation: probe.navigation,
       });
       if (signatures.has(signature)) return false;
@@ -151,6 +151,24 @@ const selectVerifiedMeasurements = (
           : 'Browser-responsive state differs in navigation, layout, or overflow from earlier probes.',
       width: probe.width,
     }));
+};
+
+/*** Normalize fluid Grid measurements only while comparing responsive probe states. */
+const responsiveLayoutSignature = (layout: string): string => {
+  const parts = layout.split(':');
+  if (parts[2] !== 'grid') return layout;
+  const gridTemplateColumns = parts[3] ?? '';
+  return [
+    ...parts.slice(0, 3),
+    `grid-tracks=${gridTrackCount(gridTemplateColumns)}`,
+    ...parts.slice(4),
+  ].join(':');
+};
+
+/*** Count measured Grid tracks without retaining their fluid pixel widths in selection policy. */
+const gridTrackCount = (gridTemplateColumns: string): number => {
+  const tracks = gridTemplateColumns.trim();
+  return tracks === '' || tracks === 'none' ? 0 : tracks.split(/\s+/u).length;
 };
 
 /*** Report conservative bounded captures when the adapter cannot supply responsive probes. */
