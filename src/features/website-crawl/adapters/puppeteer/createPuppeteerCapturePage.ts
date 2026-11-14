@@ -2,7 +2,6 @@ import puppeteer, { type Browser, type HTTPRequest, type Page } from 'puppeteer'
 
 import type {
   CssObservation,
-  DynamicElementEvidence,
   ElementObservation,
   PageObservation,
 } from '../../../../types/public.js';
@@ -11,16 +10,14 @@ import { assertPublicUrlAsync as assertPublicNetworkUrlAsync } from '../network/
 import type { LayoutCss, VisualCss } from './browserExtractionTypes.js';
 import { captureDynamicElementsAsync } from './captureDynamicElementsAsync.js';
 import { discoverBreakpointsAsync } from './discoverBreakpointsAsync.js';
+import { extractDefaultElements } from './extractDefaultElements.js';
+import { extractPageObservation } from './extractPageObservation.js';
+import { installBrowserAnimationEvidence } from './installBrowserAnimationEvidence.js';
 import { installBrowserRelevantState } from './installBrowserRelevantState.js';
 import { probeResponsiveAsync } from './probeResponsiveAsync.js';
 interface PuppeteerOptions {
   readonly allowPrivateHostsForTests?: boolean;
   readonly launchArguments?: readonly string[];
-}
-interface BrowserExtractionInput {
-  readonly dynamicElements: readonly DynamicElementEvidence[];
-  readonly statusCode: number;
-  readonly viewport: { readonly height: number; readonly id: string; readonly width: number };
 }
 declare global {
   var __ankhorageScraperElementPath: (element: Element) => string;
@@ -82,13 +79,15 @@ const capturePageAsync = async (
     });
     await assertPublicUrlAsync(page.url(), options);
     await assertBoundedDocumentAsync(page, input.maxBytes);
+    const elements = await page.evaluate(extractDefaultElements);
     const dynamicElements = await captureDynamicElementsAsync(
       page,
       input.timeoutMs,
       input.dynamicCapture,
     );
-    return page.evaluate(extractPage, {
+    return page.evaluate(extractPageObservation, {
       dynamicElements,
+      elements,
       statusCode: response?.status() ?? 0,
       viewport: input.viewport,
     });
@@ -102,6 +101,7 @@ const installBrowserExtractionAsync = async (page: Page): Promise<void> => {
   await page.evaluateOnNewDocument(installBrowserLayoutCss);
   await page.evaluateOnNewDocument(installBrowserVisualCss);
   await page.evaluateOnNewDocument(installBrowserCss);
+  await page.evaluateOnNewDocument(installBrowserAnimationEvidence);
   await page.evaluateOnNewDocument(installBrowserRelevantState);
   await page.evaluateOnNewDocument(installBrowserElement);
 };
@@ -141,28 +141,6 @@ const assertBoundedDocumentAsync = async (page: Page, maxBytes: number): Promise
   );
   if (bytes > maxBytes) throw new Error('Page exceeds configured byte limit');
 };
-
-/*** Extract one render state using helpers installed in the browser global context. */
-const extractPage = (input: BrowserExtractionInput): PageObservation => ({
-  assets: [...document.querySelectorAll('img, video, audio, source')]
-    .map((node) => node.getAttribute('src'))
-    .filter((source): source is string => source !== null)
-    .map((source) => new URL(source, location.href).href)
-    .sort(),
-  dynamicElements: input.dynamicElements,
-  elements: [...document.querySelectorAll('body *')].map(
-    globalThis.__ankhorageScraperExtractElement,
-  ),
-  links: [...document.querySelectorAll('a[href]')]
-    .map((node) => node.getAttribute('href'))
-    .filter((href): href is string => href !== null)
-    .map((href) => new URL(href, location.href).href)
-    .sort(),
-  statusCode: input.statusCode,
-  title: document.title,
-  url: location.href,
-  viewport: input.viewport,
-});
 
 /*** Install stable DOM-path extraction in the browser context. */
 const installBrowserPath = (): void => {
@@ -243,8 +221,11 @@ const installBrowserVisualCss = (): void => {
     letterSpacing: style.letterSpacing,
     lineHeight: style.lineHeight,
     opacity: style.opacity,
+    animation: style.animation,
     textAlign: style.textAlign,
     textDecoration: style.textDecoration,
+    transform: style.transform,
+    transition: style.transition,
     visibility: style.visibility,
   });
 };
@@ -274,29 +255,29 @@ const installBrowserElement = (): void => {
   globalThis.__ankhorageScraperExtractElement = (element) => {
     const style = getComputedStyle(element);
     const rect = element.getBoundingClientRect();
-    const attributes = [
-      'alt',
-      'aria-label',
-      'aria-valuemax',
-      'aria-valuemin',
-      'aria-valuenow',
-      'aria-valuetext',
-      'href',
-      'role',
-      'src',
-      'target',
-      'type',
-      'value',
-    ].reduce(
-      (result, name) => {
-        const value = element.getAttribute(name);
-        if (value === null) return result;
-        const normalized =
-          name === 'href' || name === 'src' ? new URL(value, location.href).href : value;
-        return { ...result, [name]: normalized };
-      },
-      {} as Record<string, string>,
-    );
+    const observedNames =
+      'alt aria-label aria-valuemax aria-valuemin aria-valuenow aria-valuetext class href id role src target type value'.split(
+        ' ',
+      );
+    const attributes = [...observedNames, ...element.getAttributeNames()]
+      .filter((name, index, names) => names.indexOf(name) === index)
+      .filter(
+        (name) =>
+          observedNames.includes(name) ||
+          /^data-(animation|count|progress|state|value)$/i.test(name),
+      )
+      .reduce(
+        (result, name) => {
+          const value = element.getAttribute(name);
+          if (value === null) return result;
+          const normalized =
+            name === 'href' || name === 'src' ? new URL(value, location.href).href : value;
+          const observedValue =
+            name === 'href' || name === 'src' ? normalized : normalized.slice(0, 256);
+          return { ...result, [name]: observedValue };
+        },
+        {} as Record<string, string>,
+      );
     return {
       attributes,
       css: globalThis.__ankhorageScraperExtractCss(style),
