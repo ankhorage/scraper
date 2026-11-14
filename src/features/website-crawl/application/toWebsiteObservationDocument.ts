@@ -174,6 +174,7 @@ const dynamicObservation = (
   stateId: 'initial' | 'triggered' | 'settled',
 ) => ({
   availability: { missing: null, status: 'available' as const },
+  animationEvidence: snapshot.animationEvidence,
   css: snapshot.element.css,
   provenance: { capturedAt: snapshot.capturedAt, method: 'browser' as const, sourceUrl: page.url },
   rect: snapshot.element.rect,

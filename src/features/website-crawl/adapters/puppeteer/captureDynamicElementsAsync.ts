@@ -1,10 +1,7 @@
 import type { Page } from 'puppeteer';
 
-import type {
-  DynamicCaptureOptions,
-  DynamicElementEvidence,
-  DynamicElementSnapshot,
-} from '../../../../types/public.js';
+import type { DynamicCaptureOptions, DynamicElementEvidence } from '../../../../types/public.js';
+import { captureDynamicSnapshotAsync } from './captureDynamicSnapshotAsync.js';
 
 interface DynamicCaptureBudget {
   readonly overallMs: number;
@@ -129,9 +126,9 @@ const captureCandidateEvidenceAsync = async (
   budget: DynamicCaptureBudget,
   startedAt: number,
 ): Promise<DynamicElementEvidence> => {
-  const initial = await snapshotDynamicElementAsync(page, sourceRef);
+  const initial = await captureDynamicSnapshotAsync(page, sourceRef);
   await activateViewportAsync(page, sourceRef);
-  const triggered = await snapshotDynamicElementAsync(page, sourceRef);
+  const triggered = await captureDynamicSnapshotAsync(page, sourceRef);
   const remainingMs = budget.overallMs - (Date.now() - startedAt);
   const settling = await waitForSettlingAsync(
     page,
@@ -139,15 +136,9 @@ const captureCandidateEvidenceAsync = async (
     budget.quietMs,
     Math.max(0, Math.min(remainingMs, budget.perTargetMs)),
   );
-  const settled = await snapshotDynamicElementAsync(page, sourceRef);
+  const settled = await captureDynamicSnapshotAsync(page, sourceRef);
   return toDynamicEvidence(sourceRef, initial, triggered, settled, settling);
 };
-
-/*** Extract one timestamped browser snapshot through the installed element extractor. */
-const snapshotDynamicElementAsync = async (
-  page: Page,
-  sourceRef: string,
-): Promise<DynamicElementSnapshot> => page.evaluate(snapshotDynamicElement, sourceRef);
 
 /*** Scroll one candidate into the viewport and allow native intersection work through two frames. */
 const activateViewportAsync = async (page: Page, sourceRef: string): Promise<void> => {
@@ -165,18 +156,22 @@ const waitForSettlingAsync = async (
 /*** Classify settling evidence without fabricating a value from an unchanged initial geometry. */
 const toDynamicEvidence = (
   sourceRef: string,
-  initial: DynamicElementSnapshot,
-  triggered: DynamicElementSnapshot,
-  settled: DynamicElementSnapshot,
+  initial: Awaited<ReturnType<typeof captureDynamicSnapshotAsync>>,
+  triggered: Awaited<ReturnType<typeof captureDynamicSnapshotAsync>>,
+  settled: Awaited<ReturnType<typeof captureDynamicSnapshotAsync>>,
   settling: SettlingResult,
 ): DynamicElementEvidence => {
-  const changed = initial.element.rect.width !== triggered.element.rect.width || settling.changed;
+  const changed =
+    initial.relevantState !== triggered.relevantState ||
+    triggered.relevantState !== settled.relevantState ||
+    settling.changed;
   const explicitZero =
-    settled.element.attributes['aria-valuenow'] === '0' ||
-    (settled.element.tagName === 'progress' && settled.element.attributes.value === '0');
+    settled.snapshot.element.attributes['aria-valuenow'] === '0' ||
+    (settled.snapshot.element.tagName === 'progress' &&
+      settled.snapshot.element.attributes.value === '0');
   const verified = changed || explicitZero;
   return {
-    initial,
+    initial: initial.snapshot,
     outcome: verified && settling.quiet ? 'settled' : 'incomplete',
     reason:
       verified && settling.quiet
@@ -184,16 +179,17 @@ const toDynamicEvidence = (
         : settling.timedOut
           ? 'The activated element did not become stable within its bounded capture budget.'
           : 'Activation produced no observable change and no explicit semantic zero value.',
-    settled: verified && settling.quiet ? settled : null,
+    settled: verified && settling.quiet ? settled.snapshot : null,
     sourceRef,
-    triggered,
+    triggered: triggered.snapshot,
   };
 };
 
 /*** Locate candidates without coupling the adapter to site-specific selectors. */
 const discoverCandidateSourceRefs = (limit: number): readonly string[] => {
+  const parentSelector = 'progress,[role=progressbar],[aria-valuenow]';
   const candidates = [...document.querySelectorAll('body *')]
-    .filter((element) => !element.closest('header, footer'))
+    .filter((element) => !element.parentElement?.closest(parentSelector))
     .flatMap((element): CandidateSource[] => {
       const style = getComputedStyle(element);
       if (
@@ -204,19 +200,21 @@ const discoverCandidateSourceRefs = (limit: number): readonly string[] => {
         return [];
       }
       const className = element.getAttribute('class') ?? '';
+      const hasPseudoElement = ['::before', '::after'].some((pseudo) => {
+        const pseudoStyle = getComputedStyle(element, pseudo);
+        return pseudoStyle.content !== 'none' && pseudoStyle.display !== 'none';
+      });
       const priority = element.matches('progress, [role="progressbar"], [aria-valuenow]')
         ? 0
         : element
               .getAttributeNames()
-              .some((name) => /^(data-(progress|count|value)|aria-valuenow)$/i.test(name))
+              .some((name) => /^(data-(progress|count|value)|aria-valuenow|value)$/i.test(name))
           ? 1
-          : /(?:progress|counter|reveal|animate|motion)/i.test(className)
+          : /(?:progress|counter|reveal|animate|motion|fill|bar)/i.test(className)
             ? 2
-            : style.animationName !== 'none'
+            : style.animationName !== 'none' || hasPseudoElement
               ? 3
-              : style.transitionDuration !== '0s'
-                ? 4
-                : null;
+              : null;
       return priority === null
         ? []
         : [
@@ -236,16 +234,6 @@ const discoverCandidateSourceRefs = (limit: number): readonly string[] => {
     )
     .slice(0, limit)
     .map(({ sourceRef }) => sourceRef);
-};
-
-/*** Snapshot a single installed source reference in the page context. */
-const snapshotDynamicElement = (sourceRef: string): DynamicElementSnapshot => {
-  const element = globalThis.__ankhorageScraperFindElement(sourceRef);
-  if (!element) throw new Error('Dynamic candidate disappeared before it could be captured.');
-  return {
-    capturedAt: new Date().toISOString(),
-    element: globalThis.__ankhorageScraperExtractElement(element),
-  };
 };
 
 /*** Trigger native viewport observers without invoking synthetic application events. */

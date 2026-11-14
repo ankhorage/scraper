@@ -63,7 +63,11 @@ export interface BreakpointCoverage {
   readonly uncertainty: readonly string[];
 }
 
-import type { WebsiteComputedCss, WebsiteObservationDocument } from '@ankhorage/contracts/website';
+import type {
+  WebsiteAnimationEvidence,
+  WebsiteComputedCss,
+  WebsiteObservationDocument,
+} from '@ankhorage/contracts/website';
 
 export type CssObservation = WebsiteComputedCss;
 
@@ -85,6 +89,7 @@ export interface ElementObservation {
 
 /** A timestamped browser measurement of one viewport-activated element. */
 export interface DynamicElementSnapshot {
+  readonly animationEvidence: WebsiteAnimationEvidence;
   readonly capturedAt: string;
   readonly element: ElementObservation;
 }
