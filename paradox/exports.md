@@ -37,7 +37,7 @@ Source: `src/types/public.ts:7:1`
 
 Kind: `type`
 Module: `src/types/public.ts`
-Source: `src/types/public.ts:132:1`
+Source: `src/types/public.ts:137:1`
 
 ### Members
 

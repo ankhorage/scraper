@@ -1,5 +1,11 @@
 # @ankhorage/scraper
 
+## 0.4.0
+
+### Minor Changes
+
+- 32252a1: Capture verified scroll-triggered animation evidence with immutable default observations, computed transform/transition/animation values, and generated pseudo-element dimensions.
+
 ## 0.3.1
 
 ### Patch Changes
