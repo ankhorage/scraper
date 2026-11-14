@@ -1,0 +1,41 @@
+{
+  "schemaVersion": 1,
+  "kind": "tooling",
+  "title": "Ankhorage Scraper",
+  "summary": "Captures safe, bounded browser observations of public websites for recognition workflows.",
+  "purpose": "Provide deterministic website observations through a reusable package and CLI without exposing unbounded browser automation.",
+  "domain": "public website observation",
+  "responsibilities": [
+    "Crawl public website URLs within explicit limits and emit portable observation documents.",
+    "Expose crawl behavior through package, CLI, capability, and public-type entrypoints.",
+    "Apply bounded navigation and browser-resource handling around Puppeteer."
+  ],
+  "boundaries": [
+    "Does not decide how observation documents are recognized or rendered.",
+    "Does not own browser installation, network availability, or downstream migration policy.",
+    "Does not provide unrestricted general-purpose browser automation."
+  ],
+  "audience": [
+    "Recognition pipelines that require portable observations of public websites.",
+    "CLI users inspecting a website before downstream processing."
+  ],
+  "useCases": [
+    "Capture a bounded observation document from a public URL.",
+    "Run the same crawl boundary through the standalone CLI.",
+    "Advertise scraper capabilities to Ankh-compatible tooling."
+  ],
+  "architecture": {
+    "role": "Tooling package and CLI adapter around bounded Puppeteer observation.",
+    "invariants": [
+      "Observation output uses published portable Contracts types.",
+      "Crawls remain bounded by explicit policy rather than ambient browser behavior.",
+      "Package and CLI entrypoints share the same observation boundary."
+    ]
+  },
+  "constraints": {
+    "limitations": [
+      "Requires browser and network access to the requested public site.",
+      "Website defenses, robots policy, redirects, and dynamic behavior can limit observable content."
+    ]
+  }
+}
