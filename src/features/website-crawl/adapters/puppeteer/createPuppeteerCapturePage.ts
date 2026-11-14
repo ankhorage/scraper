@@ -272,7 +272,9 @@ const installBrowserElement = (): void => {
           if (value === null) return result;
           const normalized =
             name === 'href' || name === 'src' ? new URL(value, location.href).href : value;
-          return { ...result, [name]: normalized.slice(0, 256) };
+          const observedValue =
+            name === 'href' || name === 'src' ? normalized : normalized.slice(0, 256);
+          return { ...result, [name]: observedValue };
         },
         {} as Record<string, string>,
       );

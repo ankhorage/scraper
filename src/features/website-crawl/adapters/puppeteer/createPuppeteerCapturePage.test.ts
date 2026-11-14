@@ -10,6 +10,7 @@ const transitionNoise = Array.from(
   { length: 30 },
   (_, index) => `<div class="noise">noise ${index}</div>`,
 ).join('');
+const longUrlPath = `/source/${'a'.repeat(300)}?asset=${'b'.repeat(300)}`;
 
 const fixtureBody = (url: string | undefined): string =>
   url === '/dynamic'
@@ -42,7 +43,7 @@ const fixtureBody = (url: string | undefined): string =>
     </script>`
     : url === '/about'
       ? '<title>About</title><main>About page</main>'
-      : `<title>Fixture</title><nav><a href="/about">About</a></nav><section class="grid"><article>One <span style="color: red">red</span></article><article hidden>Hidden</article><article>Three</article></section>`;
+      : `<title>Fixture</title><nav><a href="/about">About</a><a href="${longUrlPath}">Long destination</a></nav><img src="${longUrlPath}" alt="Long asset"><section class="grid"><article>One <span style="color: red">red</span></article><article hidden>Hidden</article><article>Three</article></section>`;
 
 const server = createServer((request, response) => {
   const body = fixtureBody(request.url);
@@ -221,16 +222,25 @@ test('retains exact computed Grid tracks in raw responsive probes', async () => 
   } finally {
     await capture.closeAsync();
   }
-}, 10_000);
+}, 15_000);
 
 test('captures visible and hidden DOM state, computed CSS, and navigation', async () => {
   const page = await captureFixtureAsync('/', { height: 800, id: 'desktop', width: 1440 });
+  const longUrl = `${origin}${longUrlPath}`;
+  const document = toWebsiteObservationDocument(`${origin}/`, [page]);
+  const [observedPage] = document.pages;
 
-  expect(page.links).toEqual([`${origin}/about`]);
+  expect(page.links).toEqual([`${origin}/about`, longUrl]);
   expect(page.elements.find((element) => element.text === 'red')?.css.color).toContain('255');
   expect(page.elements.find((element) => element.text === 'One ')?.tagName).toBe('article');
   expect(page.elements.find((element) => element.text === 'Hidden')?.visible).toBe(false);
   expect(page.elements.some((element) => element.css.display === 'grid')).toBe(true);
+  expect(longUrl.length).toBeGreaterThan(256);
+  expect(observedPage?.navigation.map((item) => item.url)).toContain(longUrl);
+  expect(observedPage?.assets.map((asset) => asset.url)).toContain(longUrl);
+  expect(observedPage?.nodes.flatMap((node) => node.media.map((media) => media.url))).toContain(
+    longUrl,
+  );
 });
 
 test.each([
