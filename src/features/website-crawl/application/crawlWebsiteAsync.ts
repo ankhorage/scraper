@@ -6,28 +6,21 @@ import type {
   CrawlDiagnostic,
   CrawlOptions,
   CrawlResult,
-  DynamicCaptureOptions,
   PageObservation,
 } from '../../../types/public.js';
 import { isSameOrigin } from '../domain/isSameOrigin.js';
 import { normalizeUrl } from '../domain/normalizeUrl.js';
 import type { CapturePagePort } from '../ports/CapturePagePort.js';
 import type { RobotsPort } from '../ports/RobotsPort.js';
+import { measureCrawlPhaseAsync } from '../utils/measureCrawlPhaseAsync.js';
+import { type CrawlPlan, createCrawlPlan } from './createCrawlPlan.js';
+import { toBreakpointDiagnostics } from './toBreakpointDiagnostics.js';
 import { toWebsiteObservationDocument } from './toWebsiteObservationDocument.js';
 import { verifyResponsiveCoverageAsync } from './verifyResponsiveCoverageAsync.js';
 
 interface CrawlDependencies {
   readonly capturePage: CapturePagePort;
   readonly robots: RobotsPort;
-}
-
-interface CrawlPlan {
-  readonly dynamicCapture?: DynamicCaptureOptions;
-  readonly maxBytes: number;
-  readonly maxDepth: number;
-  readonly maxPages: number;
-  readonly timeoutMs: number;
-  readonly viewports?: CrawlOptions['viewports'];
 }
 
 interface CrawlState {
@@ -54,22 +47,11 @@ export const crawlWebsiteAsync = async (
   options: CrawlOptions,
   dependencies: CrawlDependencies,
 ): Promise<CrawlResult> => {
-  const sourceUrl = normalizeUrl(options.url);
-  const plan = createCrawlPlan(options);
-  const state: CrawlState = {
-    breakpointCoverage: [],
-    breakpointEvidence: [],
-    diagnostics: [],
-    captureFingerprints: new Map<string, string>(),
-    canonicalUrls: new Set<string>(),
-    pages: [],
-    queue: [{ depth: 0, sourceUrl, url: sourceUrl }],
-    requestedUrls: new Set<string>(),
-    redirects: new Set<string>(),
-    visited: new Set<string>(),
-  };
-
+  const startedAt = performance.now();
   try {
+    const sourceUrl = normalizeUrl(options.url);
+    const plan = createCrawlPlan(options);
+    const state = createCrawlState(sourceUrl);
     while (state.queue.length > 0) {
       if (state.requestedUrls.size >= plan.maxPages) {
         const [next] = state.queue;
@@ -78,16 +60,25 @@ export const crawlWebsiteAsync = async (
       }
       await crawlNextEntryAsync(state, plan, sourceUrl, dependencies);
     }
+    const result = {
+      breakpointCoverage: state.breakpointCoverage,
+      breakpointEvidence: state.breakpointEvidence,
+      diagnostics: state.diagnostics,
+      document: toWebsiteObservationDocument(sourceUrl, state.pages),
+    };
+    await measureCrawlPhaseAsync(
+      options.timing,
+      'complete',
+      () => Promise.resolve(),
+      undefined,
+      startedAt,
+    );
+    return result;
   } finally {
-    await dependencies.capturePage.closeAsync();
+    await measureCrawlPhaseAsync(options.timing, 'browser-cleanup', () =>
+      dependencies.capturePage.closeAsync(),
+    );
   }
-
-  return {
-    breakpointCoverage: state.breakpointCoverage,
-    breakpointEvidence: state.breakpointEvidence,
-    diagnostics: state.diagnostics,
-    document: toWebsiteObservationDocument(sourceUrl, state.pages),
-  };
 };
 
 /*** Crawl the next requested URL and retain only its unique final canonical captures. */
@@ -100,7 +91,11 @@ const crawlNextEntryAsync = async (
   const entry = state.queue.shift();
   if (!entry || state.visited.has(entry.url)) return;
   state.visited.add(entry.url);
-  if (!(await dependencies.robots.isAllowedAsync(entry.url))) {
+  if (
+    !(await measureCrawlPhaseAsync(plan.timing, 'robots', () =>
+      dependencies.robots.isAllowedAsync(entry.url),
+    ))
+  ) {
     state.diagnostics.push({
       code: 'robots',
       message: 'robots.txt disallowed this URL.',
@@ -124,13 +119,20 @@ const captureEntryAsync = async (
   const viewports = await resolveViewportsAsync(state, plan, entry, capturePage);
   for (const viewport of viewports) {
     try {
-      const page = await capturePage.capturePageAsync({
-        ...(plan.dynamicCapture ? { dynamicCapture: plan.dynamicCapture } : {}),
-        maxBytes: plan.maxBytes,
-        timeoutMs: plan.timeoutMs,
-        url: entry.url,
-        viewport,
-      });
+      const page = await measureCrawlPhaseAsync(
+        plan.timing,
+        'viewport',
+        () =>
+          capturePage.capturePageAsync({
+            ...(plan.dynamicCapture ? { dynamicCapture: plan.dynamicCapture } : {}),
+            maxBytes: plan.maxBytes,
+            timeoutMs: plan.timeoutMs,
+            ...(plan.timing ? { timing: plan.timing } : {}),
+            url: entry.url,
+            viewport,
+          }),
+        viewport.id,
+      );
       retainCanonicalCapture(state, plan, sourceUrl, entry, page);
     } catch (error) {
       state.diagnostics.push({
@@ -160,7 +162,7 @@ const resolveViewportsAsync = async (
       url: entry.url,
     });
     state.breakpointEvidence.push(...evidence);
-    state.diagnostics.push(...breakpointDiagnostics(entry, evidence));
+    state.diagnostics.push(...toBreakpointDiagnostics(entry.sourceUrl, entry.url, evidence));
     const responsiveCoverage = await verifyResponsiveCoverageAsync({
       capturePage,
       evidence,
@@ -186,25 +188,6 @@ const resolveViewportsAsync = async (
     return [{ height: 900, id: 'auto-1440', width: 1440 }];
   }
 };
-
-/*** Surface unsupported CSSOM evidence without conflating container conditions with viewport rules. */
-const breakpointDiagnostics = (
-  entry: CrawlEntry,
-  evidence: readonly BreakpointEvidence[],
-): CrawlDiagnostic[] =>
-  evidence
-    .filter((item) => item.kind !== 'viewport')
-    .map((item) => ({
-      code: 'breakpoint' as const,
-      message:
-        item.kind === 'container'
-          ? `Container query retained as evidence but excluded from viewport selection: ${item.condition}`
-          : item.condition === 'Breakpoint CSSOM evidence limit reached.'
-            ? 'CSSOM breakpoint evidence reached its bounded limit; automatic selection may be incomplete.'
-            : `Stylesheet CSSOM could not be read: ${item.source} (${item.condition})`,
-      sourceUrl: entry.sourceUrl,
-      url: entry.url,
-    }));
 
 /*** Retain only the first deterministic capture for each final URL, viewport, and default state. */
 const retainCanonicalCapture = (
@@ -285,16 +268,19 @@ const recordRedirect = (state: CrawlState, entry: CrawlEntry, page: PageObservat
 const fingerprint = (page: PageObservation): string =>
   createHash('sha256').update(JSON.stringify(page)).digest('hex');
 
-/*** Apply the explicit resource bounds used for every crawl invocation. */
-const createCrawlPlan = (options: CrawlOptions): CrawlPlan => ({
-  ...(options.dynamicCapture ? { dynamicCapture: options.dynamicCapture } : {}),
-  maxBytes: options.maxBytesPerPage ?? 2_000_000,
-  maxDepth: options.maxDepth ?? 1,
-  maxPages: options.maxPages ?? 20,
-  timeoutMs: options.navigationTimeoutMs ?? 15_000,
-  ...(options.viewports ? { viewports: options.viewports } : {}),
+/*** Initialize the mutable queue and uniqueness boundaries for one normalized crawl origin. */
+const createCrawlState = (sourceUrl: string): CrawlState => ({
+  breakpointCoverage: [],
+  breakpointEvidence: [],
+  diagnostics: [],
+  captureFingerprints: new Map<string, string>(),
+  canonicalUrls: new Set<string>(),
+  pages: [],
+  queue: [{ depth: 0, sourceUrl, url: sourceUrl }],
+  requestedUrls: new Set<string>(),
+  redirects: new Set<string>(),
+  visited: new Set<string>(),
 });
-
 const enqueueLinks = (
   queue: CrawlEntry[],
   links: readonly string[],

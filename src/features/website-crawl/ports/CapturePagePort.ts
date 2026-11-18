@@ -1,6 +1,7 @@
 import type {
   BreakpointEvidence,
   BreakpointProbe,
+  CrawlTimingOptions,
   CrawlViewport,
   DynamicCaptureOptions,
   PageObservation,
@@ -10,6 +11,7 @@ export interface CapturePageInput {
   readonly dynamicCapture?: DynamicCaptureOptions;
   readonly maxBytes: number;
   readonly timeoutMs: number;
+  readonly timing?: CrawlTimingOptions;
   readonly url: string;
   readonly viewport: CrawlViewport;
 }

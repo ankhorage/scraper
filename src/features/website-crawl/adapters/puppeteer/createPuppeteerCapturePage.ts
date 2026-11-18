@@ -6,6 +6,7 @@ import type {
   PageObservation,
 } from '../../../../types/public.js';
 import type { CapturePageInput, CapturePagePort } from '../../ports/CapturePagePort.js';
+import { measureCrawlPhaseAsync } from '../../utils/measureCrawlPhaseAsync.js';
 import { assertPublicUrlAsync as assertPublicNetworkUrlAsync } from '../network/assertPublicUrlAsync.js';
 import type { LayoutCss, VisualCss } from './browserExtractionTypes.js';
 import { captureDynamicElementsAsync } from './captureDynamicElementsAsync.js';
@@ -73,17 +74,30 @@ const capturePageAsync = async (
     await page.setViewport({ height: input.viewport.height, width: input.viewport.width });
     await installBrowserExtractionAsync(page);
     await blockUnsafeRequestsAsync(page, options);
-    const response = await page.goto(input.url, {
-      timeout: input.timeoutMs,
-      waitUntil: 'networkidle2',
-    });
+    const response = await measureCrawlPhaseAsync(
+      input.timing,
+      'navigation',
+      () =>
+        page.goto(input.url, {
+          timeout: input.timeoutMs,
+          waitUntil: 'networkidle2',
+        }),
+      input.viewport.id,
+    );
     await assertPublicUrlAsync(page.url(), options);
     await assertBoundedDocumentAsync(page, input.maxBytes);
-    const elements = await page.evaluate(extractDefaultElements);
+    const elements = await measureCrawlPhaseAsync(
+      input.timing,
+      'dom-extraction',
+      () => page.evaluate(extractDefaultElements),
+      input.viewport.id,
+    );
     const dynamicElements = await captureDynamicElementsAsync(
       page,
       input.timeoutMs,
       input.dynamicCapture,
+      input.timing,
+      input.viewport.id,
     );
     return page.evaluate(extractPageObservation, {
       dynamicElements,
