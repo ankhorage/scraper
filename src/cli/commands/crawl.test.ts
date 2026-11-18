@@ -79,6 +79,23 @@ const responsiveCoverageResult: CrawlResult = {
   ],
   breakpointEvidence: [],
   diagnostics: [],
+  recognition: {
+    designTokens: [],
+    documentId: 'recognition:example',
+    media: [],
+    navigation: [],
+    observedDocumentId: 'website:example',
+    pages: [],
+    recognizedAt: '2026-11-13T00:00:00.000Z',
+    schemaVersion: 1,
+    site: { id: 'example', url: 'https://example.test/' },
+    source: {
+      crawlId: 'recognition-crawl:example',
+      crawlerId: '@ankhorage/scraper',
+      crawlerVersion: '0.1.0',
+      revision: null,
+    },
+  },
   document: {
     collectedAt: '2026-11-13T00:00:00.000Z',
     documentId: 'website:example',

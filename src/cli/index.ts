@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import type { AnkhRuntimeCommandProvider } from '@ankhorage/ankh';
 
 import { CAPABILITIES } from '../capabilities/index.js';
+import { analyze } from './commands/analyze.js';
 import { crawl } from './commands/crawl.js';
 
 const provider = {
@@ -12,12 +13,18 @@ const provider = {
   capabilities: CAPABILITIES,
   commands: [
     {
+      path: ['analyze'],
+      capability: 'scraper.crawl',
+      summary: 'Analyze a website into typed module trees.',
+    },
+    {
       path: ['crawl'],
       capability: 'scraper.crawl',
       summary: 'Capture bounded browser observations for a public website.',
     },
   ],
   handlers: [
+    { path: ['analyze'], handler: async ({ argv, context }) => await analyze(argv, context) },
     {
       path: ['crawl'],
       handler: async ({ argv, context }) => await crawl(argv, context),
