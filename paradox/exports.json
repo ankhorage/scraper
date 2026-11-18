@@ -10,7 +10,7 @@
     "modulePath": "src/types/public.ts",
     "sourceLocation": {
       "filePath": "src/types/public.ts",
-      "line": 27,
+      "line": 53,
       "column": 1
     },
     "exportPaths": [
@@ -68,6 +68,7 @@
       "src/index.ts"
     ],
     "relatedSymbols": [
+      "CrawlTimingOptions",
       "CrawlViewport",
       "DynamicCaptureOptions"
     ],
@@ -109,6 +110,13 @@
         "description": null
       },
       {
+        "name": "timing",
+        "kind": "property",
+        "type": "CrawlTimingOptions",
+        "required": false,
+        "description": null
+      },
+      {
         "name": "url",
         "kind": "property",
         "type": "string",
@@ -136,7 +144,7 @@
     "modulePath": "src/types/public.ts",
     "sourceLocation": {
       "filePath": "src/types/public.ts",
-      "line": 137,
+      "line": 163,
       "column": 1
     },
     "exportPaths": [
@@ -173,6 +181,96 @@
         "kind": "property",
         "type": "WebsiteObservationDocument",
         "required": true,
+        "description": null
+      }
+    ],
+    "structuredRows": []
+  },
+  {
+    "name": "CrawlTimingOptions",
+    "title": null,
+    "description": null,
+    "isReadme": false,
+    "see": [],
+    "security": [],
+    "kind": "type",
+    "modulePath": "src/types/public.ts",
+    "sourceLocation": {
+      "filePath": "src/types/public.ts",
+      "line": 40,
+      "column": 1
+    },
+    "exportPaths": [
+      "src/index.ts"
+    ],
+    "relatedSymbols": [
+      "CrawlTimingPhase"
+    ],
+    "signatures": [],
+    "members": [
+      {
+        "name": "onPhase",
+        "kind": "property",
+        "type": "(phase: CrawlTimingPhase) => void",
+        "required": true,
+        "description": null
+      }
+    ],
+    "structuredRows": []
+  },
+  {
+    "name": "CrawlTimingPhase",
+    "title": null,
+    "description": null,
+    "isReadme": false,
+    "see": [],
+    "security": [],
+    "kind": "type",
+    "modulePath": "src/types/public.ts",
+    "sourceLocation": {
+      "filePath": "src/types/public.ts",
+      "line": 21,
+      "column": 1
+    },
+    "exportPaths": [
+      "src/index.ts"
+    ],
+    "relatedSymbols": [],
+    "signatures": [],
+    "members": [
+      {
+        "name": "durationMs",
+        "kind": "property",
+        "type": "number",
+        "required": true,
+        "description": null
+      },
+      {
+        "name": "outcome",
+        "kind": "property",
+        "type": "\"completed\" | \"failed\"",
+        "required": true,
+        "description": null
+      },
+      {
+        "name": "phase",
+        "kind": "property",
+        "type": "\"viewport\" | \"browser-cleanup\" | \"browser-start\" | \"complete\" | \"dom-extraction\" | \"dynamic-activation\" | \"dynamic-settling\" | \"error\" | \"navigation\" | \"robots\"",
+        "required": true,
+        "description": null
+      },
+      {
+        "name": "reason",
+        "kind": "property",
+        "type": "\"error\" | \"aborted\" | \"timeout\"",
+        "required": false,
+        "description": null
+      },
+      {
+        "name": "viewportId",
+        "kind": "property",
+        "type": "string",
+        "required": false,
         "description": null
       }
     ],
@@ -233,7 +331,7 @@
     "modulePath": "src/features/website-crawl/composition/createWebsiteCrawler.ts",
     "sourceLocation": {
       "filePath": "src/features/website-crawl/composition/createWebsiteCrawler.ts",
-      "line": 12,
+      "line": 13,
       "column": 14
     },
     "exportPaths": [
@@ -272,7 +370,7 @@
     "modulePath": "src/types/public.ts",
     "sourceLocation": {
       "filePath": "src/types/public.ts",
-      "line": 19,
+      "line": 45,
       "column": 1
     },
     "exportPaths": [

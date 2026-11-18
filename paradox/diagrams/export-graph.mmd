@@ -23,10 +23,14 @@ graph LR
   module_src_features_website_crawl_application_crawlWebsiteAsync_test_ts["src/features/website-crawl/application/crawlWebsiteAsync.test.ts"]
   module_src_features_website_crawl_application_crawlWebsiteAsync_ts["src/features/website-crawl/application/crawlWebsiteAsync.ts"]
   module_src_features_website_crawl_application_crawlWebsiteAutomaticViewports_test_ts["src/features/website-crawl/application/crawlWebsiteAutomaticViewports.test.ts"]
+  module_src_features_website_crawl_application_crawlWebsiteTiming_test_ts["src/features/website-crawl/application/crawlWebsiteTiming.test.ts"]
   module_src_features_website_crawl_application_crawlWebsiteZeroDepth_test_ts["src/features/website-crawl/application/crawlWebsiteZeroDepth.test.ts"]
+  module_src_features_website_crawl_application_createCrawlPlan_ts["src/features/website-crawl/application/createCrawlPlan.ts"]
+  module_src_features_website_crawl_application_toBreakpointDiagnostics_ts["src/features/website-crawl/application/toBreakpointDiagnostics.ts"]
   module_src_features_website_crawl_application_toWebsiteObservationDocument_ts["src/features/website-crawl/application/toWebsiteObservationDocument.ts"]
   module_src_features_website_crawl_application_verifyResponsiveCoverageAsync_ts["src/features/website-crawl/application/verifyResponsiveCoverageAsync.ts"]
   module_src_features_website_crawl_composition_createWebsiteCrawler_acceptance_test_ts["src/features/website-crawl/composition/createWebsiteCrawler.acceptance.test.ts"]
+  module_src_features_website_crawl_composition_createWebsiteCrawler_timing_acceptance_test_ts["src/features/website-crawl/composition/createWebsiteCrawler.timing.acceptance.test.ts"]
   module_src_features_website_crawl_composition_createWebsiteCrawler_ts["src/features/website-crawl/composition/createWebsiteCrawler.ts"]
   module_src_features_website_crawl_domain_isPrivateAddress_ts["src/features/website-crawl/domain/isPrivateAddress.ts"]
   module_src_features_website_crawl_domain_isSameOrigin_ts["src/features/website-crawl/domain/isSameOrigin.ts"]
@@ -35,6 +39,7 @@ graph LR
   module_src_features_website_crawl_domain_selectResponsiveViewports_ts["src/features/website-crawl/domain/selectResponsiveViewports.ts"]
   module_src_features_website_crawl_ports_CapturePagePort_ts["src/features/website-crawl/ports/CapturePagePort.ts"]
   module_src_features_website_crawl_ports_RobotsPort_ts["src/features/website-crawl/ports/RobotsPort.ts"]
+  module_src_features_website_crawl_utils_measureCrawlPhaseAsync_ts["src/features/website-crawl/utils/measureCrawlPhaseAsync.ts"]
   module_src_index_ts["src/index.ts"]
   module_src_standalone_test_ts["src/standalone.test.ts"]
   module_src_types_public_ts["src/types/public.ts"]
@@ -42,11 +47,17 @@ graph LR
   module_src_types_public_ts --> export_BreakpointEvidence
   export_CrawlOptions["CrawlOptions"]
   module_src_types_public_ts --> export_CrawlOptions
+  export_CrawlOptions -.-> export_CrawlTimingOptions
   export_CrawlOptions -.-> export_CrawlViewport
   export_CrawlOptions -.-> export_DynamicCaptureOptions
   export_CrawlResult["CrawlResult"]
   module_src_types_public_ts --> export_CrawlResult
   export_CrawlResult -.-> export_BreakpointEvidence
+  export_CrawlTimingOptions["CrawlTimingOptions"]
+  module_src_types_public_ts --> export_CrawlTimingOptions
+  export_CrawlTimingOptions -.-> export_CrawlTimingPhase
+  export_CrawlTimingPhase["CrawlTimingPhase"]
+  module_src_types_public_ts --> export_CrawlTimingPhase
   export_CrawlViewport["CrawlViewport"]
   module_src_types_public_ts --> export_CrawlViewport
   export_createWebsiteCrawler["createWebsiteCrawler"]

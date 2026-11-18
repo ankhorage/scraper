@@ -1,5 +1,11 @@
 # @ankhorage/scraper
 
+## 0.5.0
+
+### Minor Changes
+
+- 8ebda94: Add opt-in, data-minimizing crawl phase timing callbacks to the public API.
+
 ## 0.4.0
 
 ### Minor Changes

@@ -4,7 +4,7 @@
 
 Kind: `type`
 Module: `src/types/public.ts`
-Source: `src/types/public.ts:27:1`
+Source: `src/types/public.ts:53:1`
 
 ### Members
 
@@ -30,6 +30,7 @@ Source: `src/types/public.ts:7:1`
 | maxDepth | property | `number` | no |  |
 | maxPages | property | `number` | no |  |
 | navigationTimeoutMs | property | `number` | no |  |
+| timing | property | `CrawlTimingOptions` | no |  |
 | url | property | `string` | yes |  |
 | viewports | property | `readonly CrawlViewport[]` | no |  |
 
@@ -37,7 +38,7 @@ Source: `src/types/public.ts:7:1`
 
 Kind: `type`
 Module: `src/types/public.ts`
-Source: `src/types/public.ts:137:1`
+Source: `src/types/public.ts:163:1`
 
 ### Members
 
@@ -47,6 +48,34 @@ Source: `src/types/public.ts:137:1`
 | breakpointEvidence | property | `readonly BreakpointEvidence[]` | yes |  |
 | diagnostics | property | `readonly CrawlDiagnostic[]` | yes |  |
 | document | property | `WebsiteObservationDocument` | yes |  |
+
+## CrawlTimingOptions
+
+Kind: `type`
+Module: `src/types/public.ts`
+Source: `src/types/public.ts:40:1`
+
+### Members
+
+| Name | Kind | Type | Required | Description |
+| --- | --- | --- | --- | --- |
+| onPhase | property | `(phase: CrawlTimingPhase) => void` | yes |  |
+
+## CrawlTimingPhase
+
+Kind: `type`
+Module: `src/types/public.ts`
+Source: `src/types/public.ts:21:1`
+
+### Members
+
+| Name | Kind | Type | Required | Description |
+| --- | --- | --- | --- | --- |
+| durationMs | property | `number` | yes |  |
+| outcome | property | `"completed" \| "failed"` | yes |  |
+| phase | property | `"viewport" \| "browser-cleanup" \| "browser-start" \| "complete" \| "dom-extraction" \| "dynamic-activation" \| "dynamic-settling" \| "error" \| "navigation" \| "robots"` | yes |  |
+| reason | property | `"error" \| "aborted" \| "timeout"` | no |  |
+| viewportId | property | `string` | no |  |
 
 ## CrawlViewport
 
@@ -66,7 +95,7 @@ Source: `src/types/public.ts:1:1`
 
 Kind: `value`
 Module: `src/features/website-crawl/composition/createWebsiteCrawler.ts`
-Source: `src/features/website-crawl/composition/createWebsiteCrawler.ts:12:14`
+Source: `src/features/website-crawl/composition/createWebsiteCrawler.ts:13:14`
 
 Create the public, safe website-recognition crawler.
 
@@ -80,7 +109,7 @@ Create the public, safe website-recognition crawler.
 
 Kind: `type`
 Module: `src/types/public.ts`
-Source: `src/types/public.ts:19:1`
+Source: `src/types/public.ts:45:1`
 
 ### Members
 

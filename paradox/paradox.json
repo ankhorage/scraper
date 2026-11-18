@@ -14,7 +14,7 @@
     {
       "id": "npm",
       "label": "npm",
-      "value": "v0.4.0",
+      "value": "v0.5.0",
       "color": "cb3837"
     },
     {
@@ -173,6 +173,7 @@
       "isEntrypoint": false,
       "dependencies": [
         "src/features/website-crawl/adapters/puppeteer/captureDynamicSnapshotAsync.ts",
+        "src/features/website-crawl/utils/measureCrawlPhaseAsync.ts",
         "src/types/public.ts"
       ],
       "exports": [
@@ -213,6 +214,7 @@
         "src/features/website-crawl/adapters/puppeteer/installBrowserRelevantState.ts",
         "src/features/website-crawl/adapters/puppeteer/probeResponsiveAsync.ts",
         "src/features/website-crawl/ports/CapturePagePort.ts",
+        "src/features/website-crawl/utils/measureCrawlPhaseAsync.ts",
         "src/types/public.ts"
       ],
       "exports": [
@@ -310,12 +312,15 @@
       "path": "src/features/website-crawl/application/crawlWebsiteAsync.ts",
       "isEntrypoint": false,
       "dependencies": [
+        "src/features/website-crawl/application/createCrawlPlan.ts",
+        "src/features/website-crawl/application/toBreakpointDiagnostics.ts",
         "src/features/website-crawl/application/toWebsiteObservationDocument.ts",
         "src/features/website-crawl/application/verifyResponsiveCoverageAsync.ts",
         "src/features/website-crawl/domain/isSameOrigin.ts",
         "src/features/website-crawl/domain/normalizeUrl.ts",
         "src/features/website-crawl/ports/CapturePagePort.ts",
         "src/features/website-crawl/ports/RobotsPort.ts",
+        "src/features/website-crawl/utils/measureCrawlPhaseAsync.ts",
         "src/types/public.ts"
       ],
       "exports": [
@@ -331,12 +336,42 @@
       "exports": []
     },
     {
+      "path": "src/features/website-crawl/application/crawlWebsiteTiming.test.ts",
+      "isEntrypoint": false,
+      "dependencies": [
+        "src/features/website-crawl/application/crawlWebsiteAsync.ts",
+        "src/types/public.ts"
+      ],
+      "exports": []
+    },
+    {
       "path": "src/features/website-crawl/application/crawlWebsiteZeroDepth.test.ts",
       "isEntrypoint": false,
       "dependencies": [
         "src/features/website-crawl/application/crawlWebsiteAsync.ts"
       ],
       "exports": []
+    },
+    {
+      "path": "src/features/website-crawl/application/createCrawlPlan.ts",
+      "isEntrypoint": false,
+      "dependencies": [
+        "src/types/public.ts"
+      ],
+      "exports": [
+        "CrawlPlan",
+        "createCrawlPlan"
+      ]
+    },
+    {
+      "path": "src/features/website-crawl/application/toBreakpointDiagnostics.ts",
+      "isEntrypoint": false,
+      "dependencies": [
+        "src/types/public.ts"
+      ],
+      "exports": [
+        "toBreakpointDiagnostics"
+      ]
     },
     {
       "path": "src/features/website-crawl/application/toWebsiteObservationDocument.ts",
@@ -370,12 +405,22 @@
       "exports": []
     },
     {
+      "path": "src/features/website-crawl/composition/createWebsiteCrawler.timing.acceptance.test.ts",
+      "isEntrypoint": false,
+      "dependencies": [
+        "src/index.ts",
+        "src/types/public.ts"
+      ],
+      "exports": []
+    },
+    {
       "path": "src/features/website-crawl/composition/createWebsiteCrawler.ts",
       "isEntrypoint": false,
       "dependencies": [
         "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.ts",
         "src/features/website-crawl/adapters/robots/robotsPort.ts",
         "src/features/website-crawl/application/crawlWebsiteAsync.ts",
+        "src/features/website-crawl/utils/measureCrawlPhaseAsync.ts",
         "src/types/public.ts"
       ],
       "exports": [
@@ -446,6 +491,16 @@
       ]
     },
     {
+      "path": "src/features/website-crawl/utils/measureCrawlPhaseAsync.ts",
+      "isEntrypoint": false,
+      "dependencies": [
+        "src/types/public.ts"
+      ],
+      "exports": [
+        "measureCrawlPhaseAsync"
+      ]
+    },
+    {
       "path": "src/index.ts",
       "isEntrypoint": true,
       "dependencies": [],
@@ -453,6 +508,8 @@
         "BreakpointEvidence",
         "CrawlOptions",
         "CrawlResult",
+        "CrawlTimingOptions",
+        "CrawlTimingPhase",
         "CrawlViewport",
         "createWebsiteCrawler",
         "DynamicCaptureOptions"
@@ -477,6 +534,8 @@
         "CrawlDiagnostic",
         "CrawlOptions",
         "CrawlResult",
+        "CrawlTimingOptions",
+        "CrawlTimingPhase",
         "CrawlViewport",
         "CssObservation",
         "DynamicCaptureOptions",
@@ -499,7 +558,7 @@
       "modulePath": "src/types/public.ts",
       "sourceLocation": {
         "filePath": "src/types/public.ts",
-        "line": 27,
+        "line": 53,
         "column": 1
       },
       "exportPaths": [
@@ -557,6 +616,7 @@
         "src/index.ts"
       ],
       "relatedSymbols": [
+        "CrawlTimingOptions",
         "CrawlViewport",
         "DynamicCaptureOptions"
       ],
@@ -598,6 +658,13 @@
           "description": null
         },
         {
+          "name": "timing",
+          "kind": "property",
+          "type": "CrawlTimingOptions",
+          "required": false,
+          "description": null
+        },
+        {
           "name": "url",
           "kind": "property",
           "type": "string",
@@ -625,7 +692,7 @@
       "modulePath": "src/types/public.ts",
       "sourceLocation": {
         "filePath": "src/types/public.ts",
-        "line": 137,
+        "line": 163,
         "column": 1
       },
       "exportPaths": [
@@ -662,6 +729,96 @@
           "kind": "property",
           "type": "WebsiteObservationDocument",
           "required": true,
+          "description": null
+        }
+      ],
+      "structuredRows": []
+    },
+    {
+      "name": "CrawlTimingOptions",
+      "title": null,
+      "description": null,
+      "isReadme": false,
+      "see": [],
+      "security": [],
+      "kind": "type",
+      "modulePath": "src/types/public.ts",
+      "sourceLocation": {
+        "filePath": "src/types/public.ts",
+        "line": 40,
+        "column": 1
+      },
+      "exportPaths": [
+        "src/index.ts"
+      ],
+      "relatedSymbols": [
+        "CrawlTimingPhase"
+      ],
+      "signatures": [],
+      "members": [
+        {
+          "name": "onPhase",
+          "kind": "property",
+          "type": "(phase: CrawlTimingPhase) => void",
+          "required": true,
+          "description": null
+        }
+      ],
+      "structuredRows": []
+    },
+    {
+      "name": "CrawlTimingPhase",
+      "title": null,
+      "description": null,
+      "isReadme": false,
+      "see": [],
+      "security": [],
+      "kind": "type",
+      "modulePath": "src/types/public.ts",
+      "sourceLocation": {
+        "filePath": "src/types/public.ts",
+        "line": 21,
+        "column": 1
+      },
+      "exportPaths": [
+        "src/index.ts"
+      ],
+      "relatedSymbols": [],
+      "signatures": [],
+      "members": [
+        {
+          "name": "durationMs",
+          "kind": "property",
+          "type": "number",
+          "required": true,
+          "description": null
+        },
+        {
+          "name": "outcome",
+          "kind": "property",
+          "type": "\"completed\" | \"failed\"",
+          "required": true,
+          "description": null
+        },
+        {
+          "name": "phase",
+          "kind": "property",
+          "type": "\"viewport\" | \"browser-cleanup\" | \"browser-start\" | \"complete\" | \"dom-extraction\" | \"dynamic-activation\" | \"dynamic-settling\" | \"error\" | \"navigation\" | \"robots\"",
+          "required": true,
+          "description": null
+        },
+        {
+          "name": "reason",
+          "kind": "property",
+          "type": "\"error\" | \"aborted\" | \"timeout\"",
+          "required": false,
+          "description": null
+        },
+        {
+          "name": "viewportId",
+          "kind": "property",
+          "type": "string",
+          "required": false,
           "description": null
         }
       ],
@@ -722,7 +879,7 @@
       "modulePath": "src/features/website-crawl/composition/createWebsiteCrawler.ts",
       "sourceLocation": {
         "filePath": "src/features/website-crawl/composition/createWebsiteCrawler.ts",
-        "line": 12,
+        "line": 13,
         "column": 14
       },
       "exportPaths": [
@@ -761,7 +918,7 @@
       "modulePath": "src/types/public.ts",
       "sourceLocation": {
         "filePath": "src/types/public.ts",
-        "line": 19,
+        "line": 45,
         "column": 1
       },
       "exportPaths": [
@@ -1075,7 +1232,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts",
-        "line": 33,
+        "line": 38,
         "column": 14
       }
     },
@@ -1086,7 +1243,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts",
-        "line": 55,
+        "line": 64,
         "column": 7
       }
     },
@@ -1097,7 +1254,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts",
-        "line": 61,
+        "line": 70,
         "column": 7
       }
     },
@@ -1108,7 +1265,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts",
-        "line": 66,
+        "line": 75,
         "column": 7
       }
     },
@@ -1119,7 +1276,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts",
-        "line": 109,
+        "line": 118,
         "column": 7
       }
     },
@@ -1130,7 +1287,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts",
-        "line": 117,
+        "line": 126,
         "column": 7
       }
     },
@@ -1141,7 +1298,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts",
-        "line": 123,
+        "line": 132,
         "column": 7
       }
     },
@@ -1152,7 +1309,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts",
-        "line": 144,
+        "line": 166,
         "column": 7
       }
     },
@@ -1163,7 +1320,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts",
-        "line": 149,
+        "line": 171,
         "column": 7
       }
     },
@@ -1174,7 +1331,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts",
-        "line": 157,
+        "line": 179,
         "column": 7
       }
     },
@@ -1185,7 +1342,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts",
-        "line": 189,
+        "line": 211,
         "column": 7
       }
     },
@@ -1196,7 +1353,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts",
-        "line": 240,
+        "line": 262,
         "column": 7
       }
     },
@@ -1207,7 +1364,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts",
-        "line": 250,
+        "line": 272,
         "column": 7
       }
     },
@@ -1218,7 +1375,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts",
-        "line": 273,
+        "line": 295,
         "column": 11
       }
     },
@@ -1361,7 +1518,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.ts",
-        "line": 31,
+        "line": 32,
         "column": 14
       }
     },
@@ -1372,7 +1529,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.ts",
-        "line": 65,
+        "line": 66,
         "column": 7
       }
     },
@@ -1383,7 +1540,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.ts",
-        "line": 99,
+        "line": 113,
         "column": 7
       }
     },
@@ -1394,7 +1551,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.ts",
-        "line": 109,
+        "line": 123,
         "column": 7
       }
     },
@@ -1405,7 +1562,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.ts",
-        "line": 117,
+        "line": 131,
         "column": 7
       }
     },
@@ -1416,7 +1573,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.ts",
-        "line": 132,
+        "line": 146,
         "column": 7
       }
     },
@@ -1427,7 +1584,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.ts",
-        "line": 138,
+        "line": 152,
         "column": 7
       }
     },
@@ -1438,7 +1595,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.ts",
-        "line": 146,
+        "line": 160,
         "column": 7
       }
     },
@@ -1449,7 +1606,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.ts",
-        "line": 167,
+        "line": 181,
         "column": 7
       }
     },
@@ -1460,7 +1617,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.ts",
-        "line": 205,
+        "line": 219,
         "column": 7
       }
     },
@@ -1471,7 +1628,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.ts",
-        "line": 234,
+        "line": 248,
         "column": 7
       }
     },
@@ -1482,7 +1639,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.ts",
-        "line": 254,
+        "line": 268,
         "column": 7
       }
     },
@@ -1856,7 +2013,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts",
-        "line": 53,
+        "line": 46,
         "column": 14
       }
     },
@@ -1867,7 +2024,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts",
-        "line": 94,
+        "line": 85,
         "column": 7
       }
     },
@@ -1878,7 +2035,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts",
-        "line": 117,
+        "line": 112,
         "column": 7
       }
     },
@@ -1889,18 +2046,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts",
-        "line": 148,
-        "column": 7
-      }
-    },
-    {
-      "name": "breakpointDiagnostics",
-      "description": "Surface unsupported CSSOM evidence without conflating container conditions with viewport rules.",
-      "see": [],
-      "security": [],
-      "sourceLocation": {
-        "filePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts",
-        "line": 191,
+        "line": 150,
         "column": 7
       }
     },
@@ -1911,7 +2057,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts",
-        "line": 210,
+        "line": 193,
         "column": 7
       }
     },
@@ -1922,7 +2068,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts",
-        "line": 252,
+        "line": 235,
         "column": 7
       }
     },
@@ -1933,7 +2079,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts",
-        "line": 272,
+        "line": 255,
         "column": 7
       }
     },
@@ -1944,18 +2090,18 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts",
-        "line": 285,
+        "line": 268,
         "column": 7
       }
     },
     {
-      "name": "createCrawlPlan",
-      "description": "Apply the explicit resource bounds used for every crawl invocation.",
+      "name": "createCrawlState",
+      "description": "Initialize the mutable queue and uniqueness boundaries for one normalized crawl origin.",
       "see": [],
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts",
-        "line": 289,
+        "line": 272,
         "column": 7
       }
     },
@@ -1966,7 +2112,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts",
-        "line": 298,
+        "line": 284,
         "column": 7
       }
     },
@@ -1977,7 +2123,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts",
-        "line": 324,
+        "line": 310,
         "column": 7
       }
     },
@@ -2045,6 +2191,50 @@
         "filePath": "src/features/website-crawl/application/crawlWebsiteAutomaticViewports.test.ts",
         "line": 207,
         "column": 7
+      }
+    },
+    {
+      "name": "testTimingFailureAsync",
+      "description": "Verify a failed robots phase still closes the browser boundary and exposes no error content.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-crawl/application/crawlWebsiteTiming.test.ts",
+        "line": 12,
+        "column": 1
+      }
+    },
+    {
+      "name": "assertFailureTimings",
+      "description": "Assert failure categories and cleanup ordering without collecting page, URL, or error payloads.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-crawl/application/crawlWebsiteTiming.test.ts",
+        "line": 40,
+        "column": 1
+      }
+    },
+    {
+      "name": "createCrawlPlan",
+      "description": "Apply the explicit resource bounds used for every crawl invocation.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-crawl/application/createCrawlPlan.ts",
+        "line": 14,
+        "column": 14
+      }
+    },
+    {
+      "name": "toBreakpointDiagnostics",
+      "description": "Surface unsupported CSSOM evidence without conflating container conditions with viewport rules.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-crawl/application/toBreakpointDiagnostics.ts",
+        "line": 4,
+        "column": 14
       }
     },
     {
@@ -2444,14 +2634,80 @@
       }
     },
     {
+      "name": "testCrawlTimingAsync",
+      "description": "Validate phase ordering and the one-settling-budget-per-viewport invariant at the public edge.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-crawl/composition/createWebsiteCrawler.timing.acceptance.test.ts",
+        "line": 28,
+        "column": 1
+      }
+    },
+    {
+      "name": "assertSettlingBudget",
+      "description": "Prove inactive dynamic candidates settle once per requested viewport rather than consuming retries.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-crawl/composition/createWebsiteCrawler.timing.acceptance.test.ts",
+        "line": 61,
+        "column": 1
+      }
+    },
+    {
+      "name": "hasOnlyTimingFields",
+      "description": "Keep the public timing payload restricted to monotonic metadata and explicit viewport identities.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-crawl/composition/createWebsiteCrawler.timing.acceptance.test.ts",
+        "line": 68,
+        "column": 1
+      }
+    },
+    {
+      "name": "listenAsync",
+      "description": "Bind the deterministic Chromium fixture to an ephemeral loopback port.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-crawl/composition/createWebsiteCrawler.timing.acceptance.test.ts",
+        "line": 75,
+        "column": 1
+      }
+    },
+    {
+      "name": "closeAsync",
+      "description": "Close the deterministic fixture after the public browser acceptance completes.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-crawl/composition/createWebsiteCrawler.timing.acceptance.test.ts",
+        "line": 83,
+        "column": 1
+      }
+    },
+    {
       "name": "createWebsiteCrawler",
       "description": "Create the public, safe website-recognition crawler.",
       "see": [],
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/composition/createWebsiteCrawler.ts",
-        "line": 12,
+        "line": 13,
         "column": 14
+      }
+    },
+    {
+      "name": "crawlWebsiteWithBrowserAsync",
+      "description": "Start the browser at the public boundary so opt-in timings include its complete lifecycle.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-crawl/composition/createWebsiteCrawler.ts",
+        "line": 22,
+        "column": 7
       }
     },
     {
@@ -2653,6 +2909,39 @@
       }
     },
     {
+      "name": "measureCrawlPhaseAsync",
+      "description": "Measure one crawl phase with the monotonic runtime clock and safely stream its bounded result.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-crawl/utils/measureCrawlPhaseAsync.ts",
+        "line": 6,
+        "column": 14
+      }
+    },
+    {
+      "name": "emitCrawlTiming",
+      "description": "Stream one terminal crawl result without allowing consumer observability to alter crawling.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-crawl/utils/measureCrawlPhaseAsync.ts",
+        "line": 35,
+        "column": 7
+      }
+    },
+    {
+      "name": "classifyTimingFailure",
+      "description": "Reduce runtime failures to a bounded category without exposing error content to consumers.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-crawl/utils/measureCrawlPhaseAsync.ts",
+        "line": 44,
+        "column": 7
+      }
+    },
+    {
       "name": "testPackedConsumerAsync",
       "description": null,
       "see": [],
@@ -2817,6 +3106,21 @@
       },
       {
         "fromPath": "src/features/website-crawl/application/crawlWebsiteAsync.ts",
+        "toPath": "src/features/website-crawl/utils/measureCrawlPhaseAsync.ts",
+        "sourcePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts"
+      },
+      {
+        "fromPath": "src/features/website-crawl/application/crawlWebsiteAsync.ts",
+        "toPath": "src/features/website-crawl/application/createCrawlPlan.ts",
+        "sourcePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts"
+      },
+      {
+        "fromPath": "src/features/website-crawl/application/crawlWebsiteAsync.ts",
+        "toPath": "src/features/website-crawl/application/toBreakpointDiagnostics.ts",
+        "sourcePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts"
+      },
+      {
+        "fromPath": "src/features/website-crawl/application/crawlWebsiteAsync.ts",
         "toPath": "src/features/website-crawl/application/toWebsiteObservationDocument.ts",
         "sourcePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts"
       },
@@ -2831,9 +3135,29 @@
         "sourcePath": "src/features/website-crawl/application/crawlWebsiteAutomaticViewports.test.ts"
       },
       {
+        "fromPath": "src/features/website-crawl/application/crawlWebsiteTiming.test.ts",
+        "toPath": "src/types/public.ts",
+        "sourcePath": "src/features/website-crawl/application/crawlWebsiteTiming.test.ts"
+      },
+      {
+        "fromPath": "src/features/website-crawl/application/crawlWebsiteTiming.test.ts",
+        "toPath": "src/features/website-crawl/application/crawlWebsiteAsync.ts",
+        "sourcePath": "src/features/website-crawl/application/crawlWebsiteTiming.test.ts"
+      },
+      {
         "fromPath": "src/features/website-crawl/application/crawlWebsiteZeroDepth.test.ts",
         "toPath": "src/features/website-crawl/application/crawlWebsiteAsync.ts",
         "sourcePath": "src/features/website-crawl/application/crawlWebsiteZeroDepth.test.ts"
+      },
+      {
+        "fromPath": "src/features/website-crawl/application/createCrawlPlan.ts",
+        "toPath": "src/types/public.ts",
+        "sourcePath": "src/features/website-crawl/application/createCrawlPlan.ts"
+      },
+      {
+        "fromPath": "src/features/website-crawl/application/toBreakpointDiagnostics.ts",
+        "toPath": "src/types/public.ts",
+        "sourcePath": "src/features/website-crawl/application/toBreakpointDiagnostics.ts"
       },
       {
         "fromPath": "src/features/website-crawl/application/toWebsiteObservationDocument.ts",
@@ -2866,6 +3190,16 @@
         "sourcePath": "src/features/website-crawl/composition/createWebsiteCrawler.acceptance.test.ts"
       },
       {
+        "fromPath": "src/features/website-crawl/composition/createWebsiteCrawler.timing.acceptance.test.ts",
+        "toPath": "src/index.ts",
+        "sourcePath": "src/features/website-crawl/composition/createWebsiteCrawler.timing.acceptance.test.ts"
+      },
+      {
+        "fromPath": "src/features/website-crawl/composition/createWebsiteCrawler.timing.acceptance.test.ts",
+        "toPath": "src/types/public.ts",
+        "sourcePath": "src/features/website-crawl/composition/createWebsiteCrawler.timing.acceptance.test.ts"
+      },
+      {
         "fromPath": "src/features/website-crawl/composition/createWebsiteCrawler.ts",
         "toPath": "src/types/public.ts",
         "sourcePath": "src/features/website-crawl/composition/createWebsiteCrawler.ts"
@@ -2886,6 +3220,11 @@
         "sourcePath": "src/features/website-crawl/composition/createWebsiteCrawler.ts"
       },
       {
+        "fromPath": "src/features/website-crawl/composition/createWebsiteCrawler.ts",
+        "toPath": "src/features/website-crawl/utils/measureCrawlPhaseAsync.ts",
+        "sourcePath": "src/features/website-crawl/composition/createWebsiteCrawler.ts"
+      },
+      {
         "fromPath": "src/features/website-crawl/domain/selectResponsiveViewports.test.ts",
         "toPath": "src/features/website-crawl/domain/selectResponsiveViewports.ts",
         "sourcePath": "src/features/website-crawl/domain/selectResponsiveViewports.test.ts"
@@ -2901,6 +3240,11 @@
         "sourcePath": "src/features/website-crawl/ports/CapturePagePort.ts"
       },
       {
+        "fromPath": "src/features/website-crawl/utils/measureCrawlPhaseAsync.ts",
+        "toPath": "src/types/public.ts",
+        "sourcePath": "src/features/website-crawl/utils/measureCrawlPhaseAsync.ts"
+      },
+      {
         "fromPath": "src/features/website-crawl/adapters/network/assertPublicUrlAsync.ts",
         "toPath": "src/features/website-crawl/domain/isPrivateAddress.ts",
         "sourcePath": "src/features/website-crawl/adapters/network/assertPublicUrlAsync.ts"
@@ -2913,6 +3257,11 @@
       {
         "fromPath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts",
         "toPath": "src/types/public.ts",
+        "sourcePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts"
+      },
+      {
+        "fromPath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts",
+        "toPath": "src/features/website-crawl/utils/measureCrawlPhaseAsync.ts",
         "sourcePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts"
       },
       {
@@ -2948,6 +3297,11 @@
       {
         "fromPath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.ts",
         "toPath": "src/features/website-crawl/ports/CapturePagePort.ts",
+        "sourcePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.ts"
+      },
+      {
+        "fromPath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.ts",
+        "toPath": "src/features/website-crawl/utils/measureCrawlPhaseAsync.ts",
         "sourcePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.ts"
       },
       {
@@ -3525,6 +3879,12 @@
       },
       {
         "fromSymbol": "crawlWebsiteAsync",
+        "toSymbol": "createCrawlState",
+        "callExpression": "createCrawlState",
+        "sourcePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts"
+      },
+      {
+        "fromSymbol": "crawlWebsiteAsync",
         "toSymbol": "limitDiagnostic",
         "callExpression": "limitDiagnostic",
         "sourcePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts"
@@ -3537,18 +3897,30 @@
       },
       {
         "fromSymbol": "crawlWebsiteAsync",
-        "toSymbol": "closeAsync",
-        "callExpression": "dependencies.capturePage.closeAsync",
-        "sourcePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts"
-      },
-      {
-        "fromSymbol": "crawlWebsiteAsync",
         "toSymbol": "toWebsiteObservationDocument",
         "callExpression": "toWebsiteObservationDocument",
         "sourcePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts"
       },
       {
+        "fromSymbol": "crawlWebsiteAsync",
+        "toSymbol": "measureCrawlPhaseAsync",
+        "callExpression": "measureCrawlPhaseAsync",
+        "sourcePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts"
+      },
+      {
+        "fromSymbol": "src/features/website-crawl/application/crawlWebsiteAsync.ts",
+        "toSymbol": "closeAsync",
+        "callExpression": "dependencies.capturePage.closeAsync",
+        "sourcePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts"
+      },
+      {
         "fromSymbol": "crawlNextEntryAsync",
+        "toSymbol": "measureCrawlPhaseAsync",
+        "callExpression": "measureCrawlPhaseAsync",
+        "sourcePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts"
+      },
+      {
+        "fromSymbol": "src/features/website-crawl/application/crawlWebsiteAsync.ts",
         "toSymbol": "isAllowedAsync",
         "callExpression": "dependencies.robots.isAllowedAsync",
         "sourcePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts"
@@ -3567,6 +3939,12 @@
       },
       {
         "fromSymbol": "captureEntryAsync",
+        "toSymbol": "measureCrawlPhaseAsync",
+        "callExpression": "measureCrawlPhaseAsync",
+        "sourcePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts"
+      },
+      {
+        "fromSymbol": "src/features/website-crawl/application/crawlWebsiteAsync.ts",
         "toSymbol": "capturePageAsync",
         "callExpression": "capturePage.capturePageAsync",
         "sourcePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts"
@@ -3585,8 +3963,8 @@
       },
       {
         "fromSymbol": "resolveViewportsAsync",
-        "toSymbol": "breakpointDiagnostics",
-        "callExpression": "breakpointDiagnostics",
+        "toSymbol": "toBreakpointDiagnostics",
+        "callExpression": "toBreakpointDiagnostics",
         "sourcePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts"
       },
       {
@@ -3684,6 +4062,36 @@
         "toSymbol": "capturePageAsync",
         "callExpression": "capturePageAsync",
         "sourcePath": "src/features/website-crawl/application/crawlWebsiteAutomaticViewports.test.ts"
+      },
+      {
+        "fromSymbol": "src/features/website-crawl/application/crawlWebsiteTiming.test.ts",
+        "toSymbol": "test",
+        "callExpression": "test",
+        "sourcePath": "src/features/website-crawl/application/crawlWebsiteTiming.test.ts"
+      },
+      {
+        "fromSymbol": "testTimingFailureAsync",
+        "toSymbol": "crawlWebsiteAsync",
+        "callExpression": "crawlWebsiteAsync",
+        "sourcePath": "src/features/website-crawl/application/crawlWebsiteTiming.test.ts"
+      },
+      {
+        "fromSymbol": "testTimingFailureAsync",
+        "toSymbol": "expect",
+        "callExpression": "expect",
+        "sourcePath": "src/features/website-crawl/application/crawlWebsiteTiming.test.ts"
+      },
+      {
+        "fromSymbol": "testTimingFailureAsync",
+        "toSymbol": "assertFailureTimings",
+        "callExpression": "assertFailureTimings",
+        "sourcePath": "src/features/website-crawl/application/crawlWebsiteTiming.test.ts"
+      },
+      {
+        "fromSymbol": "assertFailureTimings",
+        "toSymbol": "expect",
+        "callExpression": "expect",
+        "sourcePath": "src/features/website-crawl/application/crawlWebsiteTiming.test.ts"
       },
       {
         "fromSymbol": "src/features/website-crawl/application/crawlWebsiteZeroDepth.test.ts",
@@ -4040,19 +4448,109 @@
         "sourcePath": "src/features/website-crawl/composition/createWebsiteCrawler.acceptance.test.ts"
       },
       {
-        "fromSymbol": "crawlWebsiteAsync",
+        "fromSymbol": "src/features/website-crawl/composition/createWebsiteCrawler.timing.acceptance.test.ts",
+        "toSymbol": "beforeAll",
+        "callExpression": "beforeAll",
+        "sourcePath": "src/features/website-crawl/composition/createWebsiteCrawler.timing.acceptance.test.ts"
+      },
+      {
+        "fromSymbol": "src/features/website-crawl/composition/createWebsiteCrawler.timing.acceptance.test.ts",
+        "toSymbol": "createServer",
+        "callExpression": "createServer",
+        "sourcePath": "src/features/website-crawl/composition/createWebsiteCrawler.timing.acceptance.test.ts"
+      },
+      {
+        "fromSymbol": "src/features/website-crawl/composition/createWebsiteCrawler.timing.acceptance.test.ts",
+        "toSymbol": "listenAsync",
+        "callExpression": "listenAsync",
+        "sourcePath": "src/features/website-crawl/composition/createWebsiteCrawler.timing.acceptance.test.ts"
+      },
+      {
+        "fromSymbol": "src/features/website-crawl/composition/createWebsiteCrawler.timing.acceptance.test.ts",
+        "toSymbol": "afterAll",
+        "callExpression": "afterAll",
+        "sourcePath": "src/features/website-crawl/composition/createWebsiteCrawler.timing.acceptance.test.ts"
+      },
+      {
+        "fromSymbol": "src/features/website-crawl/composition/createWebsiteCrawler.timing.acceptance.test.ts",
+        "toSymbol": "closeAsync",
+        "callExpression": "closeAsync",
+        "sourcePath": "src/features/website-crawl/composition/createWebsiteCrawler.timing.acceptance.test.ts"
+      },
+      {
+        "fromSymbol": "src/features/website-crawl/composition/createWebsiteCrawler.timing.acceptance.test.ts",
+        "toSymbol": "test",
+        "callExpression": "test",
+        "sourcePath": "src/features/website-crawl/composition/createWebsiteCrawler.timing.acceptance.test.ts"
+      },
+      {
+        "fromSymbol": "testCrawlTimingAsync",
+        "toSymbol": "createWebsiteCrawler",
+        "callExpression": "createWebsiteCrawler",
+        "sourcePath": "src/features/website-crawl/composition/createWebsiteCrawler.timing.acceptance.test.ts"
+      },
+      {
+        "fromSymbol": "testCrawlTimingAsync",
         "toSymbol": "crawlWebsiteAsync",
-        "callExpression": "crawlWebsiteAsync",
-        "sourcePath": "src/features/website-crawl/composition/createWebsiteCrawler.ts"
+        "callExpression": "crawler.crawlWebsiteAsync",
+        "sourcePath": "src/features/website-crawl/composition/createWebsiteCrawler.timing.acceptance.test.ts"
+      },
+      {
+        "fromSymbol": "testCrawlTimingAsync",
+        "toSymbol": "expect",
+        "callExpression": "expect",
+        "sourcePath": "src/features/website-crawl/composition/createWebsiteCrawler.timing.acceptance.test.ts"
+      },
+      {
+        "fromSymbol": "testCrawlTimingAsync",
+        "toSymbol": "assertSettlingBudget",
+        "callExpression": "assertSettlingBudget",
+        "sourcePath": "src/features/website-crawl/composition/createWebsiteCrawler.timing.acceptance.test.ts"
+      },
+      {
+        "fromSymbol": "assertSettlingBudget",
+        "toSymbol": "expect",
+        "callExpression": "expect",
+        "sourcePath": "src/features/website-crawl/composition/createWebsiteCrawler.timing.acceptance.test.ts"
+      },
+      {
+        "fromSymbol": "src/features/website-crawl/composition/createWebsiteCrawler.timing.acceptance.test.ts",
+        "toSymbol": "reject",
+        "callExpression": "reject",
+        "sourcePath": "src/features/website-crawl/composition/createWebsiteCrawler.timing.acceptance.test.ts"
+      },
+      {
+        "fromSymbol": "src/features/website-crawl/composition/createWebsiteCrawler.timing.acceptance.test.ts",
+        "toSymbol": "resolve",
+        "callExpression": "resolve",
+        "sourcePath": "src/features/website-crawl/composition/createWebsiteCrawler.timing.acceptance.test.ts"
       },
       {
         "fromSymbol": "crawlWebsiteAsync",
+        "toSymbol": "crawlWebsiteWithBrowserAsync",
+        "callExpression": "crawlWebsiteWithBrowserAsync",
+        "sourcePath": "src/features/website-crawl/composition/createWebsiteCrawler.ts"
+      },
+      {
+        "fromSymbol": "crawlWebsiteWithBrowserAsync",
+        "toSymbol": "measureCrawlPhaseAsync",
+        "callExpression": "measureCrawlPhaseAsync",
+        "sourcePath": "src/features/website-crawl/composition/createWebsiteCrawler.ts"
+      },
+      {
+        "fromSymbol": "src/features/website-crawl/composition/createWebsiteCrawler.ts",
         "toSymbol": "createPuppeteerCapturePage",
         "callExpression": "createPuppeteerCapturePage",
         "sourcePath": "src/features/website-crawl/composition/createWebsiteCrawler.ts"
       },
       {
-        "fromSymbol": "crawlWebsiteAsync",
+        "fromSymbol": "crawlWebsiteWithBrowserAsync",
+        "toSymbol": "crawlWebsiteAsync",
+        "callExpression": "crawlWebsiteAsync",
+        "sourcePath": "src/features/website-crawl/composition/createWebsiteCrawler.ts"
+      },
+      {
+        "fromSymbol": "crawlWebsiteWithBrowserAsync",
         "toSymbol": "createRobotsPort",
         "callExpression": "createRobotsPort",
         "sourcePath": "src/features/website-crawl/composition/createWebsiteCrawler.ts"
@@ -4160,6 +4658,30 @@
         "sourcePath": "src/features/website-crawl/domain/selectResponsiveViewports.ts"
       },
       {
+        "fromSymbol": "measureCrawlPhaseAsync",
+        "toSymbol": "operation",
+        "callExpression": "operation",
+        "sourcePath": "src/features/website-crawl/utils/measureCrawlPhaseAsync.ts"
+      },
+      {
+        "fromSymbol": "measureCrawlPhaseAsync",
+        "toSymbol": "emitCrawlTiming",
+        "callExpression": "emitCrawlTiming",
+        "sourcePath": "src/features/website-crawl/utils/measureCrawlPhaseAsync.ts"
+      },
+      {
+        "fromSymbol": "measureCrawlPhaseAsync",
+        "toSymbol": "classifyTimingFailure",
+        "callExpression": "classifyTimingFailure",
+        "sourcePath": "src/features/website-crawl/utils/measureCrawlPhaseAsync.ts"
+      },
+      {
+        "fromSymbol": "emitCrawlTiming",
+        "toSymbol": "onPhase",
+        "callExpression": "timing?.onPhase",
+        "sourcePath": "src/features/website-crawl/utils/measureCrawlPhaseAsync.ts"
+      },
+      {
         "fromSymbol": "assertPublicUrlAsync",
         "toSymbol": "isPrivateAddress",
         "callExpression": "isPrivateAddress",
@@ -4209,12 +4731,18 @@
       },
       {
         "fromSymbol": "captureCandidateEvidenceAsync",
+        "toSymbol": "measureCrawlPhaseAsync",
+        "callExpression": "measureCrawlPhaseAsync",
+        "sourcePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts"
+      },
+      {
+        "fromSymbol": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts",
         "toSymbol": "activateViewportAsync",
         "callExpression": "activateViewportAsync",
         "sourcePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts"
       },
       {
-        "fromSymbol": "captureCandidateEvidenceAsync",
+        "fromSymbol": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts",
         "toSymbol": "waitForSettlingAsync",
         "callExpression": "waitForSettlingAsync",
         "sourcePath": "src/features/website-crawl/adapters/puppeteer/captureDynamicElementsAsync.ts"
@@ -4515,6 +5043,12 @@
       },
       {
         "fromSymbol": "capturePageAsync",
+        "toSymbol": "measureCrawlPhaseAsync",
+        "callExpression": "measureCrawlPhaseAsync",
+        "sourcePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.ts"
+      },
+      {
+        "fromSymbol": "capturePageAsync",
         "toSymbol": "assertBoundedDocumentAsync",
         "callExpression": "assertBoundedDocumentAsync",
         "sourcePath": "src/features/website-crawl/adapters/puppeteer/createPuppeteerCapturePage.ts"
@@ -4778,6 +5312,11 @@
       },
       {
         "fromSymbol": "CrawlOptions",
+        "toType": "CrawlTimingOptions",
+        "sourcePath": "src/types/public.ts"
+      },
+      {
+        "fromSymbol": "CrawlOptions",
         "toType": "CrawlViewport",
         "sourcePath": "src/types/public.ts"
       },
@@ -4804,6 +5343,11 @@
       {
         "fromSymbol": "CrawlResult",
         "toType": "WebsiteObservationDocument",
+        "sourcePath": "src/types/public.ts"
+      },
+      {
+        "fromSymbol": "CrawlTimingOptions",
+        "toType": "CrawlTimingPhase",
         "sourcePath": "src/types/public.ts"
       }
     ],
