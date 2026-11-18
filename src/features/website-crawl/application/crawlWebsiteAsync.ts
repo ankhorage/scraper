@@ -13,9 +13,9 @@ import { normalizeUrl } from '../domain/normalizeUrl.js';
 import type { CapturePagePort } from '../ports/CapturePagePort.js';
 import type { RobotsPort } from '../ports/RobotsPort.js';
 import { measureCrawlPhaseAsync } from '../utils/measureCrawlPhaseAsync.js';
-import { createCrawlPlan, type CrawlPlan } from './createCrawlPlan.js';
-import { toWebsiteObservationDocument } from './toWebsiteObservationDocument.js';
+import { type CrawlPlan, createCrawlPlan } from './createCrawlPlan.js';
 import { toBreakpointDiagnostics } from './toBreakpointDiagnostics.js';
+import { toWebsiteObservationDocument } from './toWebsiteObservationDocument.js';
 import { verifyResponsiveCoverageAsync } from './verifyResponsiveCoverageAsync.js';
 
 interface CrawlDependencies {
@@ -69,13 +69,11 @@ export const crawlWebsiteAsync = async (
     await measureCrawlPhaseAsync(
       options.timing,
       'complete',
-      async () => undefined,
+      () => Promise.resolve(),
       undefined,
       startedAt,
     );
     return result;
-  } catch (error) {
-    throw error;
   } finally {
     await measureCrawlPhaseAsync(options.timing, 'browser-cleanup', () =>
       dependencies.capturePage.closeAsync(),
