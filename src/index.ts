@@ -3,6 +3,8 @@ export type {
   BreakpointEvidence,
   CrawlOptions,
   CrawlResult,
+  CrawlTimingOptions,
+  CrawlTimingPhase,
   CrawlViewport,
   DynamicCaptureOptions,
 } from './types/public.js';

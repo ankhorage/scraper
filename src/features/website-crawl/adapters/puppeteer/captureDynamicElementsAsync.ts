@@ -1,6 +1,11 @@
 import type { Page } from 'puppeteer';
 
-import type { DynamicCaptureOptions, DynamicElementEvidence } from '../../../../types/public.js';
+import type {
+  CrawlTimingOptions,
+  DynamicCaptureOptions,
+  DynamicElementEvidence,
+} from '../../../../types/public.js';
+import { measureCrawlPhaseAsync } from '../../utils/measureCrawlPhaseAsync.js';
 import { captureDynamicSnapshotAsync } from './captureDynamicSnapshotAsync.js';
 
 interface DynamicCaptureBudget {
@@ -34,6 +39,8 @@ export const captureDynamicElementsAsync = async (
   page: Page,
   timeoutMs: number,
   configured: DynamicCaptureOptions | undefined,
+  timing: CrawlTimingOptions | undefined,
+  viewportId: string,
 ): Promise<readonly DynamicElementEvidence[]> => {
   const budget = toCaptureBudget(timeoutMs, configured);
   const startedAt = Date.now();
@@ -43,7 +50,9 @@ export const captureDynamicElementsAsync = async (
     const evidence: DynamicElementEvidence[] = [];
     for (const sourceRef of candidates) {
       if (Date.now() - startedAt >= budget.overallMs) break;
-      evidence.push(await captureCandidateEvidenceAsync(page, sourceRef, budget, startedAt));
+      evidence.push(
+        await captureCandidateEvidenceAsync(page, sourceRef, budget, startedAt, timing, viewportId),
+      );
     }
     return evidence;
   } finally {
@@ -125,16 +134,29 @@ const captureCandidateEvidenceAsync = async (
   sourceRef: string,
   budget: DynamicCaptureBudget,
   startedAt: number,
+  timing: CrawlTimingOptions | undefined,
+  viewportId: string,
 ): Promise<DynamicElementEvidence> => {
   const initial = await captureDynamicSnapshotAsync(page, sourceRef);
-  await activateViewportAsync(page, sourceRef);
+  await measureCrawlPhaseAsync(
+    timing,
+    'dynamic-activation',
+    () => activateViewportAsync(page, sourceRef),
+    viewportId,
+  );
   const triggered = await captureDynamicSnapshotAsync(page, sourceRef);
   const remainingMs = budget.overallMs - (Date.now() - startedAt);
-  const settling = await waitForSettlingAsync(
-    page,
-    sourceRef,
-    budget.quietMs,
-    Math.max(0, Math.min(remainingMs, budget.perTargetMs)),
+  const settling = await measureCrawlPhaseAsync(
+    timing,
+    'dynamic-settling',
+    () =>
+      waitForSettlingAsync(
+        page,
+        sourceRef,
+        budget.quietMs,
+        Math.max(0, Math.min(remainingMs, budget.perTargetMs)),
+      ),
+    viewportId,
   );
   const settled = await captureDynamicSnapshotAsync(page, sourceRef);
   return toDynamicEvidence(sourceRef, initial, triggered, settled, settling);

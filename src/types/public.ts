@@ -7,12 +7,38 @@ export interface CrawlViewport {
 export interface CrawlOptions {
   /** Bounded browser sampling policy for viewport-triggered dynamic elements. */
   readonly dynamicCapture?: DynamicCaptureOptions;
+  /** Optional, data-minimizing crawl phase measurements delivered as they complete. */
+  readonly timing?: CrawlTimingOptions;
   readonly url: string;
   readonly maxDepth?: number;
   readonly maxPages?: number;
   readonly maxBytesPerPage?: number;
   readonly navigationTimeoutMs?: number;
   readonly viewports?: readonly CrawlViewport[];
+}
+
+/** One bounded duration produced by the crawler without retaining page or URL data. */
+export interface CrawlTimingPhase {
+  readonly durationMs: number;
+  readonly outcome: 'completed' | 'failed';
+  readonly phase:
+    | 'browser-cleanup'
+    | 'browser-start'
+    | 'complete'
+    | 'dom-extraction'
+    | 'dynamic-activation'
+    | 'dynamic-settling'
+    | 'error'
+    | 'navigation'
+    | 'robots'
+    | 'viewport';
+  readonly reason?: 'aborted' | 'error' | 'timeout';
+  readonly viewportId?: string;
+}
+
+/** Opt in to bounded phase timings without retaining an unbounded crawl event history. */
+export interface CrawlTimingOptions {
+  readonly onPhase: (phase: CrawlTimingPhase) => void;
 }
 
 /** Resource limits for viewport activation and adaptive dynamic-element settling. */
