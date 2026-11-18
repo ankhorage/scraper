@@ -207,6 +207,7 @@ test('retains exact computed Grid tracks in raw responsive probes', async () => 
     const probes = await capture.probeResponsiveAsync?.({
       conditions: [],
       maxBytes: 100_000,
+      origin,
       timeoutMs: 10_000,
       url: `${origin}/`,
       widths: [320, 1440],

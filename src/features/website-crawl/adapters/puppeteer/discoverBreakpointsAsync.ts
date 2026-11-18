@@ -5,7 +5,12 @@ import { extractBreakpointEvidence } from './extractBreakpointEvidence.js';
 
 interface DiscoverBreakpointsInput {
   readonly browser: Browser;
-  readonly input: { readonly maxBytes: number; readonly timeoutMs: number; readonly url: string };
+  readonly input: {
+    readonly maxBytes: number;
+    readonly origin: string;
+    readonly timeoutMs: number;
+    readonly url: string;
+  };
   readonly options: { readonly allowPrivateHostsForTests?: boolean };
   readonly assertBoundedDocumentAsync: (page: Page, maxBytes: number) => Promise<void>;
   readonly assertPublicUrlAsync: (
@@ -15,6 +20,7 @@ interface DiscoverBreakpointsInput {
   readonly blockUnsafeRequestsAsync: (
     page: Page,
     options: { readonly allowPrivateHostsForTests?: boolean },
+    origin: string,
   ) => Promise<void>;
 }
 
@@ -31,7 +37,7 @@ export const discoverBreakpointsAsync = async ({
   const page = await browser.newPage();
   try {
     await page.setViewport({ height: 900, width: 1440 });
-    await blockUnsafeRequestsAsync(page, options);
+    await blockUnsafeRequestsAsync(page, options, input.origin);
     await page.goto(input.url, { timeout: input.timeoutMs, waitUntil: 'networkidle2' });
     await assertPublicUrlAsync(page.url(), options);
     await assertBoundedDocumentAsync(page, input.maxBytes);

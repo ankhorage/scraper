@@ -9,6 +9,15 @@ import type {
 export interface CapturePageInput {
   readonly dynamicCapture?: DynamicCaptureOptions;
   readonly maxBytes: number;
+  readonly origin: string;
+  readonly timeoutMs: number;
+  readonly url: string;
+  readonly viewport: CrawlViewport;
+}
+
+export interface ResolvePageInput {
+  readonly maxBytes: number;
+  readonly origin: string;
   readonly timeoutMs: number;
   readonly url: string;
   readonly viewport: CrawlViewport;
@@ -16,14 +25,18 @@ export interface CapturePageInput {
 
 export interface CapturePagePort {
   readonly capturePageAsync: (input: CapturePageInput) => Promise<PageObservation>;
+  /** Resolve a browser navigation without collecting CSSOM, probe, or full-page evidence. */
+  readonly resolvePageAsync?: (input: ResolvePageInput) => Promise<{ readonly url: string }>;
   readonly discoverBreakpointsAsync?: (input: {
     readonly maxBytes: number;
+    readonly origin: string;
     readonly timeoutMs: number;
     readonly url: string;
   }) => Promise<readonly BreakpointEvidence[]>;
   readonly probeResponsiveAsync?: (input: {
     readonly conditions: readonly string[];
     readonly maxBytes: number;
+    readonly origin: string;
     readonly timeoutMs: number;
     readonly url: string;
     readonly widths: readonly number[];
