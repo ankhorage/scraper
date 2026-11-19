@@ -94,6 +94,7 @@
     "@ankhorage/ankh": "^0.13.4",
     "@ankhorage/capability": "^0.2.2",
     "@ankhorage/contracts": "^26.9.0",
+    "@ankhorage/rules-design": "^0.9.3",
     "puppeteer": "^24.4.0"
   },
   "devDependencies": {

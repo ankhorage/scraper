@@ -8,7 +8,7 @@ import type {
   CrawlResult,
   PageObservation,
 } from '../../../types/public.js';
-import { recognizeWebsite } from '../../website-recognition/application/recognizeWebsite.js';
+import { recognizeWebsiteDocumentAsync } from '../../website-recognition/application/recognizeWebsiteDocumentAsync.js';
 import { isSameOrigin } from '../domain/isSameOrigin.js';
 import { normalizeUrl } from '../domain/normalizeUrl.js';
 import type { CapturePagePort } from '../ports/CapturePagePort.js';
@@ -67,7 +67,7 @@ export const crawlWebsiteAsync = async (
       breakpointEvidence: state.breakpointEvidence,
       diagnostics: state.diagnostics,
       document,
-      recognition: recognizeWebsite(document),
+      recognition: await recognizeWebsiteDocumentAsync(document),
     };
     await measureCrawlPhaseAsync(
       options.timing,

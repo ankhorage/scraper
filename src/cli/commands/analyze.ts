@@ -16,8 +16,9 @@ export const analyze = async (
     const input = parseInput(argv, context.cwd);
     await Promise.all([assertAbsentAsync(input.analysis), assertAbsentAsync(input.observation)]);
     const result = await createWebsiteCrawler().crawlWebsiteAsync({
-      maxDepth: 0,
       url: input.url,
+      ...(input.maxDepth === undefined ? {} : { maxDepth: input.maxDepth }),
+      ...(input.maxPages === undefined ? {} : { maxPages: input.maxPages }),
       ...(input.viewports ? { viewports: input.viewports } : {}),
     });
     await Promise.all([
@@ -40,7 +41,7 @@ export const analyze = async (
   }
 };
 
-/*** Parse the intentionally small analysis surface and reject paths that would overwrite evidence. */
+/*** Parse bounded multi-page analysis options and reject paths that would overwrite evidence. */
 const parseInput = (argv: readonly string[], cwd: string) => {
   const [url, ...flags] = argv;
   if (!url || url.startsWith('-') || flags.length % 2 !== 0) throw new Error(usage());
@@ -48,7 +49,13 @@ const parseInput = (argv: readonly string[], cwd: string) => {
   for (let index = 0; index < flags.length; index += 2) {
     const flag = flags.at(index);
     const value = flags.at(index + 1);
-    if (!flag || !value || !['--output', '--observation-output', '--viewport'].includes(flag))
+    if (
+      !flag ||
+      !value ||
+      !['--max-depth', '--max-pages', '--output', '--observation-output', '--viewport'].includes(
+        flag,
+      )
+    )
       throw new Error(usage());
     values.set(flag, [...(values.get(flag) ?? []), value]);
   }
@@ -70,10 +77,27 @@ const parseInput = (argv: readonly string[], cwd: string) => {
   });
   return {
     analysis: resolve(cwd, one('--output')),
+    maxDepth: nonnegativeInteger('--max-depth', values),
+    maxPages: positiveInteger('--max-pages', values),
     observation: resolve(cwd, one('--observation-output')),
     url,
     viewports: viewports.length ? viewports : undefined,
   };
+};
+
+/*** Parse a bounded non-negative crawl depth without accepting partial numeric input. */
+const nonnegativeInteger = (flag: string, values: ReadonlyMap<string, readonly string[]>) => {
+  const value = values.get(flag)?.[0];
+  if (value === undefined) return undefined;
+  if (!/^(?:0|[1-9][0-9]*)$/u.test(value)) throw new Error(usage());
+  return Number(value);
+};
+
+/*** Parse a positive page bound without allowing a zero-page analysis. */
+const positiveInteger = (flag: string, values: ReadonlyMap<string, readonly string[]>) => {
+  const value = nonnegativeInteger(flag, values);
+  if (value === 0) throw new Error(usage());
+  return value;
 };
 
 /*** Render canonical type names and semantic details as an ordered Unicode tree. */
@@ -86,9 +110,20 @@ const renderTree = (node: UiNode, prefix = '', last = true): string => {
   return `${prefix}${last ? '└── ' : '├── '}${label}${children.map((child: UiNode, index: number) => `\n${renderTree(child, `${prefix}${last ? '    ' : '│   '}`, index === children.length - 1)}`).join('')}`;
 };
 
-/*** Render observed text only when it is a safe scalar UI property. */
-const textLabel = (node: UiNode): string =>
-  typeof node.props?.text === 'string' && node.props.text.length > 0 ? `: ${node.props.text}` : '';
+/*** Render source text content only on textual modules without emitting script or style content. */
+const textLabel = (node: UiNode): string => {
+  if (!['Button', 'Heading', 'Link', 'RichText'].includes(node.type)) return '';
+  const textRuns = node.props?.textRuns;
+  if (!Array.isArray(textRuns)) return '';
+  const text = textRuns.flatMap(textRunText).join('').replace(/\s+/gu, ' ').trim();
+  return text.length > 0 ? `: ${text}` : '';
+};
+
+/*** Read one text run only when its serializable text field is actually present. */
+const textRunText = (value: unknown): readonly string[] => {
+  if (typeof value !== 'object' || value === null || !('text' in value)) return [];
+  return typeof value.text === 'string' ? [value.text] : [];
+};
 
 /*** Refuse evidence-target paths that already exist before browser work begins. */
 const assertAbsentAsync = async (path: string): Promise<void> => {
@@ -102,4 +137,4 @@ const assertAbsentAsync = async (path: string): Promise<void> => {
 
 /*** Describe the canonical direct analysis command. */
 const usage = (): string =>
-  'Usage: ankh scraper analyze <url> --output <analysis.json> --observation-output <observations.json> [--viewport <id:WIDTHxHEIGHT>]...';
+  'Usage: ankh scraper analyze <url> --output <analysis.json> --observation-output <observations.json> [--max-depth <n>] [--max-pages <n>] [--viewport <id:WIDTHxHEIGHT>]...';
