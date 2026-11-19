@@ -9,6 +9,9 @@ graph TD
   package__ankhorage_scraper -.-> module_package_json
   module_src_capabilities_index_ts["src/capabilities/index.ts"]
   package__ankhorage_scraper -.-> module_src_capabilities_index_ts
+  module_src_cli_commands_analyze_ts["src/cli/commands/analyze.ts"]
+  package__ankhorage_scraper -.-> module_src_cli_commands_analyze_ts
+  module_src_cli_commands_analyze_ts --> module_src_index_ts
   module_src_cli_commands_crawl_test_ts["src/cli/commands/crawl.test.ts"]
   package__ankhorage_scraper -.-> module_src_cli_commands_crawl_test_ts
   module_src_cli_commands_crawl_test_ts --> module_src_cli_commands_crawl_ts
@@ -25,6 +28,7 @@ graph TD
   module_src_cli_index_ts["src/cli/index.ts"]
   package__ankhorage_scraper -.-> module_src_cli_index_ts
   module_src_cli_index_ts --> module_src_capabilities_index_ts
+  module_src_cli_index_ts --> module_src_cli_commands_analyze_ts
   module_src_cli_index_ts --> module_src_cli_commands_crawl_ts
   module_src_features_website_crawl_adapters_network_assertPublicUrlAsync_ts["src/features/website-crawl/adapters/network/assertPublicUrlAsync.ts"]
   package__ankhorage_scraper -.-> module_src_features_website_crawl_adapters_network_assertPublicUrlAsync_ts
@@ -98,6 +102,7 @@ graph TD
   module_src_features_website_crawl_application_crawlWebsiteAsync_ts --> module_src_features_website_crawl_ports_CapturePagePort_ts
   module_src_features_website_crawl_application_crawlWebsiteAsync_ts --> module_src_features_website_crawl_ports_RobotsPort_ts
   module_src_features_website_crawl_application_crawlWebsiteAsync_ts --> module_src_features_website_crawl_utils_measureCrawlPhaseAsync_ts
+  module_src_features_website_crawl_application_crawlWebsiteAsync_ts --> module_src_features_website_recognition_application_recognizeWebsiteDocumentAsync_ts
   module_src_features_website_crawl_application_crawlWebsiteAsync_ts --> module_src_types_public_ts
   module_src_features_website_crawl_application_crawlWebsiteAutomaticViewports_test_ts["src/features/website-crawl/application/crawlWebsiteAutomaticViewports.test.ts"]
   package__ankhorage_scraper -.-> module_src_features_website_crawl_application_crawlWebsiteAutomaticViewports_test_ts
@@ -158,6 +163,8 @@ graph TD
   module_src_features_website_crawl_utils_measureCrawlPhaseAsync_ts["src/features/website-crawl/utils/measureCrawlPhaseAsync.ts"]
   package__ankhorage_scraper -.-> module_src_features_website_crawl_utils_measureCrawlPhaseAsync_ts
   module_src_features_website_crawl_utils_measureCrawlPhaseAsync_ts --> module_src_types_public_ts
+  module_src_features_website_recognition_application_recognizeWebsiteDocumentAsync_ts["src/features/website-recognition/application/recognizeWebsiteDocumentAsync.ts"]
+  package__ankhorage_scraper -.-> module_src_features_website_recognition_application_recognizeWebsiteDocumentAsync_ts
   module_src_index_ts["src/index.ts"]
   module_src_standalone_test_ts["src/standalone.test.ts"]
   package__ankhorage_scraper -.-> module_src_standalone_test_ts

@@ -127,6 +127,11 @@
               </button>
             </li>
             <li>
+    <button class="nav-button" type="button" data-target="src/cli/commands/analyze.ts">
+      src/cli/commands/analyze.ts
+      <small>10 functions</small>
+    </button>
+  </li><li>
     <button class="nav-button" type="button" data-target="src/cli/commands/crawl.test.ts">
       src/cli/commands/crawl.test.ts
       <small>1 function</small>
@@ -287,6 +292,11 @@
       <small>3 functions</small>
     </button>
   </li><li>
+    <button class="nav-button" type="button" data-target="src/features/website-recognition/application/recognizeWebsiteDocumentAsync.ts">
+      src/features/website-recognition/application/recognizeWebsiteDocumentAsync.ts
+      <small>2 functions</small>
+    </button>
+  </li><li>
     <button class="nav-button" type="button" data-target="src/standalone.test.ts">
       src/standalone.test.ts
       <small>5 functions</small>
@@ -303,7 +313,7 @@
       <div class="summary">
         <div><strong>8</strong><span class="muted">public exports</span></div>
         <div><strong>0</strong><span class="muted">components</span></div>
-        <div><strong>44</strong><span class="muted">modules</span></div>
+        <div><strong>46</strong><span class="muted">modules</span></div>
         <div><strong>1</strong><span class="muted">entrypoints</span></div>
       </div>
       <h3>Entrypoints</h3>
@@ -343,6 +353,11 @@
     <p class="muted">Referenced module</p>
     <p><strong>Dependencies:</strong> <span class="empty">None</span></p>
     <p><strong>Exports:</strong> <code>CAPABILITIES</code></p>
+  </article><article class="item" data-search="src/cli/commands/analyze.ts src/index.ts analyze">
+    <h3>src/cli/commands/analyze.ts</h3>
+    <p class="muted">Referenced module</p>
+    <p><strong>Dependencies:</strong> <code>src/index.ts</code></p>
+    <p><strong>Exports:</strong> <code>analyze</code></p>
   </article><article class="item" data-search="src/cli/commands/crawl.test.ts src/cli/commands/crawl.ts src/types/public.ts">
     <h3>src/cli/commands/crawl.test.ts</h3>
     <p class="muted">Referenced module</p>
@@ -358,10 +373,10 @@
     <p class="muted">Referenced module</p>
     <p><strong>Dependencies:</strong> <code>package.json</code>, <code>src/capabilities/index.ts</code>, <code>src/cli/index.ts</code></p>
     <p><strong>Exports:</strong> <span class="empty">None</span></p>
-  </article><article class="item" data-search="src/cli/index.ts src/capabilities/index.ts src/cli/commands/crawl.ts default">
+  </article><article class="item" data-search="src/cli/index.ts src/capabilities/index.ts src/cli/commands/analyze.ts src/cli/commands/crawl.ts default">
     <h3>src/cli/index.ts</h3>
     <p class="muted">Referenced module</p>
-    <p><strong>Dependencies:</strong> <code>src/capabilities/index.ts</code>, <code>src/cli/commands/crawl.ts</code></p>
+    <p><strong>Dependencies:</strong> <code>src/capabilities/index.ts</code>, <code>src/cli/commands/analyze.ts</code>, <code>src/cli/commands/crawl.ts</code></p>
     <p><strong>Exports:</strong> <code>default</code></p>
   </article><article class="item" data-search="src/features/website-crawl/adapters/network/assertPublicUrlAsync.ts src/features/website-crawl/domain/isPrivateAddress.ts assertPublicUrlAsync">
     <h3>src/features/website-crawl/adapters/network/assertPublicUrlAsync.ts</h3>
@@ -438,10 +453,10 @@
     <p class="muted">Referenced module</p>
     <p><strong>Dependencies:</strong> <code>src/features/website-crawl/application/crawlWebsiteAsync.ts</code>, <code>src/types/public.ts</code></p>
     <p><strong>Exports:</strong> <span class="empty">None</span></p>
-  </article><article class="item" data-search="src/features/website-crawl/application/crawlWebsiteAsync.ts src/features/website-crawl/application/createCrawlPlan.ts src/features/website-crawl/application/toBreakpointDiagnostics.ts src/features/website-crawl/application/toWebsiteObservationDocument.ts src/features/website-crawl/application/verifyResponsiveCoverageAsync.ts src/features/website-crawl/domain/isSameOrigin.ts src/features/website-crawl/domain/normalizeUrl.ts src/features/website-crawl/ports/CapturePagePort.ts src/features/website-crawl/ports/RobotsPort.ts src/features/website-crawl/utils/measureCrawlPhaseAsync.ts src/types/public.ts crawlWebsiteAsync">
+  </article><article class="item" data-search="src/features/website-crawl/application/crawlWebsiteAsync.ts src/features/website-crawl/application/createCrawlPlan.ts src/features/website-crawl/application/toBreakpointDiagnostics.ts src/features/website-crawl/application/toWebsiteObservationDocument.ts src/features/website-crawl/application/verifyResponsiveCoverageAsync.ts src/features/website-crawl/domain/isSameOrigin.ts src/features/website-crawl/domain/normalizeUrl.ts src/features/website-crawl/ports/CapturePagePort.ts src/features/website-crawl/ports/RobotsPort.ts src/features/website-crawl/utils/measureCrawlPhaseAsync.ts src/features/website-recognition/application/recognizeWebsiteDocumentAsync.ts src/types/public.ts crawlWebsiteAsync">
     <h3>src/features/website-crawl/application/crawlWebsiteAsync.ts</h3>
     <p class="muted">Referenced module</p>
-    <p><strong>Dependencies:</strong> <code>src/features/website-crawl/application/createCrawlPlan.ts</code>, <code>src/features/website-crawl/application/toBreakpointDiagnostics.ts</code>, <code>src/features/website-crawl/application/toWebsiteObservationDocument.ts</code>, <code>src/features/website-crawl/application/verifyResponsiveCoverageAsync.ts</code>, <code>src/features/website-crawl/domain/isSameOrigin.ts</code>, <code>src/features/website-crawl/domain/normalizeUrl.ts</code>, <code>src/features/website-crawl/ports/CapturePagePort.ts</code>, <code>src/features/website-crawl/ports/RobotsPort.ts</code>, <code>src/features/website-crawl/utils/measureCrawlPhaseAsync.ts</code>, <code>src/types/public.ts</code></p>
+    <p><strong>Dependencies:</strong> <code>src/features/website-crawl/application/createCrawlPlan.ts</code>, <code>src/features/website-crawl/application/toBreakpointDiagnostics.ts</code>, <code>src/features/website-crawl/application/toWebsiteObservationDocument.ts</code>, <code>src/features/website-crawl/application/verifyResponsiveCoverageAsync.ts</code>, <code>src/features/website-crawl/domain/isSameOrigin.ts</code>, <code>src/features/website-crawl/domain/normalizeUrl.ts</code>, <code>src/features/website-crawl/ports/CapturePagePort.ts</code>, <code>src/features/website-crawl/ports/RobotsPort.ts</code>, <code>src/features/website-crawl/utils/measureCrawlPhaseAsync.ts</code>, <code>src/features/website-recognition/application/recognizeWebsiteDocumentAsync.ts</code>, <code>src/types/public.ts</code></p>
     <p><strong>Exports:</strong> <code>crawlWebsiteAsync</code></p>
   </article><article class="item" data-search="src/features/website-crawl/application/crawlWebsiteAutomaticViewports.test.ts src/features/website-crawl/application/crawlWebsiteAsync.ts">
     <h3>src/features/website-crawl/application/crawlWebsiteAutomaticViewports.test.ts</h3>
@@ -533,6 +548,11 @@
     <p class="muted">Referenced module</p>
     <p><strong>Dependencies:</strong> <code>src/types/public.ts</code></p>
     <p><strong>Exports:</strong> <code>measureCrawlPhaseAsync</code></p>
+  </article><article class="item" data-search="src/features/website-recognition/application/recognizeWebsiteDocumentAsync.ts recognizeWebsiteDocumentAsync">
+    <h3>src/features/website-recognition/application/recognizeWebsiteDocumentAsync.ts</h3>
+    <p class="muted">Referenced module</p>
+    <p><strong>Dependencies:</strong> <span class="empty">None</span></p>
+    <p><strong>Exports:</strong> <code>recognizeWebsiteDocumentAsync</code></p>
   </article><article class="item" data-search="src/index.ts BreakpointEvidence CrawlOptions CrawlResult CrawlTimingOptions CrawlTimingPhase CrawlViewport createWebsiteCrawler DynamicCaptureOptions">
     <h3>src/index.ts</h3>
     <p class="muted">Configured entrypoint</p>
@@ -689,7 +709,7 @@
   </article><article class="item" id="symbol-crawlresult" data-search="CrawlResult  type src/types/public.ts  BreakpointEvidence">
     <h4>CrawlResult</h4>
     
-    <p class="muted">type • <code>src/types/public.ts:163:1</code></p>
+    <p class="muted">type • <code>src/types/public.ts:164:1</code></p>
     
     
     <p><strong>Export paths:</strong> <code>src/index.ts</code></p>
@@ -720,6 +740,12 @@
             <td><code>document</code></td>
             <td>property</td>
             <td><code>WebsiteObservationDocument</code></td>
+            <td>yes</td>
+            <td></td>
+          </tr><tr>
+            <td><code>recognition</code></td>
+            <td>property</td>
+            <td><code>WebsiteRecognitionDocument</code></td>
             <td>yes</td>
             <td></td>
           </tr>
@@ -886,6 +912,9 @@
   package__ankhorage_scraper -.-&gt; module_package_json
   module_src_capabilities_index_ts[&quot;src/capabilities/index.ts&quot;]
   package__ankhorage_scraper -.-&gt; module_src_capabilities_index_ts
+  module_src_cli_commands_analyze_ts[&quot;src/cli/commands/analyze.ts&quot;]
+  package__ankhorage_scraper -.-&gt; module_src_cli_commands_analyze_ts
+  module_src_cli_commands_analyze_ts --&gt; module_src_index_ts
   module_src_cli_commands_crawl_test_ts[&quot;src/cli/commands/crawl.test.ts&quot;]
   package__ankhorage_scraper -.-&gt; module_src_cli_commands_crawl_test_ts
   module_src_cli_commands_crawl_test_ts --&gt; module_src_cli_commands_crawl_ts
@@ -902,6 +931,7 @@
   module_src_cli_index_ts[&quot;src/cli/index.ts&quot;]
   package__ankhorage_scraper -.-&gt; module_src_cli_index_ts
   module_src_cli_index_ts --&gt; module_src_capabilities_index_ts
+  module_src_cli_index_ts --&gt; module_src_cli_commands_analyze_ts
   module_src_cli_index_ts --&gt; module_src_cli_commands_crawl_ts
   module_src_features_website_crawl_adapters_network_assertPublicUrlAsync_ts[&quot;src/features/website-crawl/adapters/network/assertPublicUrlAsync.ts&quot;]
   package__ankhorage_scraper -.-&gt; module_src_features_website_crawl_adapters_network_assertPublicUrlAsync_ts
@@ -975,6 +1005,7 @@
   module_src_features_website_crawl_application_crawlWebsiteAsync_ts --&gt; module_src_features_website_crawl_ports_CapturePagePort_ts
   module_src_features_website_crawl_application_crawlWebsiteAsync_ts --&gt; module_src_features_website_crawl_ports_RobotsPort_ts
   module_src_features_website_crawl_application_crawlWebsiteAsync_ts --&gt; module_src_features_website_crawl_utils_measureCrawlPhaseAsync_ts
+  module_src_features_website_crawl_application_crawlWebsiteAsync_ts --&gt; module_src_features_website_recognition_application_recognizeWebsiteDocumentAsync_ts
   module_src_features_website_crawl_application_crawlWebsiteAsync_ts --&gt; module_src_types_public_ts
   module_src_features_website_crawl_application_crawlWebsiteAutomaticViewports_test_ts[&quot;src/features/website-crawl/application/crawlWebsiteAutomaticViewports.test.ts&quot;]
   package__ankhorage_scraper -.-&gt; module_src_features_website_crawl_application_crawlWebsiteAutomaticViewports_test_ts
@@ -1035,6 +1066,8 @@
   module_src_features_website_crawl_utils_measureCrawlPhaseAsync_ts[&quot;src/features/website-crawl/utils/measureCrawlPhaseAsync.ts&quot;]
   package__ankhorage_scraper -.-&gt; module_src_features_website_crawl_utils_measureCrawlPhaseAsync_ts
   module_src_features_website_crawl_utils_measureCrawlPhaseAsync_ts --&gt; module_src_types_public_ts
+  module_src_features_website_recognition_application_recognizeWebsiteDocumentAsync_ts[&quot;src/features/website-recognition/application/recognizeWebsiteDocumentAsync.ts&quot;]
+  package__ankhorage_scraper -.-&gt; module_src_features_website_recognition_application_recognizeWebsiteDocumentAsync_ts
   module_src_index_ts[&quot;src/index.ts&quot;]
   module_src_standalone_test_ts[&quot;src/standalone.test.ts&quot;]
   package__ankhorage_scraper -.-&gt; module_src_standalone_test_ts
@@ -1054,6 +1087,9 @@
   package__ankhorage_scraper -.-&gt; module_package_json
   module_src_capabilities_index_ts[&quot;src/capabilities/index.ts&quot;]
   package__ankhorage_scraper -.-&gt; module_src_capabilities_index_ts
+  module_src_cli_commands_analyze_ts[&quot;src/cli/commands/analyze.ts&quot;]
+  package__ankhorage_scraper -.-&gt; module_src_cli_commands_analyze_ts
+  module_src_cli_commands_analyze_ts --&gt; module_src_index_ts
   module_src_cli_commands_crawl_test_ts[&quot;src/cli/commands/crawl.test.ts&quot;]
   package__ankhorage_scraper -.-&gt; module_src_cli_commands_crawl_test_ts
   module_src_cli_commands_crawl_test_ts --&gt; module_src_cli_commands_crawl_ts
@@ -1070,6 +1106,7 @@
   module_src_cli_index_ts[&quot;src/cli/index.ts&quot;]
   package__ankhorage_scraper -.-&gt; module_src_cli_index_ts
   module_src_cli_index_ts --&gt; module_src_capabilities_index_ts
+  module_src_cli_index_ts --&gt; module_src_cli_commands_analyze_ts
   module_src_cli_index_ts --&gt; module_src_cli_commands_crawl_ts
   module_src_features_website_crawl_adapters_network_assertPublicUrlAsync_ts[&quot;src/features/website-crawl/adapters/network/assertPublicUrlAsync.ts&quot;]
   package__ankhorage_scraper -.-&gt; module_src_features_website_crawl_adapters_network_assertPublicUrlAsync_ts
@@ -1143,6 +1180,7 @@
   module_src_features_website_crawl_application_crawlWebsiteAsync_ts --&gt; module_src_features_website_crawl_ports_CapturePagePort_ts
   module_src_features_website_crawl_application_crawlWebsiteAsync_ts --&gt; module_src_features_website_crawl_ports_RobotsPort_ts
   module_src_features_website_crawl_application_crawlWebsiteAsync_ts --&gt; module_src_features_website_crawl_utils_measureCrawlPhaseAsync_ts
+  module_src_features_website_crawl_application_crawlWebsiteAsync_ts --&gt; module_src_features_website_recognition_application_recognizeWebsiteDocumentAsync_ts
   module_src_features_website_crawl_application_crawlWebsiteAsync_ts --&gt; module_src_types_public_ts
   module_src_features_website_crawl_application_crawlWebsiteAutomaticViewports_test_ts[&quot;src/features/website-crawl/application/crawlWebsiteAutomaticViewports.test.ts&quot;]
   package__ankhorage_scraper -.-&gt; module_src_features_website_crawl_application_crawlWebsiteAutomaticViewports_test_ts
@@ -1203,6 +1241,8 @@
   module_src_features_website_crawl_utils_measureCrawlPhaseAsync_ts[&quot;src/features/website-crawl/utils/measureCrawlPhaseAsync.ts&quot;]
   package__ankhorage_scraper -.-&gt; module_src_features_website_crawl_utils_measureCrawlPhaseAsync_ts
   module_src_features_website_crawl_utils_measureCrawlPhaseAsync_ts --&gt; module_src_types_public_ts
+  module_src_features_website_recognition_application_recognizeWebsiteDocumentAsync_ts[&quot;src/features/website-recognition/application/recognizeWebsiteDocumentAsync.ts&quot;]
+  package__ankhorage_scraper -.-&gt; module_src_features_website_recognition_application_recognizeWebsiteDocumentAsync_ts
   module_src_index_ts[&quot;src/index.ts&quot;]
   module_src_standalone_test_ts[&quot;src/standalone.test.ts&quot;]
   package__ankhorage_scraper -.-&gt; module_src_standalone_test_ts
@@ -1217,6 +1257,7 @@
   module_examples_crawl_websiteCrawler_ts[&quot;examples/crawl/websiteCrawler.ts&quot;]
   module_package_json[&quot;package.json&quot;]
   module_src_capabilities_index_ts[&quot;src/capabilities/index.ts&quot;]
+  module_src_cli_commands_analyze_ts[&quot;src/cli/commands/analyze.ts&quot;]
   module_src_cli_commands_crawl_test_ts[&quot;src/cli/commands/crawl.test.ts&quot;]
   module_src_cli_commands_crawl_ts[&quot;src/cli/commands/crawl.ts&quot;]
   module_src_cli_index_test_ts[&quot;src/cli/index.test.ts&quot;]
@@ -1255,10 +1296,12 @@
   module_src_features_website_crawl_ports_CapturePagePort_ts[&quot;src/features/website-crawl/ports/CapturePagePort.ts&quot;]
   module_src_features_website_crawl_ports_RobotsPort_ts[&quot;src/features/website-crawl/ports/RobotsPort.ts&quot;]
   module_src_features_website_crawl_utils_measureCrawlPhaseAsync_ts[&quot;src/features/website-crawl/utils/measureCrawlPhaseAsync.ts&quot;]
+  module_src_features_website_recognition_application_recognizeWebsiteDocumentAsync_ts[&quot;src/features/website-recognition/application/recognizeWebsiteDocumentAsync.ts&quot;]
   module_src_index_ts[&quot;src/index.ts&quot;]
   module_src_standalone_test_ts[&quot;src/standalone.test.ts&quot;]
   module_src_types_public_ts[&quot;src/types/public.ts&quot;]
   module_examples_crawl_websiteCrawler_ts --&gt; module_dist_index_d_ts
+  module_src_cli_commands_analyze_ts --&gt; module_src_index_ts
   module_src_cli_commands_crawl_test_ts --&gt; module_src_cli_commands_crawl_ts
   module_src_cli_commands_crawl_test_ts --&gt; module_src_types_public_ts
   module_src_cli_commands_crawl_ts --&gt; module_src_index_ts
@@ -1267,6 +1310,7 @@
   module_src_cli_index_test_ts --&gt; module_src_capabilities_index_ts
   module_src_cli_index_test_ts --&gt; module_src_cli_index_ts
   module_src_cli_index_ts --&gt; module_src_capabilities_index_ts
+  module_src_cli_index_ts --&gt; module_src_cli_commands_analyze_ts
   module_src_cli_index_ts --&gt; module_src_cli_commands_crawl_ts
   module_src_features_website_crawl_adapters_network_assertPublicUrlAsync_ts --&gt; module_src_features_website_crawl_domain_isPrivateAddress_ts
   module_src_features_website_crawl_adapters_puppeteer_browserExtractionTypes_ts --&gt; module_src_types_public_ts
@@ -1308,6 +1352,7 @@
   module_src_features_website_crawl_application_crawlWebsiteAsync_ts --&gt; module_src_features_website_crawl_ports_CapturePagePort_ts
   module_src_features_website_crawl_application_crawlWebsiteAsync_ts --&gt; module_src_features_website_crawl_ports_RobotsPort_ts
   module_src_features_website_crawl_application_crawlWebsiteAsync_ts --&gt; module_src_features_website_crawl_utils_measureCrawlPhaseAsync_ts
+  module_src_features_website_crawl_application_crawlWebsiteAsync_ts --&gt; module_src_features_website_recognition_application_recognizeWebsiteDocumentAsync_ts
   module_src_features_website_crawl_application_crawlWebsiteAsync_ts --&gt; module_src_types_public_ts
   module_src_features_website_crawl_application_crawlWebsiteAutomaticViewports_test_ts --&gt; module_src_features_website_crawl_application_crawlWebsiteAsync_ts
   module_src_features_website_crawl_application_crawlWebsiteTiming_test_ts --&gt; module_src_features_website_crawl_application_crawlWebsiteAsync_ts
@@ -1339,6 +1384,7 @@
   module_examples_crawl_websiteCrawler_ts[&quot;examples/crawl/websiteCrawler.ts&quot;]
   module_package_json[&quot;package.json&quot;]
   module_src_capabilities_index_ts[&quot;src/capabilities/index.ts&quot;]
+  module_src_cli_commands_analyze_ts[&quot;src/cli/commands/analyze.ts&quot;]
   module_src_cli_commands_crawl_test_ts[&quot;src/cli/commands/crawl.test.ts&quot;]
   module_src_cli_commands_crawl_ts[&quot;src/cli/commands/crawl.ts&quot;]
   module_src_cli_index_test_ts[&quot;src/cli/index.test.ts&quot;]
@@ -1377,10 +1423,12 @@
   module_src_features_website_crawl_ports_CapturePagePort_ts[&quot;src/features/website-crawl/ports/CapturePagePort.ts&quot;]
   module_src_features_website_crawl_ports_RobotsPort_ts[&quot;src/features/website-crawl/ports/RobotsPort.ts&quot;]
   module_src_features_website_crawl_utils_measureCrawlPhaseAsync_ts[&quot;src/features/website-crawl/utils/measureCrawlPhaseAsync.ts&quot;]
+  module_src_features_website_recognition_application_recognizeWebsiteDocumentAsync_ts[&quot;src/features/website-recognition/application/recognizeWebsiteDocumentAsync.ts&quot;]
   module_src_index_ts[&quot;src/index.ts&quot;]
   module_src_standalone_test_ts[&quot;src/standalone.test.ts&quot;]
   module_src_types_public_ts[&quot;src/types/public.ts&quot;]
   module_examples_crawl_websiteCrawler_ts --&gt; module_dist_index_d_ts
+  module_src_cli_commands_analyze_ts --&gt; module_src_index_ts
   module_src_cli_commands_crawl_test_ts --&gt; module_src_cli_commands_crawl_ts
   module_src_cli_commands_crawl_test_ts --&gt; module_src_types_public_ts
   module_src_cli_commands_crawl_ts --&gt; module_src_index_ts
@@ -1389,6 +1437,7 @@
   module_src_cli_index_test_ts --&gt; module_src_capabilities_index_ts
   module_src_cli_index_test_ts --&gt; module_src_cli_index_ts
   module_src_cli_index_ts --&gt; module_src_capabilities_index_ts
+  module_src_cli_index_ts --&gt; module_src_cli_commands_analyze_ts
   module_src_cli_index_ts --&gt; module_src_cli_commands_crawl_ts
   module_src_features_website_crawl_adapters_network_assertPublicUrlAsync_ts --&gt; module_src_features_website_crawl_domain_isPrivateAddress_ts
   module_src_features_website_crawl_adapters_puppeteer_browserExtractionTypes_ts --&gt; module_src_types_public_ts
@@ -1430,6 +1479,7 @@
   module_src_features_website_crawl_application_crawlWebsiteAsync_ts --&gt; module_src_features_website_crawl_ports_CapturePagePort_ts
   module_src_features_website_crawl_application_crawlWebsiteAsync_ts --&gt; module_src_features_website_crawl_ports_RobotsPort_ts
   module_src_features_website_crawl_application_crawlWebsiteAsync_ts --&gt; module_src_features_website_crawl_utils_measureCrawlPhaseAsync_ts
+  module_src_features_website_crawl_application_crawlWebsiteAsync_ts --&gt; module_src_features_website_recognition_application_recognizeWebsiteDocumentAsync_ts
   module_src_features_website_crawl_application_crawlWebsiteAsync_ts --&gt; module_src_types_public_ts
   module_src_features_website_crawl_application_crawlWebsiteAutomaticViewports_test_ts --&gt; module_src_features_website_crawl_application_crawlWebsiteAsync_ts
   module_src_features_website_crawl_application_crawlWebsiteTiming_test_ts --&gt; module_src_features_website_crawl_application_crawlWebsiteAsync_ts
@@ -1463,6 +1513,7 @@
   module_examples_crawl_websiteCrawler_ts[&quot;examples/crawl/websiteCrawler.ts&quot;]
   module_package_json[&quot;package.json&quot;]
   module_src_capabilities_index_ts[&quot;src/capabilities/index.ts&quot;]
+  module_src_cli_commands_analyze_ts[&quot;src/cli/commands/analyze.ts&quot;]
   module_src_cli_commands_crawl_test_ts[&quot;src/cli/commands/crawl.test.ts&quot;]
   module_src_cli_commands_crawl_ts[&quot;src/cli/commands/crawl.ts&quot;]
   module_src_cli_index_test_ts[&quot;src/cli/index.test.ts&quot;]
@@ -1501,6 +1552,7 @@
   module_src_features_website_crawl_ports_CapturePagePort_ts[&quot;src/features/website-crawl/ports/CapturePagePort.ts&quot;]
   module_src_features_website_crawl_ports_RobotsPort_ts[&quot;src/features/website-crawl/ports/RobotsPort.ts&quot;]
   module_src_features_website_crawl_utils_measureCrawlPhaseAsync_ts[&quot;src/features/website-crawl/utils/measureCrawlPhaseAsync.ts&quot;]
+  module_src_features_website_recognition_application_recognizeWebsiteDocumentAsync_ts[&quot;src/features/website-recognition/application/recognizeWebsiteDocumentAsync.ts&quot;]
   module_src_index_ts[&quot;src/index.ts&quot;]
   module_src_standalone_test_ts[&quot;src/standalone.test.ts&quot;]
   module_src_types_public_ts[&quot;src/types/public.ts&quot;]
@@ -1534,6 +1586,7 @@
   module_examples_crawl_websiteCrawler_ts[&quot;examples/crawl/websiteCrawler.ts&quot;]
   module_package_json[&quot;package.json&quot;]
   module_src_capabilities_index_ts[&quot;src/capabilities/index.ts&quot;]
+  module_src_cli_commands_analyze_ts[&quot;src/cli/commands/analyze.ts&quot;]
   module_src_cli_commands_crawl_test_ts[&quot;src/cli/commands/crawl.test.ts&quot;]
   module_src_cli_commands_crawl_ts[&quot;src/cli/commands/crawl.ts&quot;]
   module_src_cli_index_test_ts[&quot;src/cli/index.test.ts&quot;]
@@ -1572,6 +1625,7 @@
   module_src_features_website_crawl_ports_CapturePagePort_ts[&quot;src/features/website-crawl/ports/CapturePagePort.ts&quot;]
   module_src_features_website_crawl_ports_RobotsPort_ts[&quot;src/features/website-crawl/ports/RobotsPort.ts&quot;]
   module_src_features_website_crawl_utils_measureCrawlPhaseAsync_ts[&quot;src/features/website-crawl/utils/measureCrawlPhaseAsync.ts&quot;]
+  module_src_features_website_recognition_application_recognizeWebsiteDocumentAsync_ts[&quot;src/features/website-recognition/application/recognizeWebsiteDocumentAsync.ts&quot;]
   module_src_index_ts[&quot;src/index.ts&quot;]
   module_src_standalone_test_ts[&quot;src/standalone.test.ts&quot;]
   module_src_types_public_ts[&quot;src/types/public.ts&quot;]
@@ -1603,12 +1657,67 @@
   </article>
     </section>
         </section>
-        <section id="view-src-cli-commands-crawl-test-ts" class="view" data-view="src/cli/commands/crawl.test.ts" hidden>
+        <section id="view-src-cli-commands-analyze-ts" class="view" data-view="src/cli/commands/analyze.ts" hidden>
+    <section class="panel">
+      <h2>src/cli/commands/analyze.ts</h2>
+      <article class="item" data-search="analyze src/cli/commands/analyze.ts Adapt `ankh scraper analyze` to observation capture, recognition, and an inspectable terminal tree.">
+    <h3>analyze</h3>
+    <p class="muted"><code>src/cli/commands/analyze.ts:11:14</code></p>
+    <p>Adapt `ankh scraper analyze` to observation capture, recognition, and an inspectable terminal tree.</p>
+    
+  </article><article class="item" data-search="parseInput src/cli/commands/analyze.ts Parse bounded multi-page analysis options and reject paths that would overwrite evidence.">
+    <h3>parseInput</h3>
+    <p class="muted"><code>src/cli/commands/analyze.ts:45:7</code></p>
+    <p>Parse bounded multi-page analysis options and reject paths that would overwrite evidence.</p>
+    
+  </article><article class="item" data-search="one src/cli/commands/analyze.ts ">
+    <h3>one</h3>
+    <p class="muted"><code>src/cli/commands/analyze.ts:62:9</code></p>
+    <p class="empty">No description available.</p>
+    
+  </article><article class="item" data-search="nonnegativeInteger src/cli/commands/analyze.ts Parse a bounded non-negative crawl depth without accepting partial numeric input.">
+    <h3>nonnegativeInteger</h3>
+    <p class="muted"><code>src/cli/commands/analyze.ts:89:7</code></p>
+    <p>Parse a bounded non-negative crawl depth without accepting partial numeric input.</p>
+    
+  </article><article class="item" data-search="positiveInteger src/cli/commands/analyze.ts Parse a positive page bound without allowing a zero-page analysis.">
+    <h3>positiveInteger</h3>
+    <p class="muted"><code>src/cli/commands/analyze.ts:97:7</code></p>
+    <p>Parse a positive page bound without allowing a zero-page analysis.</p>
+    
+  </article><article class="item" data-search="renderTree src/cli/commands/analyze.ts Render canonical type names and semantic details as an ordered Unicode tree.">
+    <h3>renderTree</h3>
+    <p class="muted"><code>src/cli/commands/analyze.ts:104:7</code></p>
+    <p>Render canonical type names and semantic details as an ordered Unicode tree.</p>
+    
+  </article><article class="item" data-search="textLabel src/cli/commands/analyze.ts Render source text content only on textual modules without emitting script or style content.">
+    <h3>textLabel</h3>
+    <p class="muted"><code>src/cli/commands/analyze.ts:114:7</code></p>
+    <p>Render source text content only on textual modules without emitting script or style content.</p>
+    
+  </article><article class="item" data-search="textRunText src/cli/commands/analyze.ts Read one text run only when its serializable text field is actually present.">
+    <h3>textRunText</h3>
+    <p class="muted"><code>src/cli/commands/analyze.ts:123:7</code></p>
+    <p>Read one text run only when its serializable text field is actually present.</p>
+    
+  </article><article class="item" data-search="assertAbsentAsync src/cli/commands/analyze.ts Refuse evidence-target paths that already exist before browser work begins.">
+    <h3>assertAbsentAsync</h3>
+    <p class="muted"><code>src/cli/commands/analyze.ts:129:7</code></p>
+    <p>Refuse evidence-target paths that already exist before browser work begins.</p>
+    
+  </article><article class="item" data-search="usage src/cli/commands/analyze.ts Describe the canonical direct analysis command.">
+    <h3>usage</h3>
+    <p class="muted"><code>src/cli/commands/analyze.ts:139:7</code></p>
+    <p>Describe the canonical direct analysis command.</p>
+    
+  </article>
+    </section>
+  </section><section id="view-src-cli-commands-crawl-test-ts" class="view" data-view="src/cli/commands/crawl.test.ts" hidden>
     <section class="panel">
       <h2>src/cli/commands/crawl.test.ts</h2>
       <article class="item" data-search="createContext src/cli/commands/crawl.test.ts Creates the command boundary context used to verify that rejected input has no crawl output.">
     <h3>createContext</h3>
-    <p class="muted"><code>src/cli/commands/crawl.test.ts:98:1</code></p>
+    <p class="muted"><code>src/cli/commands/crawl.test.ts:115:1</code></p>
     <p>Creates the command boundary context used to verify that rejected input has no crawl output.</p>
     
   </article>
@@ -1723,12 +1832,12 @@
       <h2>src/cli/index.ts</h2>
       <article class="item" data-search="readPackageVersion src/cli/index.ts Read the package version that is published with this provider module.">
     <h3>readPackageVersion</h3>
-    <p class="muted"><code>src/cli/index.ts:31:1</code></p>
+    <p class="muted"><code>src/cli/index.ts:38:1</code></p>
     <p>Read the package version that is published with this provider module.</p>
     
   </article><article class="item" data-search="isRecord src/cli/index.ts Narrow JSON input to a non-null record without accepting arrays.">
     <h3>isRecord</h3>
-    <p class="muted"><code>src/cli/index.ts:42:1</code></p>
+    <p class="muted"><code>src/cli/index.ts:49:1</code></p>
     <p>Narrow JSON input to a non-null record without accepting arrays.</p>
     
   </article>
@@ -2168,57 +2277,57 @@
       <h2>src/features/website-crawl/application/crawlWebsiteAsync.ts</h2>
       <article class="item" data-search="crawlWebsiteAsync src/features/website-crawl/application/crawlWebsiteAsync.ts Crawl a bounded same-origin website and return raw browser observations without assessing them.">
     <h3>crawlWebsiteAsync</h3>
-    <p class="muted"><code>src/features/website-crawl/application/crawlWebsiteAsync.ts:46:14</code></p>
+    <p class="muted"><code>src/features/website-crawl/application/crawlWebsiteAsync.ts:47:14</code></p>
     <p>Crawl a bounded same-origin website and return raw browser observations without assessing them.</p>
     
   </article><article class="item" data-search="crawlNextEntryAsync src/features/website-crawl/application/crawlWebsiteAsync.ts Crawl the next requested URL and retain only its unique final canonical captures.">
     <h3>crawlNextEntryAsync</h3>
-    <p class="muted"><code>src/features/website-crawl/application/crawlWebsiteAsync.ts:85:7</code></p>
+    <p class="muted"><code>src/features/website-crawl/application/crawlWebsiteAsync.ts:88:7</code></p>
     <p>Crawl the next requested URL and retain only its unique final canonical captures.</p>
     
   </article><article class="item" data-search="captureEntryAsync src/features/website-crawl/application/crawlWebsiteAsync.ts Capture one requested URL at every viewport while enforcing canonical capture uniqueness.">
     <h3>captureEntryAsync</h3>
-    <p class="muted"><code>src/features/website-crawl/application/crawlWebsiteAsync.ts:112:7</code></p>
+    <p class="muted"><code>src/features/website-crawl/application/crawlWebsiteAsync.ts:115:7</code></p>
     <p>Capture one requested URL at every viewport while enforcing canonical capture uniqueness.</p>
     
   </article><article class="item" data-search="resolveViewportsAsync src/features/website-crawl/application/crawlWebsiteAsync.ts Discover, probe, and select each page&#39;s responsive states unless callers supplied an override.">
     <h3>resolveViewportsAsync</h3>
-    <p class="muted"><code>src/features/website-crawl/application/crawlWebsiteAsync.ts:150:7</code></p>
+    <p class="muted"><code>src/features/website-crawl/application/crawlWebsiteAsync.ts:153:7</code></p>
     <p>Discover, probe, and select each page&#39;s responsive states unless callers supplied an override.</p>
     
   </article><article class="item" data-search="retainCanonicalCapture src/features/website-crawl/application/crawlWebsiteAsync.ts Retain only the first deterministic capture for each final URL, viewport, and default state.">
     <h3>retainCanonicalCapture</h3>
-    <p class="muted"><code>src/features/website-crawl/application/crawlWebsiteAsync.ts:193:7</code></p>
+    <p class="muted"><code>src/features/website-crawl/application/crawlWebsiteAsync.ts:196:7</code></p>
     <p>Retain only the first deterministic capture for each final URL, viewport, and default state.</p>
     
   </article><article class="item" data-search="duplicateCaptureDiagnostic src/features/website-crawl/application/crawlWebsiteAsync.ts Describe either an exact duplicate or a material conflict without merging browser evidence.">
     <h3>duplicateCaptureDiagnostic</h3>
-    <p class="muted"><code>src/features/website-crawl/application/crawlWebsiteAsync.ts:235:7</code></p>
+    <p class="muted"><code>src/features/website-crawl/application/crawlWebsiteAsync.ts:238:7</code></p>
     <p>Describe either an exact duplicate or a material conflict without merging browser evidence.</p>
     
   </article><article class="item" data-search="recordRedirect src/features/website-crawl/application/crawlWebsiteAsync.ts Record each requested-to-final URL redirect once while retaining the crawl source evidence.">
     <h3>recordRedirect</h3>
-    <p class="muted"><code>src/features/website-crawl/application/crawlWebsiteAsync.ts:255:7</code></p>
+    <p class="muted"><code>src/features/website-crawl/application/crawlWebsiteAsync.ts:258:7</code></p>
     <p>Record each requested-to-final URL redirect once while retaining the crawl source evidence.</p>
     
   </article><article class="item" data-search="fingerprint src/features/website-crawl/application/crawlWebsiteAsync.ts Fingerprint every material browser fact so canonical capture conflicts are never silently merged.">
     <h3>fingerprint</h3>
-    <p class="muted"><code>src/features/website-crawl/application/crawlWebsiteAsync.ts:268:7</code></p>
+    <p class="muted"><code>src/features/website-crawl/application/crawlWebsiteAsync.ts:271:7</code></p>
     <p>Fingerprint every material browser fact so canonical capture conflicts are never silently merged.</p>
     
   </article><article class="item" data-search="createCrawlState src/features/website-crawl/application/crawlWebsiteAsync.ts Initialize the mutable queue and uniqueness boundaries for one normalized crawl origin.">
     <h3>createCrawlState</h3>
-    <p class="muted"><code>src/features/website-crawl/application/crawlWebsiteAsync.ts:272:7</code></p>
+    <p class="muted"><code>src/features/website-crawl/application/crawlWebsiteAsync.ts:275:7</code></p>
     <p>Initialize the mutable queue and uniqueness boundaries for one normalized crawl origin.</p>
     
   </article><article class="item" data-search="enqueueLinks src/features/website-crawl/application/crawlWebsiteAsync.ts ">
     <h3>enqueueLinks</h3>
-    <p class="muted"><code>src/features/website-crawl/application/crawlWebsiteAsync.ts:284:7</code></p>
+    <p class="muted"><code>src/features/website-crawl/application/crawlWebsiteAsync.ts:287:7</code></p>
     <p class="empty">No description available.</p>
     
   </article><article class="item" data-search="limitDiagnostic src/features/website-crawl/application/crawlWebsiteAsync.ts Identify the next request that was not navigated because the request budget was exhausted.">
     <h3>limitDiagnostic</h3>
-    <p class="muted"><code>src/features/website-crawl/application/crawlWebsiteAsync.ts:310:7</code></p>
+    <p class="muted"><code>src/features/website-crawl/application/crawlWebsiteAsync.ts:313:7</code></p>
     <p>Identify the next request that was not navigated because the request budget was exhausted.</p>
     
   </article>
@@ -2660,6 +2769,21 @@
     <h3>classifyTimingFailure</h3>
     <p class="muted"><code>src/features/website-crawl/utils/measureCrawlPhaseAsync.ts:44:7</code></p>
     <p>Reduce runtime failures to a bounded category without exposing error content to consumers.</p>
+    
+  </article>
+    </section>
+  </section><section id="view-src-features-website-recognition-application-recognizewebsitedocumentasync-ts" class="view" data-view="src/features/website-recognition/application/recognizeWebsiteDocumentAsync.ts" hidden>
+    <section class="panel">
+      <h2>src/features/website-recognition/application/recognizeWebsiteDocumentAsync.ts</h2>
+      <article class="item" data-search="recognizeWebsiteDocumentAsync src/features/website-recognition/application/recognizeWebsiteDocumentAsync.ts Invoke the published Rules Design recognition entrypoint without duplicating its classification policy.">
+    <h3>recognizeWebsiteDocumentAsync</h3>
+    <p class="muted"><code>src/features/website-recognition/application/recognizeWebsiteDocumentAsync.ts:7:14</code></p>
+    <p>Invoke the published Rules Design recognition entrypoint without duplicating its classification policy.</p>
+    
+  </article><article class="item" data-search="isRulesDesignModule src/features/website-recognition/application/recognizeWebsiteDocumentAsync.ts Validate the required published recognition function at the package boundary.">
+    <h3>isRulesDesignModule</h3>
+    <p class="muted"><code>src/features/website-recognition/application/recognizeWebsiteDocumentAsync.ts:18:7</code></p>
+    <p>Validate the required published recognition function at the package boundary.</p>
     
   </article>
     </section>

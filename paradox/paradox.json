@@ -14,7 +14,7 @@
     {
       "id": "npm",
       "label": "npm",
-      "value": "v0.5.0",
+      "value": "v0.6.0",
       "color": "cb3837"
     },
     {
@@ -107,6 +107,16 @@
       ]
     },
     {
+      "path": "src/cli/commands/analyze.ts",
+      "isEntrypoint": false,
+      "dependencies": [
+        "src/index.ts"
+      ],
+      "exports": [
+        "analyze"
+      ]
+    },
+    {
       "path": "src/cli/commands/crawl.test.ts",
       "isEntrypoint": false,
       "dependencies": [
@@ -141,6 +151,7 @@
       "isEntrypoint": false,
       "dependencies": [
         "src/capabilities/index.ts",
+        "src/cli/commands/analyze.ts",
         "src/cli/commands/crawl.ts"
       ],
       "exports": [
@@ -321,6 +332,7 @@
         "src/features/website-crawl/ports/CapturePagePort.ts",
         "src/features/website-crawl/ports/RobotsPort.ts",
         "src/features/website-crawl/utils/measureCrawlPhaseAsync.ts",
+        "src/features/website-recognition/application/recognizeWebsiteDocumentAsync.ts",
         "src/types/public.ts"
       ],
       "exports": [
@@ -498,6 +510,14 @@
       ],
       "exports": [
         "measureCrawlPhaseAsync"
+      ]
+    },
+    {
+      "path": "src/features/website-recognition/application/recognizeWebsiteDocumentAsync.ts",
+      "isEntrypoint": false,
+      "dependencies": [],
+      "exports": [
+        "recognizeWebsiteDocumentAsync"
       ]
     },
     {
@@ -692,7 +712,7 @@
       "modulePath": "src/types/public.ts",
       "sourceLocation": {
         "filePath": "src/types/public.ts",
-        "line": 163,
+        "line": 164,
         "column": 1
       },
       "exportPaths": [
@@ -728,6 +748,13 @@
           "name": "document",
           "kind": "property",
           "type": "WebsiteObservationDocument",
+          "required": true,
+          "description": null
+        },
+        {
+          "name": "recognition",
+          "kind": "property",
+          "type": "WebsiteRecognitionDocument",
           "required": true,
           "description": null
         }
@@ -962,13 +989,123 @@
   "components": [],
   "sourceFunctions": [
     {
+      "name": "analyze",
+      "description": "Adapt `ankh scraper analyze` to observation capture, recognition, and an inspectable terminal tree.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/cli/commands/analyze.ts",
+        "line": 11,
+        "column": 14
+      }
+    },
+    {
+      "name": "parseInput",
+      "description": "Parse bounded multi-page analysis options and reject paths that would overwrite evidence.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/cli/commands/analyze.ts",
+        "line": 45,
+        "column": 7
+      }
+    },
+    {
+      "name": "one",
+      "description": null,
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/cli/commands/analyze.ts",
+        "line": 62,
+        "column": 9
+      }
+    },
+    {
+      "name": "nonnegativeInteger",
+      "description": "Parse a bounded non-negative crawl depth without accepting partial numeric input.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/cli/commands/analyze.ts",
+        "line": 89,
+        "column": 7
+      }
+    },
+    {
+      "name": "positiveInteger",
+      "description": "Parse a positive page bound without allowing a zero-page analysis.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/cli/commands/analyze.ts",
+        "line": 97,
+        "column": 7
+      }
+    },
+    {
+      "name": "renderTree",
+      "description": "Render canonical type names and semantic details as an ordered Unicode tree.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/cli/commands/analyze.ts",
+        "line": 104,
+        "column": 7
+      }
+    },
+    {
+      "name": "textLabel",
+      "description": "Render source text content only on textual modules without emitting script or style content.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/cli/commands/analyze.ts",
+        "line": 114,
+        "column": 7
+      }
+    },
+    {
+      "name": "textRunText",
+      "description": "Read one text run only when its serializable text field is actually present.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/cli/commands/analyze.ts",
+        "line": 123,
+        "column": 7
+      }
+    },
+    {
+      "name": "assertAbsentAsync",
+      "description": "Refuse evidence-target paths that already exist before browser work begins.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/cli/commands/analyze.ts",
+        "line": 129,
+        "column": 7
+      }
+    },
+    {
+      "name": "usage",
+      "description": "Describe the canonical direct analysis command.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/cli/commands/analyze.ts",
+        "line": 139,
+        "column": 7
+      }
+    },
+    {
       "name": "createContext",
       "description": "Creates the command boundary context used to verify that rejected input has no crawl output.",
       "see": [],
       "security": [],
       "sourceLocation": {
         "filePath": "src/cli/commands/crawl.test.ts",
-        "line": 98,
+        "line": 115,
         "column": 1
       }
     },
@@ -1199,7 +1336,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/cli/index.ts",
-        "line": 31,
+        "line": 38,
         "column": 1
       }
     },
@@ -1210,7 +1347,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/cli/index.ts",
-        "line": 42,
+        "line": 49,
         "column": 1
       }
     },
@@ -2013,7 +2150,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts",
-        "line": 46,
+        "line": 47,
         "column": 14
       }
     },
@@ -2024,7 +2161,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts",
-        "line": 85,
+        "line": 88,
         "column": 7
       }
     },
@@ -2035,7 +2172,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts",
-        "line": 112,
+        "line": 115,
         "column": 7
       }
     },
@@ -2046,7 +2183,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts",
-        "line": 150,
+        "line": 153,
         "column": 7
       }
     },
@@ -2057,7 +2194,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts",
-        "line": 193,
+        "line": 196,
         "column": 7
       }
     },
@@ -2068,7 +2205,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts",
-        "line": 235,
+        "line": 238,
         "column": 7
       }
     },
@@ -2079,7 +2216,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts",
-        "line": 255,
+        "line": 258,
         "column": 7
       }
     },
@@ -2090,7 +2227,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts",
-        "line": 268,
+        "line": 271,
         "column": 7
       }
     },
@@ -2101,7 +2238,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts",
-        "line": 272,
+        "line": 275,
         "column": 7
       }
     },
@@ -2112,7 +2249,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts",
-        "line": 284,
+        "line": 287,
         "column": 7
       }
     },
@@ -2123,7 +2260,7 @@
       "security": [],
       "sourceLocation": {
         "filePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts",
-        "line": 310,
+        "line": 313,
         "column": 7
       }
     },
@@ -2942,6 +3079,28 @@
       }
     },
     {
+      "name": "recognizeWebsiteDocumentAsync",
+      "description": "Invoke the published Rules Design recognition entrypoint without duplicating its classification policy.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-recognition/application/recognizeWebsiteDocumentAsync.ts",
+        "line": 7,
+        "column": 14
+      }
+    },
+    {
+      "name": "isRulesDesignModule",
+      "description": "Validate the required published recognition function at the package boundary.",
+      "see": [],
+      "security": [],
+      "sourceLocation": {
+        "filePath": "src/features/website-recognition/application/recognizeWebsiteDocumentAsync.ts",
+        "line": 18,
+        "column": 7
+      }
+    },
+    {
       "name": "testPackedConsumerAsync",
       "description": null,
       "see": [],
@@ -3046,8 +3205,18 @@
       },
       {
         "fromPath": "src/cli/index.ts",
+        "toPath": "src/cli/commands/analyze.ts",
+        "sourcePath": "src/cli/index.ts"
+      },
+      {
+        "fromPath": "src/cli/index.ts",
         "toPath": "src/cli/commands/crawl.ts",
         "sourcePath": "src/cli/index.ts"
+      },
+      {
+        "fromPath": "src/cli/commands/analyze.ts",
+        "toPath": "src/index.ts",
+        "sourcePath": "src/cli/commands/analyze.ts"
       },
       {
         "fromPath": "src/cli/commands/crawl.test.ts",
@@ -3082,6 +3251,11 @@
       {
         "fromPath": "src/features/website-crawl/application/crawlWebsiteAsync.ts",
         "toPath": "src/types/public.ts",
+        "sourcePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts"
+      },
+      {
+        "fromPath": "src/features/website-crawl/application/crawlWebsiteAsync.ts",
+        "toPath": "src/features/website-recognition/application/recognizeWebsiteDocumentAsync.ts",
         "sourcePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts"
       },
       {
@@ -3525,6 +3699,12 @@
       },
       {
         "fromSymbol": "handler",
+        "toSymbol": "analyze",
+        "callExpression": "analyze",
+        "sourcePath": "src/cli/index.ts"
+      },
+      {
+        "fromSymbol": "handler",
         "toSymbol": "crawl",
         "callExpression": "crawl",
         "sourcePath": "src/cli/index.ts"
@@ -3540,6 +3720,114 @@
         "toSymbol": "isRecord",
         "callExpression": "isRecord",
         "sourcePath": "src/cli/index.ts"
+      },
+      {
+        "fromSymbol": "analyze",
+        "toSymbol": "parseInput",
+        "callExpression": "parseInput",
+        "sourcePath": "src/cli/commands/analyze.ts"
+      },
+      {
+        "fromSymbol": "analyze",
+        "toSymbol": "assertAbsentAsync",
+        "callExpression": "assertAbsentAsync",
+        "sourcePath": "src/cli/commands/analyze.ts"
+      },
+      {
+        "fromSymbol": "analyze",
+        "toSymbol": "crawlWebsiteAsync",
+        "callExpression": "createWebsiteCrawler().crawlWebsiteAsync",
+        "sourcePath": "src/cli/commands/analyze.ts"
+      },
+      {
+        "fromSymbol": "analyze",
+        "toSymbol": "createWebsiteCrawler",
+        "callExpression": "createWebsiteCrawler",
+        "sourcePath": "src/cli/commands/analyze.ts"
+      },
+      {
+        "fromSymbol": "analyze",
+        "toSymbol": "writeFile",
+        "callExpression": "writeFile",
+        "sourcePath": "src/cli/commands/analyze.ts"
+      },
+      {
+        "fromSymbol": "src/cli/commands/analyze.ts",
+        "toSymbol": "renderTree",
+        "callExpression": "renderTree",
+        "sourcePath": "src/cli/commands/analyze.ts"
+      },
+      {
+        "fromSymbol": "parseInput",
+        "toSymbol": "usage",
+        "callExpression": "usage",
+        "sourcePath": "src/cli/commands/analyze.ts"
+      },
+      {
+        "fromSymbol": "one",
+        "toSymbol": "usage",
+        "callExpression": "usage",
+        "sourcePath": "src/cli/commands/analyze.ts"
+      },
+      {
+        "fromSymbol": "src/cli/commands/analyze.ts",
+        "toSymbol": "usage",
+        "callExpression": "usage",
+        "sourcePath": "src/cli/commands/analyze.ts"
+      },
+      {
+        "fromSymbol": "parseInput",
+        "toSymbol": "resolve",
+        "callExpression": "resolve",
+        "sourcePath": "src/cli/commands/analyze.ts"
+      },
+      {
+        "fromSymbol": "parseInput",
+        "toSymbol": "one",
+        "callExpression": "one",
+        "sourcePath": "src/cli/commands/analyze.ts"
+      },
+      {
+        "fromSymbol": "parseInput",
+        "toSymbol": "nonnegativeInteger",
+        "callExpression": "nonnegativeInteger",
+        "sourcePath": "src/cli/commands/analyze.ts"
+      },
+      {
+        "fromSymbol": "parseInput",
+        "toSymbol": "positiveInteger",
+        "callExpression": "positiveInteger",
+        "sourcePath": "src/cli/commands/analyze.ts"
+      },
+      {
+        "fromSymbol": "nonnegativeInteger",
+        "toSymbol": "usage",
+        "callExpression": "usage",
+        "sourcePath": "src/cli/commands/analyze.ts"
+      },
+      {
+        "fromSymbol": "positiveInteger",
+        "toSymbol": "nonnegativeInteger",
+        "callExpression": "nonnegativeInteger",
+        "sourcePath": "src/cli/commands/analyze.ts"
+      },
+      {
+        "fromSymbol": "positiveInteger",
+        "toSymbol": "usage",
+        "callExpression": "usage",
+        "sourcePath": "src/cli/commands/analyze.ts"
+      },
+      {
+        "fromSymbol": "renderTree",
+        "toSymbol": "textLabel",
+        "callExpression": "textLabel",
+        "sourcePath": "src/cli/commands/analyze.ts"
+      },
+      {
+        "fromSymbol": "assertAbsentAsync",
+        "toSymbol": "access",
+        "callExpression": "access",
+        "sourcePath": "src/cli/commands/analyze.ts"
       },
       {
         "fromSymbol": "src/cli/commands/crawl.test.ts",
@@ -3899,6 +4187,12 @@
         "fromSymbol": "crawlWebsiteAsync",
         "toSymbol": "toWebsiteObservationDocument",
         "callExpression": "toWebsiteObservationDocument",
+        "sourcePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts"
+      },
+      {
+        "fromSymbol": "crawlWebsiteAsync",
+        "toSymbol": "recognizeWebsiteDocumentAsync",
+        "callExpression": "recognizeWebsiteDocumentAsync",
         "sourcePath": "src/features/website-crawl/application/crawlWebsiteAsync.ts"
       },
       {
@@ -4682,6 +4976,18 @@
         "sourcePath": "src/features/website-crawl/utils/measureCrawlPhaseAsync.ts"
       },
       {
+        "fromSymbol": "recognizeWebsiteDocumentAsync",
+        "toSymbol": "isRulesDesignModule",
+        "callExpression": "isRulesDesignModule",
+        "sourcePath": "src/features/website-recognition/application/recognizeWebsiteDocumentAsync.ts"
+      },
+      {
+        "fromSymbol": "recognizeWebsiteDocumentAsync",
+        "toSymbol": "recognizeWebsiteDocument",
+        "callExpression": "rulesDesign.recognizeWebsiteDocument",
+        "sourcePath": "src/features/website-recognition/application/recognizeWebsiteDocumentAsync.ts"
+      },
+      {
         "fromSymbol": "assertPublicUrlAsync",
         "toSymbol": "isPrivateAddress",
         "callExpression": "isPrivateAddress",
@@ -5343,6 +5649,11 @@
       {
         "fromSymbol": "CrawlResult",
         "toType": "WebsiteObservationDocument",
+        "sourcePath": "src/types/public.ts"
+      },
+      {
+        "fromSymbol": "CrawlResult",
+        "toType": "WebsiteRecognitionDocument",
         "sourcePath": "src/types/public.ts"
       },
       {

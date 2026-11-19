@@ -38,7 +38,7 @@ Source: `src/types/public.ts:7:1`
 
 Kind: `type`
 Module: `src/types/public.ts`
-Source: `src/types/public.ts:163:1`
+Source: `src/types/public.ts:164:1`
 
 ### Members
 
@@ -48,6 +48,7 @@ Source: `src/types/public.ts:163:1`
 | breakpointEvidence | property | `readonly BreakpointEvidence[]` | yes |  |
 | diagnostics | property | `readonly CrawlDiagnostic[]` | yes |  |
 | document | property | `WebsiteObservationDocument` | yes |  |
+| recognition | property | `WebsiteRecognitionDocument` | yes |  |
 
 ## CrawlTimingOptions
 

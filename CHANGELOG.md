@@ -1,5 +1,11 @@
 # @ankhorage/scraper
 
+## 0.6.0
+
+### Minor Changes
+
+- 599f3b8: Add `ankh scraper analyze` with typed, source-linked website module trees alongside raw observations.
+
 ## 0.5.0
 
 ### Minor Changes
