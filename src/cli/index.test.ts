@@ -27,6 +27,6 @@ test('publishes the canonical Scraper capability and matching crawl handler', ()
   if (!isCapability(published)) return;
   expect(areCapabilitiesEqual(published, CAPABILITIES[0])).toBeTrue();
   expect(provider.capabilities).toBe(CAPABILITIES);
-  expect(provider.commands.map(({ path }) => path)).toEqual([['crawl']]);
-  expect(provider.handlers.map(({ path }) => path)).toEqual([['crawl']]);
+  expect(provider.commands.map(({ path }) => path)).toEqual([['analyze'], ['crawl']]);
+  expect(provider.handlers.map(({ path }) => path)).toEqual([['analyze'], ['crawl']]);
 });

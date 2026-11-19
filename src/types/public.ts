@@ -93,6 +93,7 @@ import type {
   WebsiteAnimationEvidence,
   WebsiteComputedCss,
   WebsiteObservationDocument,
+  WebsiteRecognitionDocument,
 } from '@ankhorage/contracts/website';
 
 export type CssObservation = WebsiteComputedCss;
@@ -164,5 +165,6 @@ export interface CrawlResult {
   readonly breakpointCoverage: readonly BreakpointCoverage[];
   readonly breakpointEvidence: readonly BreakpointEvidence[];
   readonly document: WebsiteObservationDocument;
+  readonly recognition: WebsiteRecognitionDocument;
   readonly diagnostics: readonly CrawlDiagnostic[];
 }
