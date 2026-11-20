@@ -6,7 +6,38 @@
 
 Package: `@ankhorage/scraper`
 
-Safe, bounded browser observations for public websites.
+Title: Ankhorage Scraper
+
+Captures safe, bounded browser observations of public websites for recognition workflows.
+
+Purpose: Provide deterministic website observations through a reusable package and CLI without exposing unbounded browser automation.
+
+Audience:
+
+- Recognition pipelines that require portable observations of public websites.
+- CLI users inspecting a website before downstream processing.
+
+## Scope and boundaries
+
+Responsibilities:
+
+- Crawl public website URLs within explicit limits and emit portable observation documents.
+- Expose crawl behavior through package, CLI, capability, and public-type entrypoints.
+- Apply bounded navigation and browser-resource handling around Puppeteer.
+
+Boundaries:
+
+- Does not decide how observation documents are recognized or rendered.
+- Does not own browser installation, network availability, or downstream migration policy.
+- Does not provide unrestricted general-purpose browser automation.
+
+Architecture role: Tooling package and CLI adapter around bounded Puppeteer observation.
+
+Architectural invariants:
+
+- Observation output uses published portable Contracts types.
+- Crawls remain bounded by explicit policy rather than ambient browser behavior.
+- Package and CLI entrypoints share the same observation boundary.
 
 ## Current architecture only
 
@@ -64,6 +95,26 @@ Paradox `/*** ... */` comments in `src` and leading `@usage` comments in real
 `examples/<example>/...` source files, plus any repository-owned manual documentation outside the
 generated output. The managed release workflow runs `bun run docs` after the package version bump
 and commits the regenerated artifacts in the release commit.
+
+## GitHub task lifecycle and workspace cleanup
+
+- **Start.** Treat each issue implementation, PR implementation, review, and change request (CR)
+  as an independent task. Fetch the current remote default branch and read the applicable issue,
+  PR, HEAD, review feedback, and CI state. Use a fresh, uniquely named task checkout or worktree.
+  Concurrent tasks must have distinct writable checkout, temporary, build, and cache paths.
+- **CRs.** Fetch and check out the current remote PR branch in the new workspace. Preserve PR
+  history and scope. Push corrections to the existing PR branch.
+- **Delivery.** Run applicable checks. Commit and push all intended changes, then verify that
+  GitHub has the intended commit on the correct remote branch. Report the exact HEAD, checks, CI,
+  findings, and blockers. Report acceptance that was not run as unverified. Read-only reviews hand
+  off their findings without creating a commit. Merge requires explicit authorization.
+- **Cleanup.** After handoff, resolve every candidate path and remove only task-owned directories
+  whose resolved paths are strictly under the resolved system path for `/tmp` (`/private/tmp` on
+  macOS). Refuse candidates that resolve outside that boundary, including through a symlink. Use
+  Git-aware removal for worktrees. Preserve workspaces outside the boundary, shared directories,
+  other tasks' directories, uncommitted changes, and unpushed commits. If blocked, persist
+  recoverable work first and document what must be retained. Report whether cleanup succeeded, was
+  skipped, or was blocked.
 
 ## Pull requests
 
